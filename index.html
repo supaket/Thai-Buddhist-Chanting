@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>บทสวดมนต์ | ธรรมะจากพุทธกาล</title>
     
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SEHP9YY4YX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-SEHP9YY4YX');
+    </script>
+    
     <!-- PWA Meta Tags -->
     <meta name="description" content="บทสวดมนต์ ธรรมะจากพุทธกาล - รวมบทสวดมนต์สำคัญ พร้อมคำแปลและเรื่องราวจากพุทธประวัติ">
     <meta name="theme-color" content="#2D5A3D">
@@ -4457,6 +4466,66 @@
         // ==========================================
         // 12. INTERACTIVE HELPERS
         // ==========================================
+        
+        // Google Analytics Event Tracking Helper
+        function trackEvent(eventName, params = {}) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, params);
+            }
+        }
+        
+        // Track page sections viewed
+        if ('IntersectionObserver' in window) {
+            const sectionTracker = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        trackEvent('section_view', {
+                            section_id: entry.target.id,
+                            section_name: entry.target.querySelector('.chant-title')?.textContent || entry.target.id
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            document.querySelectorAll('.chant-section').forEach(section => {
+                sectionTracker.observe(section);
+            });
+        }
+        
+        // Track feature usage
+        document.getElementById('darkModeBtn')?.addEventListener('click', () => {
+            trackEvent('feature_use', { feature: 'dark_mode' });
+        });
+        
+        document.getElementById('autoScrollBtn')?.addEventListener('click', () => {
+            trackEvent('feature_use', { feature: 'auto_scroll' });
+        });
+        
+        document.getElementById('timerBtn')?.addEventListener('click', () => {
+            trackEvent('feature_use', { feature: 'timer' });
+        });
+        
+        document.getElementById('ttsBtn')?.addEventListener('click', () => {
+            trackEvent('feature_use', { feature: 'text_to_speech' });
+        });
+        
+        document.getElementById('wishGenerateBtn')?.addEventListener('click', () => {
+            trackEvent('feature_use', { feature: 'wish_generator' });
+        });
+        
+        // Track theme changes
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                trackEvent('theme_change', { theme: btn.dataset.theme });
+            });
+        });
+        
+        // Track mode changes
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                trackEvent('mode_change', { mode: btn.dataset.mode });
+            });
+        });
         
         // Toast notification function
         function showToast(message, duration = 2000) {
