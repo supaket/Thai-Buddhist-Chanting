@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GA513 ติวสอบ — ภาษีมูลค่าเพิ่ม (Value Added Tax)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/5.12.8/reset.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/antd/5.12.8/antd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap');
+* { font-family: 'Noto Sans Thai', sans-serif; }
+body { background: #F5F0E8; line-height: 1.8; margin: 0; }
+.fc-perspective { perspective: 1200px; }
+.fc-card { position: relative; width: 100%; min-height: 320px; transform-style: preserve-3d; transition: transform 0.5s; cursor: pointer; }
+.fc-card.flipped { transform: rotateY(180deg); }
+.fc-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; }
+.fc-back { transform: rotateY(180deg); }
+.qc { transition: transform 0.2s, box-shadow 0.2s; }
+.qc:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(122,101,72,0.18); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #EDE8DF; }
+::-webkit-scrollbar-thumb { background: #C4B49A; border-radius: 5px; }
+::selection { background: #DDD3C1; color: #3D3229; }
+.ant-table-cell { line-height: 1.9 !important; }
+.print-only { display: none; }
+@media print {
+  /* A4 = 210mm; printable width = 210 - (10mm x 2) = 190mm */
+  @page { size: A4 portrait; margin: 10mm 10mm 12mm; }
+  html, body { width: 190mm; margin: 0 !important; background: #fff !important; }
+  .screen-only { display: none !important; }
+  .print-only {
+    display: block !important;
+    max-width: 190mm !important; width: 100% !important;
+    margin: 0 !important; padding: 0 !important;
+    font-size: 11.5px; line-height: 1.55;
+  }
+  .print-only h1, .print-only .ant-typography h1 { font-size: 20px !important; }
+  .print-only h2, .print-only .ant-typography h2 { font-size: 18px !important; margin: 6px 0 !important; }
+  .print-only h3 { font-size: 15px !important; margin: 10px 0 6px !important; }
+  .print-only h4 { font-size: 13px !important; margin: 8px 0 4px !important; }
+  .print-only .ant-typography, .print-only .ant-alert-description, .print-only li { font-size: 11.5px !important; }
+  .print-only .ant-card { margin-bottom: 6px !important; }
+  .print-only .ant-card .ant-card-head { min-height: 0 !important; padding: 2px 10px !important; }
+  .print-only .ant-card .ant-card-head-title { padding: 4px 0 !important; font-size: 12px !important; }
+  .print-only .ant-card .ant-card-body { padding: 8px 10px !important; }
+  .print-only .ant-alert { padding: 6px 10px !important; margin-bottom: 6px !important; }
+  .print-only ul, .print-only ol { margin: 0 !important; padding-left: 16px !important; }
+  .print-only .ant-table { font-size: 10.5px !important; }
+  .print-only .ant-table-cell { padding: 3px 6px !important; line-height: 1.5 !important; word-break: break-word; }
+  .print-only table { width: 100% !important; table-layout: fixed; }
+  .print-only thead { display: table-header-group; }
+  .print-only .ant-tag { font-size: 10px !important; padding: 0 4px !important; line-height: 1.6 !important; margin-right: 4px !important; }
+  .print-only .ant-row { margin-left: 0 !important; margin-right: 0 !important; }
+  .print-only .ant-col { padding-left: 0 !important; padding-right: 0 !important; }
+  .no-break, .ant-card, .ant-alert, tr { break-inside: avoid; }
+  .pv-divider { break-after: avoid; }
+  .pv-section-title { break-after: avoid; }
+  .pv-page-start { break-before: page; }
+  .ant-card { box-shadow: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { ConfigProvider, theme, Layout, Tabs, Typography, Card, Tag, Table, Space, Button, Row, Col, Divider, Alert, Statistic, Flex } = antd;
+const { Title, Text, Paragraph } = Typography;
+const { useState } = React;
+
+const C = {
+  gold: '#A8906C', goldDark: '#8B7355', goldLight: '#C4B49A',
+  amber: '#B5986A', amberDark: '#7A6548',
+  bg: '#F5F0E8', surface: '#EDE8DF', surface2: '#E5DFD4', surface3: '#F0EBE2',
+  border: '#DDD3C1', borderDark: '#C4B49A',
+  text: '#3D3229', text2: '#5C4F42', text3: '#7A6E62',
+  white: '#FAF7F2',
+  green: '#5D8A66', greenBg: '#EFF5F0',
+  red: '#B85C5C', redBg: '#F5ECEA',
+  purple: '#7B6B8A', purpleBg: '#F0ECF3',
+  blue: '#5B7A9E', blueBg: '#ECF0F5',
+  cyan: '#5B8A8A', cyanBg: '#ECF2F2',
+};
+
+const MiniCard = ({ color, bg, title, children }) => (
+  <Card size="small" style={{ background: bg, borderColor: color, borderLeftWidth: 4, marginBottom: 12 }}
+    title={<Text strong style={{ color }}>{title}</Text>}>
+    <div style={{ color: C.text }}>{children}</div>
+  </Card>
+);
+
+/* ============================================================
+   1. FOUNDATION DATA — ปูพื้นก่อนเข้าเนื้อหา
+   ============================================================ */
+const foundationData = [
+  {
+    key: 'bigpicture',
+    title: '🗺️ ภาพใหญ่: VAT เก็บจากอะไร ใครจ่ายจริง (First Principles)',
+    tags: [['เข้าใจก่อนท่อง','green'],['อ่าน 3 นาที','blue']],
+    content: () => (
+      <div>
+        <Paragraph>
+          VAT คือ<strong>ภาษีทางอ้อม</strong>ที่เก็บจาก<strong>"มูลค่าเพิ่ม"</strong> ของสินค้า/บริการในแต่ละทอดของห่วงโซ่การค้า —
+          ไม่ใช่เก็บซ้ำจากราคาเต็มทุกทอด กลไกที่ทำให้เป็นแบบนั้นคือ <strong>เครดิตภาษีซื้อ</strong>
+        </Paragraph>
+        <MiniCard color={C.gold} bg={C.surface3} title="ตัวอย่างจากชีท (จำเลขชุดนี้ไว้เลย)">
+          <Text>กิจการซื้อของ 500 + ภาษีซื้อ 35 → ขายต่อ 700 + ภาษีขาย 49{'\n'}</Text>
+          <Text><strong>VAT ที่นำส่งจริง = 49 − 35 = 14 บาท</strong> ซึ่งเท่ากับ มูลค่าเพิ่ม (700−500 = 200) × 7% = 14 พอดี{'\n'}</Text>
+          <Text type="secondary">รัฐได้ 7% ของราคาสุดท้ายครบ โดยเก็บกระจายทีละทอดตามมูลค่าที่แต่ละทอดเพิ่ม</Text>
+        </MiniCard>
+        <MiniCard color={C.blue} bg={C.blueBg} title="ประโยคเดียวที่สรุปทั้งวิชา">
+          <Text style={{ fontSize: 16 }}>ผู้แบกภาษีตัวจริงคือ<strong>ผู้บริโภคคนสุดท้าย</strong> — กิจการเป็นเพียง<strong>"ท่อส่งภาษี"</strong>:
+            เรียกเก็บภาษีขายแทนรัฐ เครดิตภาษีซื้อคืน แล้วนำส่งเฉพาะส่วนต่าง ดังนั้น
+            <strong> ภาษีซื้อไม่ใช่ "ค่าใช้จ่าย" และภาษีขายไม่ใช่ "รายได้"</strong> ของกิจการ (จุดที่อาจารย์วงไว้ในชีท)</Text>
+        </MiniCard>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="โครงเรื่องทั้งวิชา = 3 คำถาม">
+          <ol style={{ margin: 0, paddingLeft: 20 }}>
+            <li><strong>ใครต้องเสีย?</strong> — ผู้ประกอบการขายสินค้า/ให้บริการในราชอาณาจักร (รายรับเกิน 1.8 ล้าน) + ผู้นำเข้า</li>
+            <li><strong>ฐานภาษีเท่าไร เกิดเมื่อไร?</strong> — มูลค่าที่ได้รับ + จุดความรับผิด (Tax Point)</li>
+            <li><strong>คำนวณและยื่นอย่างไร?</strong> — ภาษีขาย − ภาษีซื้อ → นำส่ง/ขอคืน ด้วย ภ.พ.30 ภายในวันที่ 15 ของเดือนถัดไป</li>
+          </ol>
+        </MiniCard>
+      </div>
+    )
+  },
+  {
+    key: 'vocab',
+    title: '📇 คำศัพท์หลักที่ต้องแม่นก่อนอ่านสรุป',
+    tags: [['ศัพท์เฉพาะ','volcano']],
+    content: () => (
+      <div>
+        <Table size="small" pagination={false} bordered
+          columns={[
+            { title: 'คำ', dataIndex: 'w', key: 'w', width: '25%' },
+            { title: 'ความหมายแบบเข้าใจง่าย', dataIndex: 'm', key: 'm' },
+          ]}
+          dataSource={[
+            { key: 1, w: 'ภาษีขาย (Output Tax)', m: 'VAT ที่กิจการเรียกเก็บจากลูกค้าเมื่อขาย/ให้บริการ — ไม่ใช่รายได้ของกิจการ' },
+            { key: 2, w: 'ภาษีซื้อ (Input Tax)', m: 'VAT ที่กิจการจ่ายเมื่อซื้อสินค้า/รับบริการจากผู้อยู่ในระบบ VAT — ไม่ใช่ค่าใช้จ่าย (เอาไปเครดิตได้)' },
+            { key: 3, w: 'ใบกำกับภาษี (Tax Invoice)', m: 'เอกสารหลักฐานของระบบเครดิต — ไม่มีใบกำกับ = เครดิตภาษีซื้อไม่ได้ เปรียบเหมือน "เช็คเงินสด" ของระบบ VAT' },
+            { key: 4, w: 'Tax Point (ความรับผิด)', m: 'จุดเวลาที่หนี้ VAT "เกิดขึ้น" — ต้องออกใบกำกับและลงรายงานตามจุดนี้ ไม่ใช่ตามใจ' },
+            { key: 5, w: 'รายงาน 3 เล่ม', m: 'รายงานภาษีขาย · รายงานภาษีซื้อ · รายงานสินค้าและวัตถุดิบ (เฉพาะกิจการขาย/ผลิตสินค้า) — ลงบันทึกภายใน 3 วันทำการนับแต่วันเกิดรายการ' },
+            { key: 6, w: 'ภ.พ.30', m: 'แบบยื่น VAT รายเดือน ภายในวันที่ 15 ของเดือนถัดไป (ภ.พ.01 = จดทะเบียน, ภ.พ.30.2/30.3 = ปรับปรุงเฉลี่ยภาษีซื้อ)' },
+          ]} />
+      </div>
+    )
+  },
+  {
+    key: 'models',
+    title: '🧠 Mental Models 5 ข้อ — คิดแบบนักภาษี ไม่ใช่นักท่องจำ',
+    tags: [['วิธีคิด','purple'],['ใช้ตอบข้อสอบวิเคราะห์','green']],
+    content: () => (
+      <div>
+        <MiniCard color={C.gold} bg={C.surface3} title="Model 1 — ห่วงโซ่เครดิต (Credit Chain)">
+          <Text>ทุกทอดเก็บ 7% ของราคาขายตัวเอง แต่เครดิตของทอดก่อนหน้าคืน → สุทธิแล้วรัฐได้ 7% ของราคาสุดท้ายเสมอ
+            โซ่นี้ทำงานได้ด้วย "ใบกำกับภาษี" — โซ่ขาดตรงไหน (ใบกำกับปลอม/ไม่มี) เครดิตหายตรงนั้น{'\n'}</Text>
+          <Text type="secondary">ใช้ตอบ: ทำไมใบกำกับสำคัญ / ทำไมภาษีซื้อต้องห้ามถึงมี</Text>
+        </MiniCard>
+        <MiniCard color={C.red} bg={C.redBg} title="Model 2 — อัตรา 0% กับ ยกเว้น คนละโลกกัน (จุดหลอกอันดับ 1)">
+          <Text><strong>0% (เช่น ส่งออก):</strong> ยังอยู่ในระบบ VAT — ภาษีขาย = 0 แต่<strong>ขอคืนภาษีซื้อได้เต็ม</strong> (ดีที่สุด){'\n'}</Text>
+          <Text><strong>ยกเว้น (เช่น ขายพืชผลเกษตร):</strong> อยู่นอกระบบ — ไม่เก็บภาษีขาย แต่<strong>ภาษีซื้อเครดิตไม่ได้</strong> ต้องกลายเป็นต้นทุน{'\n'}</Text>
+          <Text type="secondary">นี่คือเหตุผลที่บางกิจการยกเว้นถึง "ขอเข้าระบบ VAT" (ภ.พ.01.1) — เพื่อขอคืนภาษีซื้อ</Text>
+        </MiniCard>
+        <MiniCard color={C.blue} bg={C.blueBg} title='Model 3 — "ขาย" ในโลก VAT กว้างกว่าภาษาคน'>
+          <Text>จำหน่าย-จ่าย-โอน <strong>ไม่ต้องมีค่าตอบแทนก็เป็นขาย</strong>: แจกของ (นอกเงื่อนไข), นำไปใช้เอง (นอกกิจการ),
+            สินค้าขาดจาก stock, ของคงเหลือวันเลิกกิจการ — ทั้งหมด "ถือเป็นขาย" และใช้<strong>ราคาตลาด</strong>เป็นฐาน{'\n'}</Text>
+          <Text type="secondary">ใช้ตอบ: โจทย์เคส "แบบนี้ต้องเสีย VAT ไหม" — เช็คก่อนว่าเข้านิยามขายกว้างหรือไม่ แล้วค่อยหาข้อยกเว้น</Text>
+        </MiniCard>
+        <MiniCard color={C.cyan} bg={C.cyanBg} title="Model 4 — Tax Point จำจากธรรมชาติของสิ่งที่ขาย">
+          <Text>หลักใหญ่มีแค่ 3 คำ: <strong>สินค้า = ส่งมอบ · บริการ = รับเงิน · นำเข้า = ผ่านศุลกากร</strong>
+            ที่เหลือคือ "เหตุการณ์ที่มาก่อน" (โอนกรรมสิทธิ์/รับเงิน/ออกใบกำกับ) ดึง Tax Point ให้เร็วขึ้น
+            และกรณีพิเศษที่ส่งมอบวัดยาก (ไฟฟ้า น้ำประปา สินค้าไม่มีรูปร่าง) เลื่อนไปที่ "รับชำระ" แทน{'\n'}</Text>
+          <Text type="secondary">ใช้ตอบ: ทุกข้อ Tax Point — เริ่มจากหลักใหญ่ แล้วถามว่ามีเหตุการณ์ใดเกิดก่อนไหม</Text>
+        </MiniCard>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="Model 5 — ภาษีซื้อต้องห้ามมี 2 ชะตากรรม">
+          <Text>ห้ามเครดิตเหมือนกัน แต่ปลายทางต่างกัน: กลุ่ม "บกพร่องด้านเอกสาร/ไม่เกี่ยวกิจการ" → <strong>ห้ามทั้งเครดิตและห้ามเป็นรายจ่าย CIT</strong> ·
+            กลุ่ม "รัฐตั้งใจตัดสิทธิ" (ค่ารับรอง, รถยนต์นั่ง ≤10 ที่นั่ง, ตามฉบับ 42) → เครดิตไม่ได้ แต่<strong>หักเป็นรายจ่าย CIT ได้</strong>{'\n'}</Text>
+          <Text type="secondary">ใช้ตอบ: ข้อสอบชอบถามว่า "ภาษีซื้อก้อนนี้เอาไปไหนได้บ้าง" — ตอบเป็น 2 ชั้นเสมอ (เครดิต? / รายจ่าย?)</Text>
+        </MiniCard>
+      </div>
+    )
+  },
+  {
+    key: 'traps',
+    title: '⚠️ กับดักข้อสอบ 8 จุด — ตอบผิดกันบ่อยที่สุด',
+    tags: [['เช็คก่อนสอบ','red']],
+    content: () => (
+      <div>
+        <Table size="small" pagination={false} bordered
+          columns={[
+            { title: '❌ ความเข้าใจผิด', dataIndex: 'w', key: 'w', width: '46%' },
+            { title: '✅ ที่ถูกต้อง', dataIndex: 'r', key: 'r' },
+          ]}
+          dataSource={[
+            { key: 1, w: '0% กับ ยกเว้น VAT เหมือน ๆ กัน ไม่เก็บทั้งคู่', r: '0% ขอคืนภาษีซื้อได้ / ยกเว้น เครดิตภาษีซื้อไม่ได้ (กลายเป็นต้นทุน) — ต่างกันมาก' },
+            { key: 2, w: 'รายรับไม่เกิน 1.8 ล้าน = ห้ามเข้าระบบ VAT', r: 'ไม่ต้องจด แต่ "ขอจดได้" (ภ.พ.01.1) เพื่อเครดิตภาษีซื้อ — เช่นเดียวกับกิจการเกษตร/ขนส่งทางอากาศ' },
+            { key: 3, w: 'Tax Point ของการขายสินค้า = วันรับเงิน', r: 'สินค้า = วันส่งมอบ (รับเงินคือหลักของ "บริการ") — แต่ถ้ารับเงิน/โอนกรรมสิทธิ์/ออกใบกำกับก่อนส่งมอบ Tax Point เกิดทันที' },
+            { key: 4, w: 'แจกของฟรี ไม่มีรายได้ ไม่ต้องเสีย VAT', r: 'แจก/แถม (มูลค่าเกินสินค้าที่ขาย) ถือเป็นขาย ฐานราคาตลาด — ยกเว้นแจกตัวอย่าง/ให้ทดลองใช้ก่อนซื้อ/แถมไม่เกินมูลค่า' },
+            { key: 5, w: 'ฐาน VAT นำเข้า = ราคาสินค้าอย่างเดียว', r: 'CIF + อากรขาเข้า + ภาษีสรรพสามิต แล้วค่อยคูณ 7% (ชีทมีตัวอย่าง 10,536.40)' },
+            { key: 6, w: 'ภาษีซื้อต้องห้ามทุกตัว เอาไปทำอะไรไม่ได้เลย', r: 'ค่ารับรอง/รถยนต์นั่ง/ตามฉบับ 42 → หักเป็นรายจ่าย CIT ได้ · เฉพาะกลุ่มเอกสารบกพร่อง/ไม่เกี่ยวกิจการที่ห้ามทั้งคู่' },
+            { key: 7, w: 'ไม่ได้เป็นผู้ประกอบการ นำเข้าของก็ไม่ต้องเสีย VAT', r: 'ผู้นำเข้า "ทุกคน" เสีย VAT ณ ด่านศุลกากร ไม่ว่าจะจดทะเบียนหรือไม่' },
+            { key: 8, w: 'อัตรา VAT คือ 7% ตามกฎหมาย', r: 'อัตรากฎหมายคือ 10% แต่ลดเหลือ 7% (VAT จริง 6.3% + ภาษีท้องถิ่น 0.7%) — ข้อสอบทฤษฎีชอบถาม' },
+          ]} />
+      </div>
+    )
+  },
+  {
+    key: 'howto',
+    title: '🎓 วิธีใช้ชีทนี้ให้ได้ผล — Evidence-based Study Plan',
+    tags: [['active recall','green'],['spaced repetition','blue']],
+    content: () => (
+      <div>
+        <ol style={{ margin: 0, paddingLeft: 20 }}>
+          <li><strong>รอบวางฐาน:</strong> อ่านแท็บปูพื้นจนอธิบาย "ห่วงโซ่เครดิต" และ "0% vs ยกเว้น" ได้โดยไม่เปิดดู</li>
+          <li><strong>รอบเนื้อหา:</strong> อ่านแท็บสรุปทีละหัวข้อ แล้วปิดจออธิบายด้วยภาษาตัวเอง (Feynman) — อธิบายไม่ได้ตรงไหน กลับไปเฉพาะจุดนั้น</li>
+          <li><strong>รอบ recall:</strong> เล่น Flashcard ตอบก่อนเปิดเฉลยเสมอ การ์ดที่ "ยังไม่ได้" วนซ้ำวันถัดไป · โจทย์คำนวณ CIF ทำซ้ำด้วยมือบนกระดาษ</li>
+          <li><strong>โค้งสุดท้าย:</strong> ไล่การ์ดจำด่วน + ตารางกับดัก 8 จุด</li>
+        </ol>
+        <Alert type="info" showIcon style={{ marginTop: 12 }}
+          message={<Text strong>เคล็ดลับข้อสอบเคส VAT</Text>}
+          description={<Text>ไล่ทีละชั้น: (1) เป็นผู้มีหน้าที่เสียไหม/ยกเว้นไหม → (2) เข้านิยาม "ขาย" กว้างไหม → (3) Tax Point เกิดเมื่อไร →
+            (4) ฐานเท่าไร อัตรา 7% หรือ 0% → (5) ภาษีซื้อเครดิตได้ไหม — ตอบเรียงชั้นได้คะแนนโครงสร้างเต็ม</Text>} />
+      </div>
+    )
+  },
+];
+
+/* ============================================================
+   2. SUMMARY DATA
+   ============================================================ */
+const summaryData = [
+  {
+    key: 'concept',
+    title: '💡 หลักการ VAT + สมการหลัก + หน้าที่เอกสาร',
+    tags: [['หลักการพื้นฐาน','purple'],['ออกสอบแนวคิด','volcano']],
+    content: () => (
+      <div>
+        <Alert type="info" showIcon style={{ marginBottom: 16 }}
+          message={<Text strong>สมการหลัก: VAT ที่ต้องนำส่ง = ภาษีขาย − ภาษีซื้อ</Text>}
+          description={<Text>ภาษีขายมากกว่า → <strong>นำส่ง</strong> · ภาษีซื้อมากกว่า → <strong>ขอคืน</strong> (เป็นเงินสดหรือเครดิตภาษีเดือนถัดไป) ·
+            ยื่นแบบ <strong>ภ.พ.30 ภายในวันที่ 15 ของเดือนถัดไป</strong> (เป็นรายเดือนภาษี)</Text>} />
+        <MiniCard color={C.cyan} bg={C.cyanBg} title="ตัวอย่างเลขในชีท: ซื้อ 500 ขาย 700">
+          <Text>ภาษีซื้อ 35 (500×7%) · ภาษีขาย 49 (700×7%) → นำส่ง 49−35 = <strong>14</strong> = มูลค่าเพิ่ม 200 × 7%{'\n'}</Text>
+          <Text strong style={{ color: C.red }}>ภาษีซื้อไม่ใช่ "ค่าใช้จ่าย" · ภาษีขายไม่ใช่ "รายได้" ของกิจการ</Text>
+        </MiniCard>
+        <MiniCard color={C.green} bg={C.greenBg} title="หน้าที่เอกสารของผู้จดทะเบียน VAT">
+          <ul style={{ margin: 0, paddingLeft: 20 }}>
+            <li><strong>ฝั่งขาย:</strong> ออกและเก็บ<strong>ใบกำกับภาษีขาย</strong> → บันทึกลง<strong>รายงานภาษีขาย</strong></li>
+            <li><strong>ฝั่งซื้อ:</strong> เก็บ<strong>ใบกำกับภาษีซื้อ</strong> → บันทึกลง<strong>รายงานภาษีซื้อ</strong></li>
+            <li>กิจการขาย/ผลิตสินค้า ต้องทำ<strong>รายงานสินค้าและวัตถุดิบ</strong>เพิ่ม</li>
+            <li><strong>ทุกรายการต้องลงรายงานภายใน 3 วันทำการ</strong> นับจากวันที่เกิดรายการ</li>
+          </ul>
+        </MiniCard>
+      </div>
+    )
+  },
+  {
+    key: 'who',
+    title: '👤 ผู้มีหน้าที่เสีย VAT — 2 กลุ่ม',
+    tags: [['องค์ประกอบ 3 ข้อ','volcano'],['1.8 ล้าน','gold']],
+    content: () => (
+      <div>
+        <MiniCard color={C.blue} bg={C.blueBg} title="กลุ่ม 1: ผู้ประกอบการขายสินค้า/ให้บริการในราชอาณาจักร">
+          <Text>ต้องครบ <strong>3 องค์ประกอบ</strong>: (1) เป็น<strong>ผู้ประกอบการ</strong> (บุคคลธรรมดา คณะบุคคล หรือนิติบุคคล — ขายในทางธุรกิจ/วิชาชีพ
+            ไม่ว่าจะได้ประโยชน์ตอบแทนหรือไม่ และไม่ว่าจดทะเบียนแล้วหรือไม่) + (2) <strong>ขายสินค้า หรือให้บริการ</strong> + (3) <strong>ในราชอาณาจักร</strong>{'\n'}</Text>
+          <Text strong style={{ color: C.red }}>+ รายรับเกิน 1.8 ล้านบาท/ปี → ต้องจดทะเบียน VAT</Text>
+          <Text type="secondary"> (โน้ตอาจารย์: นับแต่วันที่เกิน — เกินปุ๊บต้องจดภายใน 30 วัน ไม่ใช่รอสิ้นปี)</Text>
+        </MiniCard>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="กลุ่ม 2: ผู้นำเข้า">
+          <Text>ผู้ประกอบการหรือ<strong>บุคคลอื่นใด</strong>ที่นำสินค้าเข้ามาในราชอาณาจักร (รวมของที่ต้องเสียอากรขาเข้า/ได้รับยกเว้นอากรที่ออกจากเขตปลอดอากรโดยมิใช่เพื่อส่งออก)
+            → เสีย <strong>VAT 7% บนฐาน CIF + อากรขาเข้า (+สรรพสามิต)</strong> ณ ด่านศุลกากร — <strong>ไม่ว่าจะจดทะเบียนหรือไม่</strong></Text>
+        </MiniCard>
+        <MiniCard color={C.gold} bg={C.surface3} title="ยุคดิจิทัล (ฉบับที่ 53 พ.ศ. 2564)">
+          <Text><strong>บริการทางอิเล็กทรอนิกส์ (e-Service)</strong> = บริการที่ส่งมอบผ่านอินเทอร์เน็ตแบบอัตโนมัติเป็นสาระสำคัญ ·
+            <strong> อิเล็กทรอนิกส์แพลตฟอร์ม</strong> = ตลาด/ช่องทางที่ผู้ให้บริการหลายรายใช้ให้บริการ — บริการทำในต่างประเทศ+ใช้ในไทย (เช่น โฆษณาบน Platform ต่างชาติ) อยู่ในข่าย VAT</Text>
+        </MiniCard>
+      </div>
+    )
+  },
+  {
+    key: 'exempt',
+    title: '🚫 กิจการยกเว้น VAT (แม้รายรับเกิน 1.8 ล้าน) + กลุ่มที่ขอจดได้',
+    tags: [['ท่องเป็นกลุ่ม','gold'],['ออกสอบบ่อย','red']],
+    content: () => (
+      <div>
+        <Row gutter={12}>
+          <Col xs={24} md={12}>
+            <MiniCard color={C.green} bg={C.greenBg} title="ขายสินค้า (กลุ่มเกษตร-ปัจจัยพื้นฐาน)">
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                <li>พืชผลทางการเกษตรที่ยังไม่แปรสภาพ (สีข้าวได้ แต่ E-book... ดูหมวดหนังสือ)</li>
+                <li>สัตว์ มีชีวิต/ไม่มีชีวิต และวัตถุพลอยได้ (เนื้อสด — รักษาสภาพชั่วคราวได้)</li>
+                <li>ปุ๋ย · ปลาป่น อาหารสัตว์</li>
+                <li>ยาหรือเคมีภัณฑ์สำหรับพืชหรือสัตว์</li>
+                <li>หนังสือพิมพ์ นิตยสาร ตำราเรียน (รวม E-book)</li>
+              </ul>
+            </MiniCard>
+          </Col>
+          <Col xs={24} md={12}>
+            <MiniCard color={C.blue} bg={C.blueBg} title="ให้บริการ (กลุ่มสังคม-สาธารณะ)">
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                <li>การศึกษา (ของราชการและเอกชน) · ศิลปะวัฒนธรรม</li>
+                <li>รักษาพยาบาล (สถานพยาบาล) · ประกอบโรคศิลปะ การสอบบัญชี ว่าความ วิชาชีพอิสระอื่น</li>
+                <li>วิจัย/บริการทางวิชาการ · ห้องสมุด พิพิธภัณฑ์ สวนสัตว์</li>
+                <li>จ้างแรงงาน · แข่งขันกีฬาสมัครเล่น · นักแสดงสาธารณะ</li>
+                <li><strong>ขนส่งในราชอาณาจักร</strong> (ทางบก) · ขนส่งระหว่างประเทศทางบก</li>
+                <li><strong>ให้เช่าอสังหาริมทรัพย์</strong> · บริการของราชการส่วนท้องถิ่น</li>
+                <li>ขายสินค้า/บริการเพื่อศาสนาหรือการกุศลสาธารณะ</li>
+              </ul>
+            </MiniCard>
+          </Col>
+        </Row>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="นำเข้าที่ยกเว้น">
+          <Text>สินค้าตามกลุ่มเกษตรข้างต้นนำเข้า · สินค้านำเข้าเขตปลอดอากร · ของตามภาค 4 พิกัดอัตราศุลกากร (ยกเว้นอากร) · ของที่นำเข้าแล้วต้องส่งกลับออกไป (Re-export ได้คืนอากร)</Text>
+        </MiniCard>
+        <Alert type="warning" showIcon
+          message={<Text strong>ยกเว้นแต่ "มีสิทธิขอจดทะเบียน VAT ได้" (ยื่น ภ.พ.01.1 จำนวน 1 ชุด 3 ฉบับ พร้อม ภ.พ.01)</Text>}
+          description={<ul style={{ margin: 0, paddingLeft: 20 }}>
+            <li>กลุ่มขายพืชผลเกษตร สัตว์ ปุ๋ย ปลาป่น อาหารสัตว์ ยา/เคมีภัณฑ์ หนังสือ</li>
+            <li>กิจการที่รายรับไม่เกิน 1.8 ล้านบาท/ปี</li>
+            <li>ขนส่งในราชอาณาจักรโดยท่าอากาศยาน (สายการบิน)</li>
+            <li>ส่งออกของผู้ประกอบการในเขตอุตสาหกรรมส่งออก (กนอ.)</li>
+            <li>ขนส่งน้ำมันเชื้อเพลิงทางท่อในราชอาณาจักร</li>
+          </ul>} />
+        <Alert type="success" showIcon style={{ marginTop: 8 }}
+          message={<Text>ทำไมถึงอยากจด? → เข้าระบบแล้ว<strong>เครดิต/ขอคืนภาษีซื้อได้</strong> (Model 2 ในแท็บปูพื้น)</Text>} />
+      </div>
+    )
+  },
+  {
+    key: 'sale',
+    title: '📦 นิยาม "ขาย · สินค้า · บริการ · ในราชอาณาจักร"',
+    tags: [['นิยามกว้าง','volcano'],['เคสเยอะ','blue']],
+    content: () => (
+      <div>
+        <MiniCard color={C.gold} bg={C.surface3} title='"ขาย" = จำหน่าย จ่าย โอน — ไม่ว่าจะมีค่าตอบแทนหรือไม่'>
+          <Text>รวมถึง: สัญญาให้เช่าซื้อ/ขายผ่อนชำระ · ส่งมอบสินค้าให้ตัวแทนเพื่อขาย (ฝากขาย) · ส่งสินค้าออกนอกราชอาณาจักร ·
+            นำสินค้าไปใช้ไม่ว่าประการใด ๆ · สินค้าขาดจากรายงาน · สินค้าคงเหลือ ณ วันเลิกกิจการ</Text>
+        </MiniCard>
+        <Row gutter={12}>
+          <Col xs={24} md={12}>
+            <MiniCard color={C.red} bg={C.redBg} title="ถือเป็นการขาย (แม้ไม่ได้เงิน)">
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                <li>ขายทั่วไป/ขายทรัพย์สินใช้งาน/ขายเศษซากวัตถุดิบ</li>
+                <li>นำสินค้าไปแลกเปลี่ยน (เช่น แลกเครื่องจักร/คอมพิวเตอร์)</li>
+                <li>นำทรัพย์สินเก่าไปตีเป็นส่วนหนึ่งของราคาทรัพย์สินใหม่ (เทิร์นรถ)</li>
+                <li>ขายสินค้าพร้อมบริการรวมในราคาสินค้า (ขายพร้อมส่ง)</li>
+                <li>แถมสินค้าที่<strong>มูลค่าเกินกว่า</strong>สินค้าที่ขาย</li>
+              </ul>
+            </MiniCard>
+          </Col>
+          <Col xs={24} md={12}>
+            <MiniCard color={C.green} bg={C.greenBg} title="ไม่ถือเป็นการขาย">
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                <li>แจกสินค้า/สิ่งของ<strong>เป็นตัวอย่าง</strong>เพื่อส่งเสริมการขาย (ตามเกณฑ์)</li>
+                <li>ส่งสินค้าไปให้ลูกค้า<strong>ทดลองใช้ก่อนตัดสินใจซื้อ</strong></li>
+                <li>ให้ยืมใช้/ใช้แล้วส่งคืน (ไม่ได้เปลี่ยนมือถาวร)</li>
+                <li>ของแถมที่<strong>มูลค่าไม่เกิน</strong>สินค้า/บริการที่ขาย (แถมพร้อมขาย)</li>
+              </ul>
+            </MiniCard>
+          </Col>
+        </Row>
+        <MiniCard color={C.blue} bg={C.blueBg} title='"สินค้า" และ "บริการ"'>
+          <Text><strong>สินค้า</strong> = ทรัพย์สินมีรูปร่าง/ไม่มีรูปร่าง ที่อาจมีราคา มีไว้เพื่อขาย/ใช้/การใด ๆ + รวมของนำเข้าทุกชนิด
+            แต่<strong>ไม่รวม</strong>สินทรัพย์ไม่มีรูปร่างที่ส่งมอบผ่านอินเทอร์เน็ต (นั่นคือ "บริการอิเล็กทรอนิกส์"){'\n'}</Text>
+          <Text><strong>บริการ</strong> = การหาประโยชน์อันมีมูลค่าซึ่งมิใช่การขายสินค้า รวมถึงใช้บริการตนเอง
+            แต่<strong>ไม่รวม</strong>: นำสินค้า/บริการไปใช้<strong>เพื่อประกอบกิจการตนเองโดยตรง</strong> · นำเงินไปฝากธนาคาร/ซื้อพันธบัตร-หลักทรัพย์</Text>
+        </MiniCard>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="นำสินค้าไปใช้เอง — เว้นแต่ใช้เพื่อประกอบกิจการตนเอง">
+          <Text>ใช้ในการผลิต/ให้บริการ/บริหารงานของกิจการ → ไม่เป็นขาย · <strong>แต่ไม่รวมรถยนต์นั่ง ≤10 ที่นั่ง</strong>
+            (เอารถออกใช้ = เป็นขาย เว้นแต่ในสถานแสดงรถยนต์เพื่อขาย) · <strong>เครื่องแบบพนักงาน</strong>แจกได้ไม่เป็นขาย ปีละไม่เกิน 2 ชุด (เสื้อนอก 1 ตัว)</Text>
+        </MiniCard>
+        <MiniCard color={C.cyan} bg={C.cyanBg} title='"ในราชอาณาจักร" — จุดตัดสินของบริการข้ามชาติ'>
+          <Text><strong>ขายสินค้า:</strong> ต้องขายในประเทศไทยเท่านั้น{'\n'}</Text>
+          <Text><strong>ให้บริการ อยู่ในข่ายทั้ง 3 แบบ:</strong> ทำในไทย+ใช้ในไทย · ทำในไทย+ใช้ต่างประเทศ (เช่น รับจ้างเขียนซอฟต์แวร์ให้บริษัทต่างชาติ — ได้อัตรา 0%!) ·
+            ทำในต่างประเทศ+ใช้ในไทย (เช่น ใช้บริการโฆษณาบน Platform ต่างชาติ)</Text>
+        </MiniCard>
+        <MiniCard color={C.gold} bg={C.surface3} title="เคสพิเศษ: เช่าซื้อ · ฝากขาย · ส่งออก · สินค้าขาด/เลิกกิจการ">
+          <ul style={{ margin: 0, paddingLeft: 20 }}>
+            <li><strong>เช่าซื้อ/ผ่อนชำระ (ป.36/2536):</strong> ความรับผิดเกิดเมื่อ<strong>ถึงกำหนดชำระแต่ละงวด</strong> (ไม่ใช่ตอนส่งมอบ) · ผู้เช่าซื้อผิดนัด → ผู้ขายยังต้องนำส่ง VAT ตามงวด · ดอกเบี้ยผิดนัด → รวมเป็นฐาน VAT · ให้ส่วนลดหลังขาย → ส่วนลดนั้นยังรวมเป็นฐาน</li>
+            <li><strong>ฝากขายผ่านตัวแทน:</strong> มี<strong>สัญญาตั้งตัวแทนเป็นลายลักษณ์อักษร</strong> (ทั้งคู่อยู่ในระบบ VAT, แจ้งสรรพากรใน 15 วัน, เก็บสัญญา ≥5 ปี) → Tax Point เลื่อนไปตอน<strong>ตัวแทนส่งมอบให้ผู้ซื้อ</strong> · ไม่มีสัญญา → ผู้ฝากขายออกใบกำกับตั้งแต่ส่งมอบให้ตัวแทน (แม้ยังขายไม่ได้)</li>
+            <li><strong>ส่งออก (ป.97/2543):</strong> เสีย VAT <strong>0%</strong> — หลักฐาน: Invoice, Packing List, L/C หรือ T/T-T/P, ใบขนสินค้าขาออก</li>
+            <li><strong>สินค้าขาดจากรายงาน (ม.87(3)):</strong> เสีย VAT โดย<strong>ไม่ต้องออกใบกำกับ</strong> ฐาน = ราคาตลาด ณ วันความรับผิดเกิด (ป.86/2542, ม.79/3 วรรคท้าย)</li>
+            <li><strong>เลิกกิจการ/ถูกถอนทะเบียน (ป.66/2539):</strong> สินค้า/ทรัพย์สินคงเหลือถือเป็นขาย ฐาน = ราคาตลาด ณ วันเลิก/วันได้รับแจ้งคำสั่งถอน</li>
+          </ul>
+        </MiniCard>
+      </div>
+    )
+  },
+  {
+    key: 'taxpoint',
+    title: '⏱️ Tax Point (ความรับผิดในการเสียภาษี) — ครบทุกกรณี',
+    tags: [['ออกสอบแน่','red'],['ตารางต้องจำ','gold']],
+    content: () => (
+      <div>
+        <Alert type="info" showIcon style={{ marginBottom: 12 }}
+          message={<Text strong>หลักใหญ่ 3 คำ: สินค้า = ส่งมอบ · บริการ = รับเงิน · นำเข้า = ผ่านศุลกากร</Text>}
+          description={<Text>เว้นแต่มี "เหตุการณ์มาก่อน" (โอนกรรมสิทธิ์ / ได้รับชำระ / ออกใบกำกับภาษี / ได้ใช้บริการเอง) → Tax Point เกิดทันทีตามส่วนของการกระทำนั้น</Text>} />
+        <Table size="small" pagination={false} bordered style={{ marginBottom: 12 }}
+          columns={[
+            { title: 'กรณี', dataIndex: 'c', key: 'c', width: '42%' },
+            { title: 'Tax Point เกิดเมื่อ', dataIndex: 'p', key: 'p' },
+          ]}
+          dataSource={[
+            { key: 1, c: 'ขายสินค้า (ทั่วไป)', p: 'ส่งมอบ — เว้นแต่โอนกรรมสิทธิ์/รับชำระ/ออกใบกำกับก่อน' },
+            { key: 2, c: 'เช่าซื้อ / ขายผ่อนชำระ (กรรมสิทธิ์ยังไม่โอน)', p: 'ถึงกำหนดชำระราคาแต่ละงวด — เว้นแต่รับชำระ/ออกใบกำกับก่อนถึงงวด' },
+            { key: 3, c: 'ฝากขายผ่านตัวแทน (มีสัญญาตามเกณฑ์)', p: 'ตัวแทนส่งมอบสินค้าให้ผู้ซื้อ — เว้นแต่ตัวแทนโอนกรรมสิทธิ์/รับชำระ/ออกใบกำกับ/นำสินค้าไปใช้ก่อน' },
+            { key: 4, c: 'ส่งออกสินค้า', p: 'ชำระอากรขาออก / วางหลักประกัน / วันออกใบขนสินค้าขาออก (กรณียกเว้นอากร)' },
+            { key: 5, c: 'ให้บริการ (ทั่วไป)', p: 'ได้รับชำระค่าบริการ — เว้นแต่ออกใบกำกับ/ได้ใช้บริการนั้นเองก่อน' },
+            { key: 6, c: 'บริการตามสัญญาที่กำหนดค่าตอบแทนตามส่วนของงาน', p: 'ได้รับชำระตามส่วนของบริการที่สิ้นสุดแต่ละส่วน' },
+            { key: 7, c: 'นำเข้าสินค้า', p: 'ชำระอากรขาเข้า / วางหลักประกัน / วันออกใบขนสินค้าขาเข้า (กรณียกเว้นอากร)' },
+          ]} />
+        <MiniCard color={C.purple} bg={C.purpleBg} title="กรณีพิเศษ ตามกฎกระทรวง ฉบับที่ 189 (พ.ศ. 2534)">
+          <Table size="small" pagination={false} bordered
+            columns={[
+              { title: 'กรณี', dataIndex: 'c', key: 'c', width: '46%' },
+              { title: 'Tax Point', dataIndex: 'p', key: 'p' },
+            ]}
+            dataSource={[
+              { key: 1, c: 'ขายกระแสไฟฟ้า น้ำประปา', p: 'ได้รับชำระราคา (หรือออกใบกำกับก่อน)' },
+              { key: 2, c: 'ขายสินค้าไม่มีรูปร่าง', p: 'ได้รับชำระราคา (เว้นโอนกรรมสิทธิ์/ออกใบกำกับก่อน)' },
+              { key: 3, c: 'ขายผ่านเครื่องอัตโนมัติ (หยอดเหรียญ/บัตร)', p: 'นำเงิน เหรียญ บัตร ออกจากเครื่อง' },
+              { key: 4, c: 'ขายสินค้า ชำระด้วยบัตรเครดิต', p: 'ส่งมอบสินค้า (เว้นโอนกรรมสิทธิ์/ออกหลักฐานใช้บัตร/ออกใบกำกับก่อน)' },
+              { key: 5, c: 'ให้บริการ ชำระด้วยบัตรเครดิต', p: 'มีการออกหลักฐานการใช้บัตรเครดิต (เว้นออกใบกำกับก่อน)' },
+              { key: 6, c: 'ขายตามสัญญาจะขาย', p: 'ส่งมอบ (เว้นโอนกรรมสิทธิ์/รับชำระ/ออกใบกำกับก่อน)' },
+              { key: 7, c: 'นำสินค้าไปใช้ (มิใช่เพื่อกิจการโดยตรง)', p: 'นำไปใช้ หรือส่งมอบสินค้าให้คนอื่น' },
+              { key: 8, c: 'สินค้าขาดจากรายงาน', p: 'มีการตรวจพบ' },
+              { key: 9, c: 'สินค้า/ทรัพย์สินคงเหลือ ณ เลิกกิจการ', p: 'เลิกหรือแจ้งเลิกประกอบกิจการ (ถอนทะเบียน = วันได้รับแจ้งคำสั่ง)' },
+            ]} />
+        </MiniCard>
+      </div>
+    )
+  },
+  {
+    key: 'base',
+    title: '🧮 ฐานภาษี + อัตรา 7% / 0% + ตัวอย่างคำนวณนำเข้า',
+    tags: [['คำนวณ','volcano'],['CIF','gold']],
+    content: () => (
+      <div>
+        <Row gutter={12}>
+          <Col xs={24} md={12}>
+            <MiniCard color={C.green} bg={C.greenBg} title="ฐานขายสินค้า/บริการ — รวม">
+              <Text>มูลค่า<strong>ทั้งหมด</strong>ที่ได้รับหรือพึงได้รับ: เงิน ทรัพย์สิน ค่าตอบแทน ค่าบริการ หรือประโยชน์ใดที่คิดเป็นเงินได้</Text>
+            </MiniCard>
+          </Col>
+          <Col xs={24} md={12}>
+            <MiniCard color={C.red} bg={C.redBg} title="ไม่รวมเป็นฐาน (ประกาศฯ ฉบับ 40)">
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                <li><strong>ส่วนลดที่ให้ขณะขาย</strong> (ลดทันที ณ จุดขาย)</li>
+                <li>ค่าชดเชยหรือเงินอุดหนุน</li>
+                <li>ภาษีขาย (VAT ไม่คิดซ้อน VAT)</li>
+                <li>ค่าตอบแทนตามที่อธิบดีกำหนด</li>
+              </ul>
+            </MiniCard>
+          </Col>
+        </Row>
+        <MiniCard color={C.blue} bg={C.blueBg} title="ฐานนำเข้า vs ส่งออก">
+          <Text><strong>นำเข้า:</strong> ราคา C.I.F. (Cost + Insurance + Freight) + ภาษีสรรพสามิต + อากรขาเข้า{'\n'}</Text>
+          <Text><strong>ส่งออก:</strong> ราคา F.O.B. (ณ ด่านศุลกากร ไม่รวมค่าขนส่ง/ประกันภัย) + สรรพสามิต + ภาษี/ค่าธรรมเนียมอื่น — <strong>แต่ไม่รวมอากรขาออก</strong>{'\n'}</Text>
+          <Text><strong>ขนส่งระหว่างประเทศ:</strong> คนโดยสาร = ค่าโดยสารฯ ที่เรียกเก็บ<strong>ในราชอาณาจักร</strong> · สินค้า = ค่าระวางฯ สำหรับขนออกนอกราชอาณาจักร <strong>ไม่ว่าเรียกเก็บใน/นอก</strong></Text>
+        </MiniCard>
+        <MiniCard color={C.cyan} bg={C.cyanBg} title="ตัวอย่างคำนวณนำเข้าจากชีท (ทำซ้ำด้วยมือให้ได้)">
+          <Table size="small" pagination={false}
+            columns={[{ title: 'รายการ', dataIndex: 'l', key: 'l' }, { title: 'จำนวน', dataIndex: 'v', key: 'v', align: 'right' }]}
+            dataSource={[
+              { key: 1, l: 'Cost 1,000 USD · Insurance 10 USD (1%) · Freight 50 USD · อัตรา 35 บาท/USD', v: 'C 35,000 + I 350 + F 1,750' },
+              { key: 2, l: 'มูลค่ารวม CIF', v: '37,100' },
+              { key: 3, l: 'อากรขาเข้า 20% (37,100 × 20%)', v: '7,420' },
+              { key: 4, l: 'VAT = (37,100 + 7,420) × 7%', v: '3,116.40' },
+              { key: 5, l: 'ภาษีอากรรวมที่ต้องชำระ (7,420 + 3,116.40)', v: '10,536.40' },
+            ]} />
+        </MiniCard>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="ฐานพิเศษ — ใช้ราคาตลาดเป็นฐาน">
+          <Text>ขาย/ให้บริการที่ไม่มีค่าตอบแทนหรือ<strong>ต่ำกว่าราคาตลาด</strong> · นำสินค้าไปใช้เอง (มิใช่เพื่อกิจการ) · สินค้า/ทรัพย์สินคงเหลือ ณ วันเลิกกิจการ ·
+            สินค้าที่เคยได้ 0% ต่อมากลายเป็น 7% · สินค้าขาดจาก Stock</Text>
+        </MiniCard>
+        <Row gutter={12}>
+          <Col xs={24} md={10}>
+            <MiniCard color={C.gold} bg={C.surface3} title="อัตราภาษี">
+              <Text>อัตราตามกฎหมาย <strong>10%</strong> ลดเหลือ <strong>7%</strong>{'\n'}</Text>
+              <Text type="secondary">(VAT แท้จริง 6.3% + ภาษีมูลค่าเพิ่มท้องถิ่น 0.7%)</Text>{'\n'}
+              <Text>ใช้กับ (1) ขายสินค้า (2) ให้บริการ (3) นำเข้า</Text>
+            </MiniCard>
+          </Col>
+          <Col xs={24} md={14}>
+            <MiniCard color={C.green} bg={C.greenBg} title="กลุ่มอัตรา 0% (อยู่ในระบบ + ขอคืนภาษีซื้อได้)">
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                <li><strong>ส่งออกสินค้า</strong>ที่ไม่ได้รับยกเว้น VAT</li>
+                <li>บริการที่<strong>ทำในไทยแต่ใช้ในต่างประเทศ</strong></li>
+                <li><strong>ขนส่งระหว่างประเทศ</strong>ทางอากาศยานหรือเรือเดินทะเล</li>
+                <li>ขายสินค้า/บริการให้ราชการ ตามโครงการเงินกู้-เงินช่วยเหลือจากต่างประเทศ</li>
+                <li>ขายให้ <strong>UN องค์การระหว่างประเทศ สถานทูต</strong> สถานกงสุล</li>
+                <li>ขายสินค้า/บริการระหว่าง<strong>คลังสินค้าทัณฑ์บน ↔ เขตปลอดอากร</strong></li>
+              </ul>
+            </MiniCard>
+          </Col>
+        </Row>
+      </div>
+    )
+  },
+  {
+    key: 'forbidden',
+    title: '🚷 ภาษีซื้อต้องห้าม (ม.82/5) — แยกให้ออกว่ากลุ่มไหนยังหักรายจ่ายได้',
+    tags: [['ม.82/5','purple'],['2 ชะตากรรม','red']],
+    content: () => (
+      <div>
+        <Alert type="error" showIcon style={{ marginBottom: 12 }}
+          message={<Text strong>ภาษีซื้อต้องห้าม = นำมาหักออกจากภาษีขายไม่ได้ — แต่แบ่งเป็น 2 กลุ่มตามชะตากรรมใน CIT</Text>} />
+        <MiniCard color={C.red} bg={C.redBg} title="กลุ่ม A: ห้ามเครดิต และห้ามเป็นรายจ่าย CIT ด้วย (บกพร่องเชิงเอกสาร/เนื้อหา)">
+          <ul style={{ margin: 0, paddingLeft: 20 }}>
+            <li>ไม่มีใบกำกับภาษี หรือมีแต่<strong>แสดงไม่ได้</strong>ว่ามีการชำระภาษีซื้อ</li>
+            <li>ใบกำกับมีข้อความ<strong>ไม่ถูกต้อง/ไม่สมบูรณ์ในส่วนที่เป็นสาระสำคัญ</strong></li>
+            <li>ภาษีซื้อที่<strong>ไม่เกี่ยวข้องโดยตรงกับการประกอบกิจการ</strong></li>
+            <li>ใบกำกับที่ออกโดย<strong>ผู้ไม่มีสิทธิออก</strong></li>
+          </ul>
+        </MiniCard>
+        <MiniCard color={C.green} bg={C.greenBg} title="กลุ่ม B: ห้ามเครดิต แต่หักเป็นรายจ่าย CIT ได้">
+          <ul style={{ margin: 0, paddingLeft: 20 }}>
+            <li>ภาษีซื้อจาก<strong>รายจ่ายเพื่อการรับรอง</strong> (Entertainment) หรืออันมีลักษณะทำนองเดียวกัน</li>
+            <li>ภาษีซื้อตามที่อธิบดีกำหนดโดยอนุมัติรัฐมนตรี (<strong>ประกาศฯ ฉบับ 42</strong>) ↓</li>
+          </ul>
+        </MiniCard>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="ประกาศฯ ฉบับ 42 — ตัวอย่างสำคัญที่ออกสอบ">
+          <ul style={{ margin: 0, paddingLeft: 20 }}>
+            <li>ซื้อ เช่าซื้อ เช่า หรือรับโอน<strong>รถยนต์นั่ง/รถยนต์โดยสาร ≤10 ที่นั่ง</strong> รวมภาษีซื้อสินค้า-บริการเกี่ยวกับรถนั้น (เว้นกิจการขาย/ให้เช่ารถยนต์เอง)</li>
+            <li>ภาษีซื้อตาม<strong>ใบกำกับภาษีอย่างย่อ</strong></li>
+            <li>ซื้อทรัพย์สิน/รายจ่ายเพื่อใช้ใน<strong>กิจการประเภทที่ไม่ต้องเสีย VAT</strong></li>
+            <li>ค่าก่อสร้างอาคาร-อสังหาฯ เพื่อใช้ในกิจการตนเอง แล้ว<strong>ขาย/ให้เช่า/ใช้ในกิจการ Non-VAT ภายใน 3 ปี</strong>นับแต่เดือนที่ก่อสร้างเสร็จ</li>
+            <li>ใบกำกับเต็มรูปที่คำว่า "ใบกำกับภาษี" / ชื่อที่อยู่เลขผู้เสียภาษีของผู้ออก <strong>ไม่ได้ตีพิมพ์หรือจัดทำด้วยคอมพิวเตอร์</strong> (กรณีทำทั้งฉบับด้วยคอม)</li>
+            <li>ใบกำกับเต็มรูปที่มีรายการเป็น<strong>สำเนา (copy)</strong> — เว้นเอกสารออกเป็นชุดที่มีคำว่า "เอกสารออกเป็นชุด"</li>
+            <li>ภาษีซื้อ<strong>ส่วนเฉลี่ย</strong>ของกิจการประเภทที่ไม่ต้องเสีย VAT</li>
+            <li>กิจการ 2 ประเภท เลือกเฉลี่ยแบบไม่นำภาษีซื้อทั้งหมดไปหัก (กรณีรายได้ Non-VAT ≥90%)</li>
+            <li>ใบกำกับเต็มรูปที่รายการ<strong>ถูกแก้ไขเปลี่ยนแปลง</strong> (เว้นแก้ตามหลักเกณฑ์อธิบดี)</li>
+          </ul>
+        </MiniCard>
+      </div>
+    )
+  },
+  {
+    key: 'invoice',
+    title: '🧾 ใบกำกับภาษี · ใบเพิ่มหนี้ · ใบลดหนี้ · รายงาน',
+    tags: [['ม.86/4','gold'],['7 รายการ','blue']],
+    content: () => (
+      <div>
+        <MiniCard color={C.blue} bg={C.blueBg} title="ใบกำกับภาษีเต็มรูป — ข้อความที่ต้องมี 7 ข้อ (ม.86/4)">
+          <ol style={{ margin: 0, paddingLeft: 20 }}>
+            <li>คำว่า <strong>"ใบกำกับภาษี"</strong> เห็นชัดเด่น</li>
+            <li>ชื่อ ที่อยู่ เลขประจำตัวผู้เสียภาษีของ<strong>ผู้ขาย</strong> + ระบุ "สำนักงานใหญ่"/"สาขา"</li>
+            <li>ชื่อ ที่อยู่ เลขประจำตัวผู้เสียภาษีของ<strong>ผู้ซื้อ</strong> + ระบุ "สำนักงานใหญ่"/"สาขา" (ผู้ซื้อไม่ได้จด VAT → ไม่ต้องกรอกเลข)</li>
+            <li><strong>หมายเลขลำดับ</strong>ของใบกำกับ และเล่มที่ (ถ้ามี)</li>
+            <li>ชื่อ ชนิด ประเภท <strong>ปริมาณ และมูลค่า</strong>ของสินค้า/บริการ</li>
+            <li>จำนวน <strong>VAT ที่แยกออกจากมูลค่า</strong>สินค้า/บริการ</li>
+            <li><strong>วัน เดือน ปี</strong> ที่ออกใบกำกับ</li>
+          </ol>
+        </MiniCard>
+        <Row gutter={12}>
+          <Col xs={24} md={12}>
+            <MiniCard color={C.green} bg={C.greenBg} title="ใบเพิ่มหนี้ (Debit Note)">
+              <Text><strong>เหตุ:</strong> ราคาสินค้า/บริการ<strong>เพิ่มขึ้น</strong>จากที่ตกลง (ส่งเกินจำนวน / คำนวณราคาผิดพลาดต่ำกว่าจริง){'\n'}</Text>
+              <Text><strong>ผู้ออก:</strong> ถือเป็น<strong>ภาษีขาย</strong>ของเดือนที่ออกใบเพิ่มหนี้{'\n'}</Text>
+              <Text><strong>ผู้รับ:</strong> ถือเป็น<strong>ภาษีซื้อ</strong>ของเดือนที่ได้รับ</Text>
+            </MiniCard>
+          </Col>
+          <Col xs={24} md={12}>
+            <MiniCard color={C.red} bg={C.redBg} title="ใบลดหนี้ (Credit Note)">
+              <Text><strong>เหตุ:</strong> ราคา<strong>ลดลง</strong> (ของชำรุด/ขาดจำนวน/คำนวณสูงกว่าจริง) · รับคืนสินค้า (ผิดข้อกำหนด/ไม่ตรงตัวอย่าง) · เลิกสัญญาบริการ{'\n'}</Text>
+              <Text><strong>ผู้ออก:</strong> นำไป<strong>หักออกจากภาษีขาย</strong>เดือนที่ออก{'\n'}</Text>
+              <Text><strong>ผู้รับ:</strong> นำไป<strong>หักออกจากภาษีซื้อ</strong>เดือนที่ได้รับ</Text>
+            </MiniCard>
+          </Col>
+        </Row>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="ยกเลิกใบกำกับเดิม → ออกฉบับใหม่ / ใบแทน">
+          <Text><strong>ออกใหม่:</strong> เรียกคืนฉบับเดิม ประทับ "ยกเลิก" · ฉบับใหม่ใช้<strong>เลขที่ใหม่ แต่วันเดือนปีตรงกับฉบับเดิม</strong> + หมายเหตุอ้างอิงการยกเลิก · ลงรายงานภาษีขายเดือนที่จัดทำฉบับใหม่{'\n'}</Text>
+          <Text><strong>ใบแทน (สูญหาย/ถูกทำลาย/ชำรุด):</strong> ถ่ายสำเนา + บันทึก "ใบแทนออกให้ครั้งที่ / วันเดือนปีที่ออกใบแทน / คำอธิบายย่อ / ลงลายมือชื่อ" · ลงรายงานภาษีขายเดือนที่ออกใบแทน</Text>
+        </MiniCard>
+        <MiniCard color={C.cyan} bg={C.cyanBg} title="รายงานที่กรมสรรพากรกำหนด">
+          <Text><strong>รายงานภาษีขาย / รายงานภาษีซื้อ:</strong> แสดงเดือนภาษี-ปีภาษี ชื่อสถานประกอบการ เลขผู้เสียภาษี ที่อยู่ สำนักงานใหญ่/สาขา และรายละเอียดใบกำกับ (วันที่ เลขที่ ชื่อคู่ค้า เลขผู้เสียภาษีคู่ค้า มูลค่า จำนวน VAT){'\n'}</Text>
+          <Text><strong>รายงานสินค้าและวัตถุดิบ:</strong> ลงรับ-จ่าย-คงเหลือ ตามเลขที่ใบสำคัญ · ลงบันทึก<strong>ภายใน 3 วันทำการ</strong>นับแต่วันเกิดรายการ</Text>
+        </MiniCard>
+      </div>
+    )
+  },
+  {
+    key: 'apportion',
+    title: '⚖️ การเฉลี่ยภาษีซื้อ — กิจการ VAT + Non-VAT ปนกัน',
+    tags: [['ประกาศฯ ฉบับ 29','purple'],['เกณฑ์ 90%','red']],
+    content: () => (
+      <div>
+        <Alert type="info" showIcon style={{ marginBottom: 12 }}
+          message={<Text strong>เมื่อไรต้องเฉลี่ย?</Text>}
+          description={<Text>กิจการทำทั้งประเภท <strong>VAT และ Non-VAT</strong> (เช่น ขายปลาสวยงาม Non-VAT + ขายอุปกรณ์ตกแต่งตู้ปลา VAT · ขายผลไม้สด + ผลไม้แปรรูป · ให้เช่าอสังหาฯ + รับเหมาก่อสร้าง)
+            แล้วมี<strong>ภาษีซื้อร่วม</strong>ที่แยกไม่ได้ชัดว่าเป็นของประเภทใด (ค่าเช่า/ค่าน้ำไฟส่วนกลาง เครื่องใช้สำนักงาน โฆษณา ซ่อมแซม) → ต้อง<strong>เฉลี่ยภาษีซื้อ</strong> เครดิตได้เฉพาะส่วนของกิจการ VAT</Text>} />
+        <MiniCard color={C.gold} bg={C.surface3} title="3 วิธีตามประกาศฯ ฉบับ 29">
+          <ol style={{ margin: 0, paddingLeft: 20 }}>
+            <li><strong>กรณีทั่วไป</strong> (ทรัพย์สินส่วนกลาง/ค่าใช้จ่ายส่วนกลาง) → เฉลี่ย<strong>ตามส่วนของรายได้</strong></li>
+            <li><strong>ภาษีซื้อจากการก่อสร้างอาคาร</strong> ใช้ร่วม VAT/Non-VAT → เฉลี่ย<strong>ตามพื้นที่ใช้อาคาร</strong> (ประมาณการพื้นที่ → ปรับปรุงเมื่อสร้างเสร็จ/การใช้เปลี่ยน ยื่น ภ.พ.30.3 · ติดตามปรับ 3 ปี)</li>
+            <li><strong>ตามหลักเกณฑ์ที่อธิบดีกำหนด</strong> — กรณีที่ 2 วิธีแรกใช้ไม่ได้ (เช่น พื้นที่ส่วนกลางแยกไม่ได้)</li>
+          </ol>
+        </MiniCard>
+        <MiniCard color={C.blue} bg={C.blueBg} title="กรณีทั่วไป (เฉลี่ยตามรายได้) — 2 สถานการณ์">
+          <Text><strong>1) เพิ่งเริ่มกิจการ / ยังไม่มีรายได้:</strong> ใช้<strong>ประมาณการรายได้</strong>ทั้งสองประเภทของ "ปีที่เริ่มมีรายได้"
+            (บุคคลธรรมดา: ปีที่มีรายได้ทั้ง 2 ประเภทเริ่มตั้งแต่ ก.ค. ขึ้นไป · นิติบุคคล: มีรายได้ทั้งคู่อย่างน้อย 6 เดือนภาษีในรอบบัญชี ไม่จำเป็นต้องติดต่อกัน)
+            → สิ้นปีที่เริ่มมีรายได้ <strong>ปรับปรุงตามรายได้จริง</strong>: ประมาณการมากกว่าจริง → เสียเพิ่ม (ไม่ต้องเสียเบี้ยปรับ/เงินเพิ่ม) · ประมาณการน้อยกว่าจริง → ขอคืนได้ (ภายใน 3 ปี) · ยื่นปรับด้วย <strong>ภ.พ.30.2</strong> ฉบับเดียว ภายในวันที่ 15 ของเดือนถัดจากเดือนที่ปรับ{'\n'}</Text>
+          <Text><strong>2) มีรายได้ปีที่ผ่านมาแล้ว:</strong> เฉลี่ยตาม<strong>ส่วนของรายได้ปีที่ผ่านมา</strong> โดยเลือกได้ว่า
+            (2.1) ไม่ปรับปรุงเมื่อสิ้นปี หรือ (2.2) ปรับปรุงตามรายได้จริงสิ้นปี — <strong>เลือกแล้วต้องถือปฏิบัติตลอดไป</strong> (เว้นได้รับอนุมัติอธิบดี)</Text>
+        </MiniCard>
+        <MiniCard color={C.red} bg={C.redBg} title="ข้อผ่อนปรน — เกณฑ์ 90% (ไม่ต้องเฉลี่ย)">
+          <Text><strong>รายได้ฝั่ง VAT ≥90%</strong> ของรายได้ปีที่ผ่านมา → มีสิทธิเลือก<strong>เครดิตภาษีซื้อทั้งจำนวน</strong> (แต่ขอคืนส่วนเกินภายหลังไม่ได้){'\n'}</Text>
+          <Text><strong>รายได้ฝั่ง Non-VAT ≥90%</strong> → มีสิทธิเลือก<strong>ไม่นำภาษีซื้อไปหักเลย</strong> โดยนำไปรวมเป็นต้นทุนทรัพย์สิน/รายจ่ายของกิจการ</Text>
+        </MiniCard>
+        <MiniCard color={C.purple} bg={C.purpleBg} title="เฉลี่ยตามหลักเกณฑ์อธิบดี (ตัวอย่างชีท: กิจการ VAT + SBT)">
+          <Text>พื้นที่ส่วนที่กำหนดแน่นอนไม่ได้ (แผนกบัญชี ห้องกรรมการ บริการทั่วไป) → ปีที่มีรายได้แล้ว: เฉลี่ยตามส่วนของ<strong>รายได้ปีนั้น (25X1)</strong> ·
+            ปียังไม่มีรายได้: ใช้<strong>ประมาณการรายได้ของปี 25X2</strong> — ข้อสังเกต: หลักเกณฑ์อธิบดีให้เฉลี่ยตาม "ส่วนของรายได้" แม้เป็นภาษีซื้อจากการก่อสร้างอาคาร</Text>
+        </MiniCard>
+      </div>
+    )
+  },
+];
+
+/* ============================================================
+   3. FLASHCARDS
+   ============================================================ */
+const flashcards = [
+  { q: 'สมการหลักของ VAT คืออะไร? ยื่นแบบอะไร ภายในเมื่อไร?', a: 'VAT นำส่ง = ภาษีขาย − ภาษีซื้อ · ยื่น ภ.พ.30 ภายในวันที่ 15 ของเดือนถัดไป', d: 'ภาษีขายมากกว่า → นำส่ง · ภาษีซื้อมากกว่า → ขอคืน (เงินสดหรือเครดิตเดือนถัดไป) — เป็นภาษีรายเดือน', star: 3, exam: false },
+  { q: 'ซื้อ 500 + ภาษีซื้อ 35, ขาย 700 + ภาษีขาย 49 — นำส่ง VAT เท่าไร และเลขนี้พิสูจน์หลักการอะไร?', a: 'นำส่ง 14 = มูลค่าเพิ่ม 200 × 7%', d: 'พิสูจน์ว่า VAT เก็บจาก "มูลค่าเพิ่ม" ของแต่ละทอดผ่านกลไกเครดิตภาษีซื้อ — รัฐได้ 7% ของราคาสุดท้ายเสมอ', star: 3, exam: true },
+  { q: 'ภาษีซื้อเป็น "ค่าใช้จ่าย" และภาษีขายเป็น "รายได้" ของกิจการ ใช่หรือไม่?', a: 'ไม่ใช่ทั้งคู่ — กิจการเป็นแค่ท่อส่งภาษี', d: 'ภาษีซื้อเป็นสิทธิเครดิต (ลูกหนี้กรมสรรพากร) ภาษีขายเป็นหนี้ต้องนำส่ง (เจ้าหนี้) ผู้แบกภาระจริงคือผู้บริโภคคนสุดท้าย', star: 3, exam: false },
+  { q: 'ผู้มีหน้าที่เสีย VAT มี 2 กลุ่มอะไรบ้าง?', a: '1) ผู้ประกอบการขายสินค้า/ให้บริการในราชอาณาจักร (รายรับเกิน 1.8 ล้าน) 2) ผู้นำเข้า', d: 'กลุ่ม 1 ต้องครบ 3 องค์ประกอบ: ผู้ประกอบการ + ขายสินค้า/ให้บริการ + ในราชอาณาจักร · กลุ่ม 2 เสียทุกคนไม่ว่าจดทะเบียนหรือไม่', star: 3, exam: false },
+  { q: 'เกณฑ์รายรับที่ต้องจดทะเบียน VAT คือเท่าไร?', a: 'รายรับเกิน 1.8 ล้านบาทต่อปี', d: 'เกินเมื่อไรต้องจดภายใน 30 วันนับแต่วันที่เกิน (โน้ตอาจารย์: นับแต่วันที่เกิน ไม่ใช่รอสิ้นปี) · ไม่เกินก็ขอจดได้เพื่อเครดิตภาษีซื้อ', star: 3, exam: false },
+  { q: 'อัตรา VAT ตามกฎหมายคือเท่าไร? 7% ประกอบด้วยอะไร?', a: 'อัตรากฎหมาย 10% ลดเหลือ 7% = VAT 6.3% + ภาษีท้องถิ่น 0.7%', d: 'ม.80 กำหนด 10% แต่มีพระราชกฤษฎีกาลดเหลือ 7% — ข้อสอบทฤษฎีชอบถามส่วนประกอบ 6.3 + 0.7', star: 3, exam: false },
+  { q: 'อัตรา 0% ต่างจาก "ยกเว้น VAT" อย่างไร?', a: '0% อยู่ในระบบ ขอคืนภาษีซื้อได้ / ยกเว้น อยู่นอกระบบ เครดิตภาษีซื้อไม่ได้', d: 'จุดหลอกอันดับ 1 — 0% ภาษีขายเป็นศูนย์แต่สิทธิเครดิตยังอยู่ครบ (ดีที่สุด เช่น ส่งออก) ส่วนยกเว้น ภาษีซื้อกลายเป็นต้นทุน จึงมีกิจการยกเว้นที่ "ขอจด" เพื่อเข้าระบบ', star: 3, exam: true },
+  { q: 'กิจการใดเสีย VAT อัตรา 0% บ้าง (ยกมา 4 ตัวหลัก)?', a: 'ส่งออกสินค้า · บริการทำในไทยใช้ต่างประเทศ · ขนส่งระหว่างประเทศทางอากาศ/เรือ · ขายให้ UN/สถานทูต', d: 'เพิ่มเติม: ขายให้ราชการตามโครงการเงินกู้/เงินช่วยเหลือต่างประเทศ และขายระหว่างคลังสินค้าทัณฑ์บน/เขตปลอดอากร', star: 3, exam: false },
+  { q: 'ขายสินค้าเกษตรยังไม่แปรสภาพ สัตว์ ปุ๋ย อาหารสัตว์ หนังสือ — สถานะ VAT คืออะไร?', a: 'ยกเว้น VAT แม้รายรับเกิน 1.8 ล้าน — แต่มีสิทธิขอจดทะเบียนได้ (ภ.พ.01.1)', d: 'กลุ่มยกเว้นเชิงนโยบาย (ปัจจัยพื้นฐาน) · ขอเข้าระบบได้เพื่อเครดิตภาษีซื้อ เช่นเดียวกับกิจการรายรับไม่เกิน 1.8 ล้าน ขนส่งทางอากาศ ส่งออกในเขต กนอ. ขนส่งน้ำมันทางท่อ', star: 3, exam: false },
+  { q: 'บริการยกเว้น VAT มีกลุ่มใหญ่อะไรบ้าง (ยกมา 6)?', a: 'การศึกษา · รักษาพยาบาล · จ้างแรงงาน · ขนส่งในราชอาณาจักร(ทางบก) · เช่าอสังหาริมทรัพย์ · วิชาชีพอิสระ/ศิลปวัฒนธรรม', d: 'เพิ่มเติม: วิจัย-วิชาการ ห้องสมุด พิพิธภัณฑ์ สวนสัตว์ กีฬาสมัครเล่น นักแสดงสาธารณะ ราชการส่วนท้องถิ่น ศาสนา-การกุศล — สังเกตธีม "สังคม-สาธารณะ"', star: 2, exam: false },
+  { q: '"ขาย" ตามนิยาม VAT ต้องมีค่าตอบแทนหรือไม่? ยกตัวอย่างขายที่ไม่ได้เงิน', a: 'ไม่ต้อง — จำหน่าย จ่าย โอน ไม่ว่าจะมีประโยชน์ตอบแทนหรือไม่', d: 'เช่น แจกสินค้า (นอกเกณฑ์ตัวอย่าง), นำสินค้าไปใช้นอกกิจการ, แลกเปลี่ยน/เทิร์นสินค้า, สินค้าขาดจาก stock, สินค้าคงเหลือวันเลิกกิจการ — ใช้ราคาตลาดเป็นฐาน', star: 3, exam: false },
+  { q: 'แจกของตัวอย่าง กับ ของแถม อะไรเป็นการขาย อะไรไม่เป็น?', a: 'แจกตัวอย่าง/ทดลองใช้ก่อนซื้อ/แถมมูลค่าไม่เกินสินค้า = ไม่เป็นขาย · แถม/แจกมูลค่าเกิน = เป็นขาย', d: 'หลักคือของแถมต้องมูลค่าไม่เกินกว่าสินค้า/บริการที่ขาย และการแจกต้องเข้าลักษณะส่งเสริมการขาย/ตัวอย่าง — เกินเกณฑ์ = เสีย VAT จากราคาตลาด', star: 3, exam: true },
+  { q: 'นำสินค้าของกิจการไปใช้เอง เมื่อไรไม่ถือเป็นขาย? มีข้อยกเว้นอะไร?', a: 'ใช้เพื่อประกอบกิจการตนเองโดยตรง = ไม่เป็นขาย — แต่ไม่รวมรถยนต์นั่ง ≤10 ที่นั่ง', d: 'เอารถยนต์นั่งออกใช้ = ถือเป็นขาย (เว้นจอดในสถานแสดงรถเพื่อขาย) · เครื่องแบบพนักงานแจกได้ปีละ 2 ชุด + เสื้อนอก 1 ตัว ไม่เป็นขาย', star: 2, exam: false },
+  { q: 'บริการทำในไทยแต่ลูกค้าใช้ในต่างประเทศ (เช่น เขียนซอฟต์แวร์ให้บริษัทต่างชาติ) — VAT อย่างไร?', a: 'อยู่ในข่าย VAT แต่ได้อัตรา 0%', d: 'บริการเข้าข่าย "ในราชอาณาจักร" ทั้ง 3 คู่: ทำไทย+ใช้ไทย (7%), ทำไทย+ใช้ตปท. (0%), ทำตปท.+ใช้ไทย (7% เช่น โฆษณาบน Platform ต่างชาติ)', star: 3, exam: true },
+  { q: 'Tax Point ของการขายสินค้าทั่วไป คือเมื่อไร?', a: 'เมื่อส่งมอบ — เว้นแต่โอนกรรมสิทธิ์ / รับชำระ / ออกใบกำกับ เกิดก่อน', d: 'หลักใหญ่ 3 คำ: สินค้า=ส่งมอบ บริการ=รับเงิน นำเข้า=ผ่านศุลกากร · เหตุการณ์ที่มาก่อนดึง Tax Point ให้เร็วขึ้นตามส่วนที่เกิด', star: 3, exam: true },
+  { q: 'Tax Point ของการให้บริการ คือเมื่อไร?', a: 'เมื่อได้รับชำระค่าบริการ — เว้นแต่ออกใบกำกับ / ได้ใช้บริการนั้นเอง เกิดก่อน', d: 'สัญญาที่กำหนดค่าตอบแทนตามส่วนของงาน → รับชำระตามส่วนของบริการที่สิ้นสุดแต่ละส่วน', star: 3, exam: true },
+  { q: 'Tax Point ของเช่าซื้อ/ขายผ่อนชำระ คือเมื่อไร?', a: 'เมื่อถึงกำหนดชำระราคาแต่ละงวด (ไม่ใช่ตอนส่งมอบ)', d: 'ป.36/2536 — แม้ลูกค้าผิดนัดก็ต้องนำส่งตามงวด · ดอกเบี้ยผิดนัดรวมเป็นฐาน · ส่วนลดหลังขายยังรวมเป็นฐาน', star: 3, exam: true },
+  { q: 'ฝากขายผ่านตัวแทน Tax Point เกิดเมื่อไร? เงื่อนไขสัญญาตั้งตัวแทนมีอะไร?', a: 'มีสัญญาตามเกณฑ์ → เมื่อตัวแทนส่งมอบให้ผู้ซื้อ · ไม่มีสัญญา → ผู้ฝากออกใบกำกับตอนส่งมอบให้ตัวแทน', d: 'เงื่อนไข: สัญญาเป็นลายลักษณ์อักษร + ทั้งคู่เป็นผู้ประกอบการในระบบ VAT + แจ้งสรรพากรใน 15 วัน + เก็บสัญญาที่สำนักงานใหญ่ ≥5 ปี + ตัวแทนทำรายงานสินค้าแยกของตนเอง', star: 2, exam: false },
+  { q: 'Tax Point ของการส่งออก และการนำเข้า คือเมื่อไร?', a: 'พร้อมชำระอากรขาออก/ขาเข้า หรือวันวางหลักประกัน — ถ้ายกเว้นอากร = วันออกใบขนสินค้า', d: 'ทั้งสองฝั่งใช้หลักเดียวกัน: ผูกกับพิธีการศุลกากร ไม่ใช่วันทำสัญญาหรือวันรับเงิน', star: 3, exam: false },
+  { q: 'Tax Point กรณีพิเศษ: ไฟฟ้า/น้ำประปา · เครื่องขายอัตโนมัติ · ขายสินค้าด้วยบัตรเครดิต · บริการด้วยบัตรเครดิต?', a: 'รับชำระ · นำเงินออกจากเครื่อง · ส่งมอบสินค้า · ออกหลักฐานใช้บัตร', d: 'กฎกระทรวง 189/2534 — ไฟฟ้า น้ำ สินค้าไม่มีรูปร่าง ส่งมอบวัดยากจึงเลื่อนไป "รับชำระ" · สินค้าขาด = ตรวจพบ · เลิกกิจการ = วันเลิก/แจ้งเลิก · ถอนทะเบียน = วันได้รับแจ้งคำสั่ง', star: 2, exam: false },
+  { q: 'ฐานภาษีการขาย ไม่รวมอะไรบ้าง (4 ตัว)?', a: 'ส่วนลดขณะขาย · ค่าชดเชย/เงินอุดหนุน · ภาษีขาย · ค่าตอบแทนตามประกาศอธิบดีฯ ฉบับ 40', d: 'สำคัญสุดคือ "ส่วนลดที่ให้ขณะขาย" ไม่รวมเป็นฐาน — แต่ส่วนลดหลังขาย (เช่น เช่าซื้อ) ยังต้องรวม', star: 3, exam: false },
+  { q: '[โจทย์ชีท] นำเข้า Cost 1,000 USD, Insurance 10, Freight 50, อัตรา 35 บาท/USD, อากร 20% — VAT เท่าไร?', a: 'VAT = 3,116.40 บาท (รวมภาษีอากรต้องชำระ 10,536.40)', d: 'CIF = 35,000+350+1,750 = 37,100 → อากร = 37,100×20% = 7,420 → VAT = (37,100+7,420)×7% = 3,116.40 — ฐานนำเข้า = CIF + สรรพสามิต + อากรขาเข้า', star: 3, exam: true },
+  { q: 'ฐานภาษีการส่งออกใช้ราคาอะไร? รวม/ไม่รวมอะไร?', a: 'F.O.B. + สรรพสามิต + ภาษี/ค่าธรรมเนียมอื่น — ไม่รวมอากรขาออก', d: 'F.O.B. = ราคา ณ ด่านศุลกากร ไม่รวมค่าขนส่งและประกันภัย (ต่างจากนำเข้าที่ใช้ CIF ซึ่งรวม)', star: 2, exam: false },
+  { q: 'กรณีใดใช้ "ราคาตลาด" เป็นฐานภาษี (ฐานพิเศษ)?', a: 'ขายต่ำกว่าราคาตลาด/ไม่มีค่าตอบแทน · นำไปใช้เอง · คงเหลือ ณ เลิกกิจการ · 0% กลายเป็น 7% · สินค้าขาดจาก Stock', d: 'ตรรกะเดียวกัน: เมื่อไม่มีราคาซื้อขายจริงที่เชื่อถือได้ กฎหมายให้เทียบราคาตลาดแทน กันการถ่ายโอนมูลค่าหนี VAT', star: 2, exam: false },
+  { q: 'ภาษีซื้อต้องห้ามกลุ่มไหน "หักเป็นรายจ่าย CIT ได้"?', a: 'ค่ารับรอง (Entertainment) และกลุ่มตามประกาศฯ ฉบับ 42 เช่น รถยนต์นั่ง ≤10 ที่นั่ง, ใบกำกับอย่างย่อ', d: 'ส่วนกลุ่มห้ามทั้งคู่ (เครดิตไม่ได้ + รายจ่ายไม่ได้): ไม่มีใบกำกับ/แสดงไม่ได้, ใบกำกับผิดสาระสำคัญ, ไม่เกี่ยวกับกิจการ, ออกโดยผู้ไม่มีสิทธิ — ตอบข้อสอบเป็น 2 ชั้นเสมอ', star: 3, exam: true },
+  { q: 'ภาษีซื้อจากการซื้อ/เช่ารถยนต์นั่ง ≤10 ที่นั่ง เครดิตได้หรือไม่?', a: 'ไม่ได้ (ต้องห้ามตามฉบับ 42) — แต่หักเป็นรายจ่าย CIT ได้ · เว้นกิจการขาย/ให้เช่ารถยนต์เอง', d: 'รวมถึงภาษีซื้อสินค้า-บริการที่เกี่ยวกับรถนั้น (น้ำมัน ซ่อม ประกัน) · ถ้าดัดแปลงเป็นรถ >10 ที่นั่งภายใน 3 ปี มีเงื่อนไขพิเศษ', star: 3, exam: false },
+  { q: 'ใบกำกับภาษีอย่างย่อ นำมาเครดิตภาษีซื้อได้หรือไม่?', a: 'ไม่ได้ — เป็นภาษีซื้อต้องห้ามตามประกาศฯ ฉบับ 42 (แต่หักรายจ่าย CIT ได้)', d: 'เครดิตได้เฉพาะใบกำกับเต็มรูปตาม ม.86/4 ที่ครบสาระสำคัญ ไม่แก้ไข ไม่เป็นสำเนา (เว้น "เอกสารออกเป็นชุด")', star: 3, exam: false },
+  { q: 'ใบกำกับภาษีเต็มรูปต้องมีข้อความ 7 ข้ออะไรบ้าง?', a: 'คำว่าใบกำกับภาษี · ชื่อ-ที่อยู่-เลขผู้ขาย(สนญ./สาขา) · ชื่อ-ที่อยู่-เลขผู้ซื้อ · เลขที่/เล่มที่ · รายการสินค้า-ปริมาณ-มูลค่า · VAT แยกชัด · วันเดือนปี', d: 'ม.86/4 · ผู้ซื้อไม่ได้จด VAT → ไม่ต้องกรอกเลขผู้ซื้อ · ขาดสาระสำคัญข้อใด = ผู้รับเครดิตไม่ได้', star: 3, exam: true },
+  { q: 'ใบเพิ่มหนี้/ใบลดหนี้ ลงภาษีเดือนไหน?', a: 'ผู้ออก: เดือนที่ออก (เพิ่มหนี้=ภาษีขาย, ลดหนี้=หักภาษีขาย) · ผู้รับ: เดือนที่ได้รับ (เพิ่มหนี้=ภาษีซื้อ, ลดหนี้=หักภาษีซื้อ)', d: 'เหตุเพิ่มหนี้: ราคาเพิ่ม/ส่งเกิน/คำนวณต่ำไป · เหตุลดหนี้: ราคาลด ของชำรุด-ขาดจำนวน รับคืนสินค้า เลิกสัญญาบริการ', star: 3, exam: true },
+  { q: 'ยกเลิกใบกำกับภาษีเดิมเพื่อออกฉบับใหม่ — ฉบับใหม่ใช้เลขที่และวันที่อย่างไร?', a: 'เลขที่ใหม่ แต่วัน เดือน ปี ตรงกับใบกำกับเดิม', d: 'ต้องเรียกคืนฉบับเดิมประทับ "ยกเลิก" + หมายเหตุการยกเลิกในฉบับใหม่ + ลงรายงานภาษีขายเดือนที่จัดทำฉบับใหม่ · ใบแทนใช้กรณีสูญหาย/ชำรุด (ถ่ายสำเนา+บันทึกกำกับ)', star: 2, exam: false },
+  { q: 'รายการซื้อ-ขาย ต้องบันทึกลงรายงาน VAT ภายในกี่วัน? กิจการขายสินค้าต้องทำรายงานอะไรเพิ่ม?', a: 'ภายใน 3 วันทำการนับแต่วันเกิดรายการ · เพิ่มรายงานสินค้าและวัตถุดิบ', d: 'รายงาน 3 เล่ม: ภาษีขาย ภาษีซื้อ สินค้าและวัตถุดิบ — เลข 3-1.8-15: บันทึก 3 วัน / เกณฑ์จด 1.8 ล้าน / ยื่นวันที่ 15', star: 3, exam: false },
+  { q: 'เมื่อไรต้อง "เฉลี่ยภาษีซื้อ"? มีวิธีหลักอะไรบ้าง?', a: 'กิจการ VAT + Non-VAT มีภาษีซื้อร่วมที่แยกไม่ได้ · วิธี: ตามส่วนรายได้ (ทั่วไป) / ตามพื้นที่ใช้อาคาร (ก่อสร้าง) / ตามหลักเกณฑ์อธิบดี', d: 'ประกาศฯ ฉบับ 29 — เครดิตได้เฉพาะส่วนที่เฉลี่ยเข้ากิจการ VAT ส่วนของ Non-VAT เป็นภาษีซื้อต้องห้าม (รวมเป็นต้นทุน/รายจ่ายได้)', star: 3, exam: true },
+  { q: 'เกณฑ์ผ่อนปรน 90% ของการเฉลี่ยภาษีซื้อ คืออะไร?', a: 'รายได้ VAT ≥90% → เลือกเครดิตภาษีซื้อทั้งจำนวนได้ (ขอคืนภายหลังไม่ได้) · รายได้ Non-VAT ≥90% → เลือกไม่หักเลย รวมเป็นต้นทุน/รายจ่าย', d: 'ออกแบบมาลดภาระกิจการที่อีกฝั่งมีสัดส่วนน้อยมาก — จำคู่ 90/90 และผลของแต่ละทาง', star: 3, exam: false },
+  { q: 'เพิ่งเริ่มกิจการยังไม่มีรายได้ เฉลี่ยภาษีซื้ออย่างไร? ปรับปรุงด้วยแบบอะไร?', a: 'ใช้ประมาณการรายได้ของปีที่เริ่มมีรายได้ → สิ้นปีปรับตามรายได้จริง ยื่น ภ.พ.30.2 ฉบับเดียว', d: 'ประมาณ > จริง → เสียเพิ่ม (ไม่มีเบี้ยปรับ/เงินเพิ่ม) · ประมาณ < จริง → ขอคืนภายใน 3 ปี · มีรายได้ปีก่อนแล้ว: เฉลี่ยตามรายได้ปีก่อน เลือกปรับ/ไม่ปรับสิ้นปี แล้วถือปฏิบัติตลอด', star: 2, exam: false },
+  { q: 'ภาษีซื้อจากการก่อสร้างอาคารใช้ร่วม VAT/Non-VAT เฉลี่ยตามอะไร? ติดตามกี่ปี?', a: 'เฉลี่ยตามส่วนของประมาณการการใช้พื้นที่อาคาร · ปรับปรุงเมื่อสร้างเสร็จ/การใช้เปลี่ยน ยื่น ภ.พ.30.3 · ติดตาม 3 ปีนับแต่ก่อสร้างเสร็จ', d: 'ต่างจากกรณีทั่วไปที่ใช้ "รายได้" — อาคารใช้ "พื้นที่" · ถ้าใช้พื้นที่ไม่ตรงประมาณการ: หักเกิน → เสียเพิ่มเป็นรายเดือน / หักขาด → ขอคืน', star: 2, exam: false },
+  { q: 'สินค้าขาดจากรายงานสินค้าและวัตถุดิบ มีผล VAT อย่างไร?', a: 'ถือเป็นขาย ต้องเสีย VAT จากราคาตลาด โดยไม่ต้อง (และไม่ได้) ออกใบกำกับภาษี · Tax Point = เมื่อตรวจพบ', d: 'ม.87(3), ป.86/2542, ม.79/3 วรรคท้าย — โจทย์ audit ชอบออก: นับสต๊อกขาด = โดน VAT + เบี้ยปรับ', star: 2, exam: false },
+  { q: 'เลิกกิจการแล้วมีสินค้า/ทรัพย์สินเหลืออยู่ ต้องทำอย่างไรทาง VAT?', a: 'ถือเป็นการขาย เสีย VAT จากราคาตลาด ณ วันเลิกประกอบกิจการ', d: 'ป.66/2539 + กฎกระทรวง 188 — รวมกรณีถูกเพิกถอนทะเบียน (นับ ณ วันได้รับแจ้งคำสั่งถอน) · ยกเว้นได้รับอนุญาตให้ออกใบกำกับต่อชั่วคราวจนหยุดจริง', star: 2, exam: false },
+  { q: '[ปูพื้น] ทำไมระบบ VAT ต้องมี "ใบกำกับภาษี" เป็นหัวใจ?', a: 'เพราะเป็นหลักฐานของห่วงโซ่เครดิต — ไม่มีใบกำกับ = เครดิตภาษีซื้อไม่ได้ โซ่ขาด', d: 'Model 1: ทุกทอดเก็บ 7% แล้วเครดิตของทอดก่อนคืน ใบกำกับคือหลักฐานที่พิสูจน์ว่าทอดก่อนเก็บภาษีแล้วจริง จึงเทียบได้กับ "เช็คเงินสด" ของระบบ', star: 2, exam: false },
+  { q: '[ปูพื้น] ผู้แบกภาระ VAT ตัวจริงคือใคร และทำไม?', a: 'ผู้บริโภคคนสุดท้าย — เพราะกิจการทุกทอดเครดิตภาษีซื้อคืนได้ เหลือแต่คนสุดท้ายที่เครดิตไม่ได้', d: 'นี่คือความหมายของ "ภาษีทางอ้อม": คนนำส่ง (กิจการ) ไม่ใช่คนแบกภาระ (ผู้บริโภค) — ใช้อธิบายว่าทำไมภาษีซื้อ/ขายไม่ใช่ค่าใช้จ่าย/รายได้', star: 2, exam: false },
+];
+
+/* ============================================================
+   4. QUICK REFERENCE CARDS
+   ============================================================ */
+const quickSections = [
+  { divider: '🎯 สูตรตอบข้อสอบ 30 วินาที' },
+  { s: 'FLOW', t: 'ไล่เคส VAT 5 ชั้น', b: 'ผู้มีหน้าที่/ยกเว้น? → เข้านิยาม "ขาย" กว้าง? → Tax Point เมื่อไร? → ฐานเท่าไร 7% หรือ 0%? → ภาษีซื้อเครดิตได้ไหม?', type: 'flow' },
+  { s: 'สมการ', t: 'VAT นำส่ง', b: 'ภาษีขาย − ภาษีซื้อ · ขายมากกว่า→นำส่ง · ซื้อมากกว่า→ขอคืน · ภ.พ.30 ภายในวันที่ 15 เดือนถัดไป', type: 'formula' },
+  { s: 'CIF', t: 'สูตรนำเข้า', b: 'CIF(=C+I+F) → อากรขาเข้า = CIF×อัตรา → VAT = (CIF+อากร+สรรพสามิต)×7% · โจทย์ชีท: 37,100 → 7,420 → 3,116.40', type: 'formula' },
+  { s: '3-1.8-15', t: 'เลขต้องจำ', b: 'ลงรายงานใน 3 วันทำการ · เกณฑ์จดทะเบียน 1.8 ล้าน/ปี (เกินแล้วจดใน 30 วัน) · ยื่น ภ.พ.30 วันที่ 15', type: 'mnem' },
+  { divider: '📊 อัตรา & สถานะ' },
+  { s: '7%', t: 'อัตราปกติ', b: 'กฎหมาย 10% ลดเหลือ 7% = VAT 6.3% + ท้องถิ่น 0.7% · ใช้กับขายสินค้า ให้บริการ นำเข้า', type: 'chunk' },
+  { s: '0%', t: 'กลุ่มอัตราศูนย์ (ขอคืนภาษีซื้อได้)', b: 'ส่งออก · บริการทำไทยใช้ตปท. · ขนส่งระหว่างประเทศทางอากาศ/เรือ · ขายราชการโครงการเงินกู้ตปท. · UN/สถานทูต · คลังทัณฑ์บน↔เขตปลอดอากร', type: 'chunk' },
+  { s: 'ยกเว้น', t: 'กลุ่มยกเว้น (เครดิตภาษีซื้อไม่ได้)', b: 'เกษตร-สัตว์-ปุ๋ย-อาหารสัตว์-ยาพืชสัตว์-หนังสือ · การศึกษา-รักษาพยาบาล-จ้างแรงงาน-ขนส่งทางบก-เช่าอสังหาฯ-วิชาชีพ-ศิลปะ-กุศล', type: 'chunk' },
+  { s: '0≠ยกเว้น', t: 'จุดหลอกอันดับ 1', b: '0% อยู่ในระบบ ขอคืนภาษีซื้อได้ (ดีสุด) · ยกเว้น อยู่นอกระบบ ภาษีซื้อจม เป็นต้นทุน · ยกเว้นบางกลุ่มจึง "ขอจด" ได้ (ภ.พ.01.1)', type: 'contrast' },
+  { divider: '⏱️ Tax Point ท่องเป็นชุด' },
+  { s: 'หลัก 3 คำ', t: 'Tax Point หลักใหญ่', b: 'สินค้า = ส่งมอบ · บริการ = รับเงิน · นำเข้า/ส่งออก = พิธีการศุลกากร — เว้นแต่ โอนกรรมสิทธิ์/รับเงิน/ออกใบกำกับ/ใช้เอง เกิดก่อน', type: 'mnem' },
+  { s: 'เช่าซื้อ', t: 'ผ่อน/เช่าซื้อ/ฝากขาย', b: 'เช่าซื้อ = ถึงกำหนดแต่ละงวด · ฝากขายมีสัญญาตามเกณฑ์ = ตัวแทนส่งมอบให้ผู้ซื้อ (ไม่มีสัญญา = ออกใบกำกับตอนส่งให้ตัวแทน)', type: 'flow' },
+  { s: 'พิเศษ 189', t: 'กฎกระทรวง 189', b: 'ไฟฟ้า-ประปา-สินค้าไม่มีรูปร่าง = รับชำระ · ตู้อัตโนมัติ = นำเงินออก · บัตรเครดิต: สินค้า = ส่งมอบ, บริการ = ออกหลักฐานใช้บัตร · ขาด stock = ตรวจพบ · เลิกกิจการ = วันเลิก/แจ้ง', type: 'chunk' },
+  { divider: '🧮 ฐานภาษี' },
+  { s: 'ไม่รวม', t: 'ฐานขาย ไม่รวม 4 ตัว', b: 'ส่วนลดขณะขาย · ค่าชดเชย/เงินอุดหนุน · ภาษีขาย · ค่าตอบแทนตามฉบับ 40 (ระวัง: ส่วนลดหลังขายเช่าซื้อ ยังรวม!)', type: 'chunk' },
+  { s: 'ราคาตลาด', t: 'ฐานพิเศษ 5 กรณี', b: 'ขายต่ำกว่าตลาด/ฟรี · นำไปใช้เอง · คงเหลือวันเลิกกิจการ · 0%→7% · ขาดจาก Stock — ทั้งหมดใช้ราคาตลาด', type: 'chunk' },
+  { s: 'FOB/CIF', t: 'ส่งออก vs นำเข้า', b: 'นำเข้า: CIF+สรรพสามิต+อากรขาเข้า · ส่งออก: FOB+สรรพสามิต+ภาษีอื่น แต่ไม่รวมอากรขาออก · ขนส่งระหว่างประเทศ: คน=เก็บในไทย, ของ=ขนออกไม่ว่าเก็บที่ไหน', type: 'contrast' },
+  { divider: '🚷 ภาษีซื้อต้องห้าม & ใบกำกับ' },
+  { s: '2 ชะตา', t: 'ภาษีซื้อต้องห้าม 2 กลุ่ม', b: 'ห้ามทั้งคู่: ไม่มีใบกำกับ/ผิดสาระสำคัญ/ไม่เกี่ยวกิจการ/ผู้ออกไม่มีสิทธิ · ห้ามเครดิตแต่หักรายจ่ายได้: ค่ารับรอง + ฉบับ 42 (รถนั่ง≤10, ใบย่อ, ส่วนเฉลี่ย Non-VAT)', type: 'contrast' },
+  { s: '7 ข้อ', t: 'ใบกำกับเต็มรูป ม.86/4', b: 'คำว่าใบกำกับภาษี · ผู้ขาย(ชื่อ-ที่อยู่-เลข+สนญ./สาขา) · ผู้ซื้อ · เลขที่/เล่มที่ · รายการ-ปริมาณ-มูลค่า · VAT แยก · วันเดือนปี', type: 'chunk' },
+  { s: 'Dr/Cr', t: 'ใบเพิ่มหนี้/ลดหนี้', b: 'ผู้ออกลงเดือนที่ออก ผู้รับลงเดือนที่ได้รับ · เพิ่มหนี้: +ภาษีขาย/+ภาษีซื้อ · ลดหนี้: −ภาษีขาย/−ภาษีซื้อ · ฉบับใหม่แทนยกเลิก: เลขใหม่ วันที่เดิม', type: 'flow' },
+  { divider: '⚖️ เฉลี่ยภาษีซื้อ' },
+  { s: 'เมื่อไร', t: 'เงื่อนไขต้องเฉลี่ย', b: 'กิจการ VAT + Non-VAT และมีภาษีซื้อร่วมแยกไม่ได้ → เฉลี่ย · ทั่วไปตาม "รายได้" · ก่อสร้างอาคารตาม "พื้นที่" (ภ.พ.30.3, ติดตาม 3 ปี)', type: 'flow' },
+  { s: '90/90', t: 'ข้อผ่อนปรน', b: 'รายได้ VAT ≥90% → เครดิตทั้งจำนวนได้ (ขอคืนภายหลังไม่ได้) · Non-VAT ≥90% → ไม่หักเลย รวมเป็นต้นทุน/รายจ่าย', type: 'formula' },
+  { s: 'เริ่มใหม่', t: 'ปีแรก vs มีรายได้แล้ว', b: 'ปีแรก: ใช้ประมาณการ → ปรับจริงสิ้นปี (ภ.พ.30.2, เกิน=เสียเพิ่มไม่มีเบี้ยปรับ, ขาด=ขอคืนใน 3 ปี) · มีรายได้แล้ว: ใช้รายได้ปีก่อน เลือกปรับ/ไม่ปรับ แล้วถือตลอด', type: 'flow' },
+  { divider: '🧱 ปูพื้นต้องจำ' },
+  { s: 'ห่วงโซ่', t: 'Credit Chain', b: 'ทุกทอดเก็บ 7% ของราคาขายตัวเอง เครดิตทอดก่อนคืน → รัฐได้ 7% ของราคาสุดท้าย · ตัวอย่างชีท: 49−35 = 14 = 200×7%', type: 'mnem' },
+  { s: 'ท่อส่ง', t: 'กิจการ = ท่อส่งภาษี', b: 'ผู้บริโภคคนสุดท้ายแบกภาระ · ภาษีซื้อไม่ใช่ค่าใช้จ่าย ภาษีขายไม่ใช่รายได้ · ใบกำกับภาษี = เช็คเงินสดของระบบเครดิต', type: 'mnem' },
+];
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
+const Stars = ({ n }) => <span>{'⭐'.repeat(n)}</span>;
+
+const SectionCards = ({ data }) => (
+  <div>
+    {data.map(sec => (
+      <Card key={sec.key} style={{ marginBottom: 20, borderColor: C.border, background: C.white }}
+        title={<Space wrap><Text strong style={{ fontSize: 17, color: C.text }}>{sec.title}</Text>
+          {sec.tags.map(([label, color], i) => <Tag key={i} color={color}>{label}</Tag>)}</Space>}>
+        {sec.content()}
+      </Card>
+    ))}
+  </div>
+);
+
+const FoundationTab = () => <SectionCards data={foundationData} />;
+const SummaryTab = () => <SectionCards data={summaryData} />;
+
+const FlashcardTab = () => {
+  const [mode, setMode] = useState('all');
+  const [order, setOrder] = useState(flashcards.map((_, i) => i));
+  const [pos, setPos] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [score, setScore] = useState({ ok: 0, no: 0 });
+
+  const filteredIdx = order.filter(i => {
+    if (mode === 'exam') return flashcards[i].exam;
+    if (mode === 'star3') return flashcards[i].star === 3;
+    return true;
+  });
+  const total = filteredIdx.length;
+  const safePos = total === 0 ? 0 : Math.min(pos, total - 1);
+  const card = total > 0 ? flashcards[filteredIdx[safePos]] : null;
+
+  const shuffle = () => {
+    const arr = [...flashcards.keys()];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    setOrder(arr); setPos(0); setFlipped(false); setScore({ ok: 0, no: 0 });
+  };
+  const go = (d) => { setFlipped(false); setPos(p => (p + d + total) % total); };
+  const mark = (ok) => {
+    setScore(s => ok ? { ...s, ok: s.ok + 1 } : { ...s, no: s.no + 1 });
+    go(1);
+  };
+  const switchMode = (m) => { setMode(m); setPos(0); setFlipped(false); setScore({ ok: 0, no: 0 }); };
+
+  return (
+    <div>
+      <Flex justify="space-between" align="center" wrap="wrap" gap={12} style={{ marginBottom: 16 }}>
+        <Space wrap>
+          <Button type={mode === 'all' ? 'primary' : 'default'} onClick={() => switchMode('all')}>ทั้งหมด ({flashcards.length})</Button>
+          <Button type={mode === 'exam' ? 'primary' : 'default'} onClick={() => switchMode('exam')}>🧮 โจทย์เด่น ({flashcards.filter(f => f.exam).length})</Button>
+          <Button type={mode === 'star3' ? 'primary' : 'default'} onClick={() => switchMode('star3')}>⭐⭐⭐ สำคัญสุด ({flashcards.filter(f => f.star === 3).length})</Button>
+        </Space>
+        <Button onClick={shuffle}>🔀 สับไพ่</Button>
+      </Flex>
+      <Row gutter={12} style={{ marginBottom: 16 }}>
+        <Col span={8}><Card size="small" style={{ background: C.surface3, borderColor: C.border, textAlign: 'center' }}><Statistic title="การ์ดที่" value={total === 0 ? 0 : safePos + 1} suffix={`/ ${total}`} valueStyle={{ color: C.text, fontSize: 20 }} /></Card></Col>
+        <Col span={8}><Card size="small" style={{ background: C.greenBg, borderColor: C.green, textAlign: 'center' }}><Statistic title="ตอบถูก" value={score.ok} valueStyle={{ color: C.green, fontSize: 20 }} /></Card></Col>
+        <Col span={8}><Card size="small" style={{ background: C.redBg, borderColor: C.red, textAlign: 'center' }}><Statistic title="ยังไม่ได้" value={score.no} valueStyle={{ color: C.red, fontSize: 20 }} /></Card></Col>
+      </Row>
+      {card ? (
+        <div>
+          <div className="fc-perspective" onClick={() => setFlipped(f => !f)}>
+            <div className={'fc-card' + (flipped ? ' flipped' : '')}>
+              <div className="fc-face" style={{ background: C.white, border: `2px solid ${C.borderDark}`, boxShadow: '0 4px 14px rgba(122,101,72,0.12)' }}>
+                <Space direction="vertical" align="center" style={{ width: '100%' }}>
+                  <Space>
+                    <Stars n={card.star} />
+                    {card.exam && <Tag color="volcano">🧮 โจทย์เด่น</Tag>}
+                  </Space>
+                  <Text strong style={{ fontSize: 19, textAlign: 'center', color: C.text }}>{card.q}</Text>
+                  <Text type="secondary" style={{ marginTop: 12 }}>👆 แตะการ์ดเพื่อดูเฉลย</Text>
+                </Space>
+              </div>
+              <div className="fc-face fc-back" style={{ background: C.surface3, border: `2px solid ${C.gold}`, boxShadow: '0 4px 14px rgba(122,101,72,0.12)' }}>
+                <Space direction="vertical" align="center" style={{ width: '100%' }}>
+                  <Tag color="gold" style={{ fontSize: 13 }}>คำตอบ</Tag>
+                  <Text strong style={{ fontSize: 18, textAlign: 'center', color: C.amberDark }}>{card.a}</Text>
+                  <Divider style={{ margin: '10px 0', borderColor: C.borderDark }} />
+                  <Text style={{ fontSize: 14, textAlign: 'center', color: C.text2 }}>{card.d}</Text>
+                </Space>
+              </div>
+            </div>
+          </div>
+          <Flex justify="center" gap={12} style={{ marginTop: 20 }} wrap="wrap">
+            <Button onClick={() => go(-1)}>← ก่อนหน้า</Button>
+            <Button danger onClick={() => mark(false)}>✗ ยังไม่ได้</Button>
+            <Button type="primary" style={{ background: C.green }} onClick={() => mark(true)}>✓ ตอบได้</Button>
+            <Button onClick={() => go(1)}>ถัดไป →</Button>
+          </Flex>
+        </div>
+      ) : <Alert type="warning" message="ไม่มีการ์ดในโหมดนี้" />}
+    </div>
+  );
+};
+
+const typeStyle = {
+  mnem: { color: C.purple, bg: C.purpleBg, label: '🧠 ช่วยจำ' },
+  flow: { color: C.cyan, bg: C.cyanBg, label: '🔄 ขั้นตอน' },
+  contrast: { color: C.red, bg: C.redBg, label: '⚖️ เทียบ/ระวัง' },
+  chunk: { color: C.blue, bg: C.blueBg, label: '📦 จำเป็นกลุ่ม' },
+  formula: { color: C.amberDark, bg: '#F3EBDCFF', label: '🧮 สูตร' },
+};
+
+const QuickTab = () => (
+  <div>
+    {quickSections.map((item, idx) => {
+      if (item.divider) {
+        return <Divider key={idx} orientation="left" style={{ borderColor: C.borderDark }}>
+          <Text strong style={{ fontSize: 16, color: C.amberDark }}>{item.divider}</Text>
+        </Divider>;
+      }
+      const st = typeStyle[item.type];
+      return (
+        <Card key={idx} size="small" className="qc"
+          style={{ marginBottom: 10, background: st.bg, borderColor: st.color, borderLeftWidth: 5, borderLeftColor: st.color }}>
+          <Flex align="flex-start" gap={12} wrap="wrap">
+            <Tag color="default" style={{ background: C.white, borderColor: st.color, color: st.color, fontWeight: 700, minWidth: 64, textAlign: 'center' }}>{item.s}</Tag>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <Space size={6} wrap>
+                <Text strong style={{ color: C.text }}>{item.t}</Text>
+                <Text style={{ fontSize: 12, color: st.color }}>{st.label}</Text>
+              </Space>
+              <div><Text style={{ color: C.text2 }}>{item.b}</Text></div>
+            </div>
+          </Flex>
+        </Card>
+      );
+    })}
+  </div>
+);
+
+/* Print-friendly view: all four tabs flattened into one A4 document. */
+const PrintView = () => (
+  <div className="print-only" style={{ maxWidth: 900, margin: '0 auto', padding: 16, background: '#fff' }}>
+    <div style={{ textAlign: 'center', marginBottom: 20 }}>
+      <Title level={2} style={{ color: C.amberDark, marginBottom: 4 }}>GA513 การภาษีอากร — ภาษีมูลค่าเพิ่ม (Value Added Tax)</Title>
+      <Text type="secondary">ชีทติวสอบฉบับพิมพ์ · สรุปจากเอกสารประกอบการสอน ดร.จิรารัช พิพัฒน์นราพงศ์ · UTCC บัญชีมหาบัณฑิต</Text>
+    </div>
+    <Title level={3} className="pv-section-title" style={{ color: C.amberDark, borderBottom: `3px solid ${C.gold}`, paddingBottom: 6 }}>ส่วนที่ 1 — ปูพื้น</Title>
+    {foundationData.map(sec => (
+      <div key={sec.key} style={{ marginBottom: 20 }}>
+        <Title level={4} className="pv-section-title" style={{ color: C.text, borderBottom: `1px solid ${C.borderDark}`, paddingBottom: 4 }}>{sec.title}</Title>
+        {sec.content()}
+      </div>
+    ))}
+    <Title level={3} className="pv-section-title pv-page-start" style={{ color: C.amberDark, borderBottom: `3px solid ${C.gold}`, paddingBottom: 6 }}>ส่วนที่ 2 — สรุปเนื้อหา</Title>
+    {summaryData.map(sec => (
+      <div key={sec.key} style={{ marginBottom: 20 }}>
+        <Title level={4} className="pv-section-title" style={{ color: C.text, borderBottom: `1px solid ${C.borderDark}`, paddingBottom: 4 }}>{sec.title}</Title>
+        {sec.content()}
+      </div>
+    ))}
+    <Title level={3} className="pv-section-title pv-page-start" style={{ color: C.amberDark, borderBottom: `3px solid ${C.gold}`, paddingBottom: 6 }}>ส่วนที่ 3 — Flashcard {flashcards.length} ข้อ (ถาม–ตอบ)</Title>
+    {flashcards.map((f, i) => (
+      <div key={i} className="no-break" style={{ border: `1px solid ${C.border}`, borderRadius: 8, padding: '8px 12px', marginBottom: 8 }}>
+        <div>
+          <Text strong>{i + 1}. {f.q}</Text>
+          <Text> {'⭐'.repeat(f.star)}</Text>
+          {f.exam && <Tag color="volcano" style={{ marginLeft: 6 }}>🧮 โจทย์เด่น</Tag>}
+        </div>
+        <div><Text strong style={{ color: C.amberDark }}>ตอบ: {f.a}</Text></div>
+        <div><Text style={{ fontSize: 13, color: C.text2 }}>{f.d}</Text></div>
+      </div>
+    ))}
+    <Title level={3} className="pv-section-title pv-page-start" style={{ color: C.amberDark, borderBottom: `3px solid ${C.gold}`, paddingBottom: 6 }}>ส่วนที่ 4 — การ์ดจำด่วน</Title>
+    {quickSections.map((item, idx) => {
+      if (item.divider) {
+        return <Title key={idx} level={4} className="pv-divider" style={{ color: C.amberDark, marginTop: 16 }}>{item.divider}</Title>;
+      }
+      const st = typeStyle[item.type];
+      return (
+        <div key={idx} className="no-break" style={{ border: `1px solid ${C.border}`, borderLeft: `4px solid ${st.color}`, borderRadius: 8, padding: '6px 12px', marginBottom: 6 }}>
+          <Text strong>[{item.s}] {item.t}</Text>
+          <Text style={{ fontSize: 12, color: st.color }}> {st.label}</Text>
+          <div><Text style={{ fontSize: 13, color: C.text2 }}>{item.b}</Text></div>
+        </div>
+      );
+    })}
+    <div style={{ textAlign: 'center', marginTop: 24, borderTop: `1px solid ${C.border}`, paddingTop: 8 }}>
+      <Text type="secondary" style={{ fontSize: 12 }}>GA513 ติวสอบ ภาษีมูลค่าเพิ่ม · โชคดีในการสอบ! 🍀</Text>
+    </div>
+  </div>
+);
+
+const App = () => (
+  <ConfigProvider theme={{
+    algorithm: theme.defaultAlgorithm,
+    token: {
+      colorPrimary: C.gold, colorBgBase: C.bg, colorTextBase: C.text,
+      colorBgContainer: C.white, colorBorder: C.border, colorBorderSecondary: C.border,
+      borderRadius: 10, fontFamily: "'Noto Sans Thai', sans-serif", fontSize: 15,
+    },
+  }}>
+    <Layout className="screen-only" style={{ minHeight: '100vh', background: C.bg }}>
+      <Layout.Content style={{ maxWidth: 900, width: '100%', margin: '0 auto', padding: '28px 16px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 8 }}>
+          <Title level={2} style={{ color: C.amberDark, marginBottom: 4 }}>📚 GA513 การภาษีอากร</Title>
+          <Title level={4} style={{ color: C.text2, marginTop: 0, fontWeight: 500 }}>ภาษีมูลค่าเพิ่ม (Value Added Tax)</Title>
+          <Text type="secondary">สรุปจากเอกสารประกอบการสอน ดร.จิรารัช พิพัฒน์นราพงศ์ · UTCC บัญชีมหาบัณฑิต · มิ.ย.–ก.ค. 2569</Text>
+          <div style={{ marginTop: 12 }}>
+            <Button onClick={() => window.print()}>🖨️ พิมพ์ / บันทึกเป็น PDF</Button>
+            <div><Text type="secondary" style={{ fontSize: 12 }}>ฉบับพิมพ์รวมเนื้อหาทั้ง 4 แท็บ (ปูพื้น + สรุป + ถาม-ตอบ + การ์ดจำด่วน) พอดีกระดาษ A4</Text></div>
+          </div>
+        </div>
+        <Tabs centered type="card" size="large" style={{ marginTop: 16 }}
+          items={[
+            { key: 'foundation', label: '🧱 ปูพื้น', children: <FoundationTab /> },
+            { key: 'summary', label: '📖 สรุปเนื้อหา', children: <SummaryTab /> },
+            { key: 'flash', label: '🃏 Flashcard', children: <FlashcardTab /> },
+            { key: 'quick', label: '⚡ การ์ดจำด่วน', children: <QuickTab /> },
+          ]} />
+        <div style={{ textAlign: 'center', marginTop: 32, paddingTop: 16, borderTop: `1px solid ${C.border}` }}>
+          <Text type="secondary" style={{ fontSize: 13 }}>สร้างจากเอกสารประกอบการสอน GA513-VAT (37 หน้า) · ใช้คู่กับรูป JPEG ทั้ง 37 หน้าในโฟลเดอร์ GA513-VAT-jpeg · โชคดีในการสอบ! 🍀</Text>
+        </div>
+      </Layout.Content>
+    </Layout>
+    <PrintView />
+  </ConfigProvider>
+);
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script src="../../../assets/ink-tool.js?v=7" defer></script>
+</body>
+</html>
