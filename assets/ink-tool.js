@@ -559,16 +559,21 @@
           setBusy(false);
           document.body.classList.add('ink-print-all');
           var restored = false;
+          var mq = window.matchMedia ? window.matchMedia('print') : null;
+          function onMq(e) { if (!e.matches) restore(); }       // ออกจากโหมดพิมพ์แล้วค่อยคืนสภาพ
           function restore() {
             if (restored) return; restored = true;
             window.removeEventListener('afterprint', restore);
+            if (mq) { if (mq.removeEventListener) mq.removeEventListener('change', onMq); else if (mq.removeListener) mq.removeListener(onMq); }
             document.body.classList.remove('ink-print-all');
             removeAppendix();
             actives.forEach(function (a) { if (a && document.contains(a)) { try { a.click(); } catch (_) {} } });
           }
           window.addEventListener('afterprint', restore);
+          if (mq) { if (mq.addEventListener) mq.addEventListener('change', onMq); else if (mq.addListener) mq.addListener(onMq); }
           window.print();
-          setTimeout(restore, 4000);                            // สำรอง เผื่อ afterprint ไม่ยิงบางเบราว์เซอร์
+          // สำคัญ: ห้ามคืนสภาพเร็ว — ผู้ใช้ยังเปิดหน้าตัวอย่างพิมพ์อยู่ (เดิมตั้ง 4 วิ ทำให้ preview กลายเป็นหน้าว่าง)
+          setTimeout(restore, 300000);                          // กันค้างกรณีสุดวิสัยเท่านั้น (5 นาที)
         }, 300);
       })();
     });
