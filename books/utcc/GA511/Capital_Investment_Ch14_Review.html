@@ -858,6 +858,96 @@ const QuickTab = () => (
 );
 
 /* ============================================================ */
+/* ---------- 📖 อ่านง่าย: ตัวย่อแปลไทย + วิธีทำทีละขั้น ---------- */
+const REStep = ({title, color, items}) => (
+  <Card size="small" style={{marginBottom:12, background:C.white, borderColor:color, borderLeft:`5px solid ${color}`}}>
+    <Text strong style={{color, fontSize:15}}>{title}</Text>
+    <div style={{marginTop:8}}>
+      {items.map((s,i)=>(
+        <div key={i} style={{display:'flex', gap:10, alignItems:'flex-start', marginBottom:7}}>
+          <div style={{flex:'0 0 26px', width:26, height:26, borderRadius:'50%', background:color, color:'#fff', display:'grid', placeItems:'center', fontWeight:700, fontSize:13}}>{i+1}</div>
+          <Text style={{color:C.text, fontSize:14, lineHeight:1.7}}>{s}</Text>
+        </div>
+      ))}
+    </div>
+  </Card>
+);
+const ReadEasyTab = () => {
+  const glossary = [
+    {k:'NPV', e:'Net Present Value', m:'มูลค่าปัจจุบันสุทธิ = เงินที่โครงการทำให้ "รวยขึ้น" คิดเป็นเงินวันนี้'},
+    {k:'IRR', e:'Internal Rate of Return', m:'อัตราผลตอบแทนภายใน = "ดอกเบี้ย" ที่โครงการจ่ายให้เรา'},
+    {k:'PV', e:'Present Value', m:'มูลค่าปัจจุบัน = ดึงเงินอนาคตกลับมาตีค่าเป็นเงินวันนี้'},
+    {k:'FV', e:'Future Value', m:'มูลค่าอนาคต = เงินวันนี้โตไปเป็นเท่าไรในอนาคต'},
+    {k:'CF', e:'Cash Flow', m:'กระแสเงินสด = เงินสดเข้า–ออกจริง (ไม่ใช่กำไรบัญชี)'},
+    {k:'TVM', e:'Time Value of Money', m:'มูลค่าเงินตามเวลา = เงิน 100 วันนี้ > เงิน 100 ปีหน้า'},
+    {k:'ARR', e:'Accounting Rate of Return', m:'อัตราผลตอบแทนทางบัญชี = กำไรเฉลี่ย ÷ เงินลงทุน'},
+    {k:'df', e:'Discount Factor', m:'ตัวคูณส่วนลด = 1 ÷ (1+r)ⁿ เอาไว้คูณกระแสเงินสด'},
+    {k:'r', e:'rate / hurdle rate', m:'อัตราคิดลด / อัตราขั้นต่ำที่โครงการต้องทำให้ได้'},
+    {k:'n', e:'number of periods', m:'จำนวนงวด (ปี)'},
+    {k:'Payback', e:'Payback Period', m:'ระยะเวลาคืนทุน = กี่ปีถึงได้เงินลงทุนคืนครบ'},
+  ];
+  const formulas = [
+    ['PV = CF ÷ (1 + r)ⁿ', 'เงินอนาคต ÷ (1 บวกอัตรา) ยกกำลังจำนวนปี = ค่าของมันวันนี้'],
+    ['NPV = Σ (CF × df) − เงินลงทุน', 'รวมมูลค่าปัจจุบันของเงินเข้าทุกปี แล้วลบเงินลงทุน'],
+    ['Payback = เงินลงทุน ÷ CF ต่อปี', 'กี่ปีได้ทุนคืน (กรณีกระแสเท่ากันทุกปี)'],
+    ['ARR = กำไรเฉลี่ยต่อปี ÷ เงินลงทุน', 'ตัวเดียวในบทที่ใช้ "กำไรบัญชี"'],
+  ];
+  const pitfalls = [
+    'NPV กับ IRR ขัดกันเมื่อไร → เชื่อ NPV เสมอ',
+    'ARR ใช้ "กำไรบัญชี" ไม่ใช่ "กระแสเงินสด" — ห้ามสับ',
+    'Payback ไม่สนมูลค่าเงินตามเวลา (TVM) และไม่สนเงินที่ได้หลังคืนทุน',
+    'ค่าเสื่อมราคาไม่ใช่กระแสเงินสดจ่าย (แต่มีผลทางภาษี)',
+  ];
+  return (
+    <div className="fadein">
+      <Alert type="success" showIcon style={{marginBottom:14, background:C.greenBg, border:`1px solid ${C.green}`}}
+        message={<Text strong style={{color:C.text}}>อ่านง่ายทีละขั้น — ยังงงเริ่มจากแท็บนี้</Text>}
+        description={<Text style={{color:C.text2}}>บทนี้ตอบคำถามเดียว: "ควรลงเงินก้อนใหญ่ในโครงการนี้ไหม?" ทุกอย่างวนอยู่กับ TVM — เงินวันนี้มีค่ามากกว่าเงินอนาคต</Text>}/>
+      <Card size="small" title={<Text strong style={{color:C.goldDark}}>🔤 ตัวย่อในบทนี้ (แปลไทย)</Text>} style={{marginBottom:12, background:C.surface3, borderColor:C.border}}>
+        <Table size="small" pagination={false}
+          columns={[
+            {title:'ตัวย่อ', dataIndex:'k', key:'k', width:96, render:t=><Text strong style={{color:C.goldDark}}>{t}</Text>},
+            {title:'ย่อมาจาก', dataIndex:'e', key:'e', width:210, render:t=><Text style={{color:C.text3, fontSize:13}}>{t}</Text>},
+            {title:'ความหมายแบบเข้าใจง่าย', dataIndex:'m', key:'m', render:t=><Text style={{color:C.text}}>{t}</Text>},
+          ]}
+          dataSource={glossary.map((r,i)=>({...r, key:i}))}/>
+      </Card>
+      <Card size="small" title={<Text strong style={{color:C.blue}}>🧮 สูตรที่ต้องแม่น (อ่านออกเสียงได้)</Text>} style={{marginBottom:12, background:C.blueBg, borderColor:C.blue}}>
+        {formulas.map((f,i)=>(
+          <div key={i} style={{marginBottom:8}}>
+            <Text strong style={{color:C.text, fontSize:15}}>{f[0]}</Text><br/>
+            <Text style={{color:C.text3, fontSize:13}}>↳ {f[1]}</Text>
+          </div>
+        ))}
+      </Card>
+      <REStep title="📝 หา NPV ทีละขั้น (ราชาของบท — ออกทุกครั้ง)" color={C.green} items={[
+        'เขียนกระแสเงินสดสุทธิของแต่ละปีออกมาให้ครบ (ปีไหนได้/จ่ายเท่าไร)',
+        'เปิดตาราง PV ที่อัตรา r หา "ตัวคูณส่วนลด (df)" ของแต่ละปี',
+        'คูณ: กระแสเงินสดแต่ละปี × df ของปีนั้น = PV ของปีนั้น',
+        'บวก PV ทุกปีเข้าด้วยกัน = PV รวมของเงินที่รับเข้า',
+        'ลบเงินลงทุนตั้งต้นออก → ได้ NPV',
+        'ตัดสิน: NPV ≥ 0 รับ · < 0 ปฏิเสธ · เลือกได้อันเดียวเอา NPV สูงสุด',
+      ]}/>
+      <REStep title="🎯 หา IRR ทีละขั้น (กรณีกระแสเท่ากันทุกปี)" color={C.purple} items={[
+        'หาตัวคูณ: df = เงินลงทุน ÷ กระแสเงินสดต่อปี',
+        'เปิดตาราง annuity แถวจำนวนปี (n) ของโครงการ',
+        'ไล่ดูว่า df ที่ได้ ตรง/ใกล้ช่อง % ไหน — % นั้นคือ IRR',
+        'เทียบ IRR กับ hurdle rate: IRR ≥ ขั้นต่ำ → รับโครงการ',
+      ]}/>
+      <REStep title="⏱️ Payback & 📒 ARR ทีละขั้น" color={C.gold} items={[
+        'Payback (เท่ากันทุกปี) = เงินลงทุน ÷ กระแสเงินสดต่อปี = จำนวนปีที่คืนทุน',
+        'Payback (ไม่เท่ากัน) = ค่อย ๆ หักกระแสเงินสดแต่ละปีจนเงินลงทุนหมดพอดี',
+        'ARR = กำไรสุทธิเฉลี่ยต่อปี ÷ เงินลงทุน (ใช้ "กำไรบัญชี" ไม่ใช่เงินสด!)',
+      ]}/>
+      <Card size="small" title={<Text strong style={{color:C.red}}>⚠️ จุดพลาดบ่อย</Text>} style={{marginBottom:4, background:C.redBg, borderColor:C.red}}>
+        <ul style={{margin:0, paddingLeft:20}}>
+          {pitfalls.map((p,i)=><li key={i} style={{marginBottom:4}}><Text style={{color:C.text}}>{p}</Text></li>)}
+        </ul>
+      </Card>
+    </div>
+  );
+};
+
 const App = () => (
   <ConfigProvider theme={{
     algorithm: theme.defaultAlgorithm,
@@ -873,7 +963,8 @@ const App = () => (
         <Paragraph style={{textAlign:'center', color:C.text3, marginBottom:24}}>
           Cornerstones of Managerial Accounting, 5e · เรียนแบบ case method: พื้นฐาน → กรอบคิด → ทดลอง → เคสจริง → ท่องจำ
         </Paragraph>
-        <Tabs centered type="card" defaultActiveKey="basics" items={[
+        <Tabs centered type="card" defaultActiveKey="easy" items={[
+          { key:'easy', label:'📖 อ่านง่าย', children:<ReadEasyTab/> },
           { key:'basics', label:'🌱 ปูพื้นก่อน', children:<BasicsTab/> },
           { key:'sum', label:'📚 สรุปเนื้อหา', children:<SummaryTab/> },
           { key:'lab', label:'🧪 ห้องทดลอง', children:<LabTab/> },

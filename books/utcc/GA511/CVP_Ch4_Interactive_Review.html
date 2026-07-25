@@ -704,6 +704,94 @@ const QuickTab = () => (
 );
 
 /* ============================================================ */
+/* ---------- 📖 อ่านง่าย: ตัวย่อแปลไทย + วิธีทำทีละขั้น ---------- */
+const REStep = ({title, color, items}) => (
+  <Card size="small" style={{marginBottom:12, background:C.white, borderColor:color, borderLeft:`5px solid ${color}`}}>
+    <Text strong style={{color, fontSize:15}}>{title}</Text>
+    <div style={{marginTop:8}}>
+      {items.map((s,i)=>(
+        <div key={i} style={{display:'flex', gap:10, alignItems:'flex-start', marginBottom:7}}>
+          <div style={{flex:'0 0 26px', width:26, height:26, borderRadius:'50%', background:color, color:'#fff', display:'grid', placeItems:'center', fontWeight:700, fontSize:13}}>{i+1}</div>
+          <Text style={{color:C.text, fontSize:14, lineHeight:1.7}}>{s}</Text>
+        </div>
+      ))}
+    </div>
+  </Card>
+);
+const ReadEasyTab = () => {
+  const glossary = [
+    {k:'CVP', e:'Cost–Volume–Profit', m:'วิเคราะห์ความสัมพันธ์ ต้นทุน–ปริมาณ–กำไร (หัวใจของบท)'},
+    {k:'CM', e:'Contribution Margin', m:'กำไรส่วนเกิน = ราคาขาย − VC (เหลือไว้จ่าย FC แล้วเป็นกำไร)'},
+    {k:'CM ratio', e:'Contribution Margin ratio', m:'อัตรากำไรส่วนเกิน = CM ÷ ยอดขาย'},
+    {k:'VC', e:'Variable Cost', m:'ต้นทุนผันแปร = เพิ่มตามจำนวนที่ผลิต/ขาย'},
+    {k:'FC', e:'Fixed Cost', m:'ต้นทุนคงที่ = เท่าเดิมไม่ว่าจะขายกี่หน่วย'},
+    {k:'BE / BEP', e:'Break-Even Point', m:'จุดคุ้มทุน = ขายเท่าไรถึงไม่ขาดทุน (กำไร = 0)'},
+    {k:'MOS', e:'Margin of Safety', m:'ส่วนเผื่อปลอดภัย = ยอดขายจริงสูงกว่าจุดคุ้มทุนเท่าไร'},
+    {k:'DOL', e:'Degree of Operating Leverage', m:'ยอดขายขยับ กำไรขยับกี่เท่า = CM ÷ กำไรดำเนินงาน'},
+    {k:'OI', e:'Operating Income', m:'กำไรจากการดำเนินงาน'},
+  ];
+  const formulas = [
+    ['CM ต่อหน่วย = ราคาขาย − VC ต่อหน่วย', 'เงินที่เหลือจากขาย 1 หน่วย ไว้จ่ายต้นทุนคงที่'],
+    ['CM ratio = CM ÷ ยอดขาย', 'ทุก 1 บาทที่ขาย เหลือเป็น CM กี่บาท'],
+    ['BE (หน่วย) = FC ÷ CM ต่อหน่วย', 'ต้องขายกี่หน่วยถึงคุ้มทุน'],
+    ['BE (บาท) = FC ÷ CM ratio', 'ต้องขายกี่บาทถึงคุ้มทุน'],
+    ['ขายเพื่อกำไรเป้า = (FC + กำไรเป้า) ÷ CM ต่อหน่วย', 'บวกกำไรที่อยากได้เข้าไปก่อนหาร'],
+    ['MOS = ยอดขายจริง − ยอดขาย ณ จุดคุ้มทุน', 'ยอดตกได้อีกเท่าไรก่อนขาดทุน'],
+    ['DOL = CM ÷ กำไรดำเนินงาน', 'ยอดขาย +1% → กำไร +DOL%'],
+  ];
+  const pitfalls = [
+    'CM = ราคา − VC เท่านั้น (ยังไม่หัก FC) — อย่าเผลอหัก FC ก่อน',
+    'BE "หน่วย" ใช้ ÷ CM ต่อหน่วย · BE "บาท" ใช้ ÷ CM ratio — คนละสูตร',
+    'กำไรเป้า ให้บวกเข้ากับ FC ก่อนแล้วค่อยหาร',
+    'FC เปลี่ยน → BE เปลี่ยน · ราคา/VC เปลี่ยน → CM เปลี่ยน',
+  ];
+  return (
+    <div className="fadein">
+      <Alert type="success" showIcon style={{marginBottom:14, background:C.greenBg, border:`1px solid ${C.green}`}}
+        message={<Text strong style={{color:C.text}}>อ่านง่ายทีละขั้น — ยังงงเริ่มจากแท็บนี้</Text>}
+        description={<Text style={{color:C.text2}}>ทั้งบทหมุนรอบคำเดียว: CM (กำไรส่วนเกิน) หา CM ได้ ก็หา จุดคุ้มทุน / กำไรเป้า / ความเสี่ยง ได้หมด</Text>}/>
+      <Card size="small" title={<Text strong style={{color:C.goldDark}}>🔤 ตัวย่อในบทนี้ (แปลไทย)</Text>} style={{marginBottom:12, background:C.surface3, borderColor:C.border}}>
+        <Table size="small" pagination={false}
+          columns={[
+            {title:'ตัวย่อ', dataIndex:'k', key:'k', width:96, render:t=><Text strong style={{color:C.goldDark}}>{t}</Text>},
+            {title:'ย่อมาจาก', dataIndex:'e', key:'e', width:210, render:t=><Text style={{color:C.text3, fontSize:13}}>{t}</Text>},
+            {title:'ความหมายแบบเข้าใจง่าย', dataIndex:'m', key:'m', render:t=><Text style={{color:C.text}}>{t}</Text>},
+          ]}
+          dataSource={glossary.map((r,i)=>({...r, key:i}))}/>
+      </Card>
+      <Card size="small" title={<Text strong style={{color:C.blue}}>🧮 สูตรที่ต้องแม่น (อ่านออกเสียงได้)</Text>} style={{marginBottom:12, background:C.blueBg, borderColor:C.blue}}>
+        {formulas.map((f,i)=>(
+          <div key={i} style={{marginBottom:8}}>
+            <Text strong style={{color:C.text, fontSize:15}}>{f[0]}</Text><br/>
+            <Text style={{color:C.text3, fontSize:13}}>↳ {f[1]}</Text>
+          </div>
+        ))}
+      </Card>
+      <REStep title="📝 หาจุดคุ้มทุน (BE) ทีละขั้น" color={C.green} items={[
+        'หา CM ต่อหน่วย = ราคาขาย − VC ต่อหน่วย',
+        'BE (หน่วย) = FC ÷ CM ต่อหน่วย',
+        'BE (บาท) = BE หน่วย × ราคา  หรือ  FC ÷ CM ratio',
+        'ตรวจ: ที่ BE → CM รวม = FC พอดี (กำไร = 0)',
+      ]}/>
+      <REStep title="🎯 ขายเท่าไรได้กำไรตามเป้า" color={C.purple} items={[
+        'บวกกำไรเป้าเข้ากับ FC ก่อน (FC + กำไรเป้า)',
+        'หารด้วย CM ต่อหน่วย → จำนวนหน่วยที่ต้องขาย',
+        'อยากได้เป็นบาท: หารด้วย CM ratio แทน',
+      ]}/>
+      <REStep title="🛡️ วัดความเสี่ยง: MOS & DOL ทีละขั้น" color={C.gold} items={[
+        'MOS = ยอดขายจริง − ยอดขาย ณ จุดคุ้มทุน (ยิ่งมาก ยิ่งปลอดภัย)',
+        'DOL = CM ÷ กำไรดำเนินงาน',
+        'ยอดขายเปลี่ยนกี่ % → กำไรเปลี่ยน = %ยอดขาย × DOL',
+      ]}/>
+      <Card size="small" title={<Text strong style={{color:C.red}}>⚠️ จุดพลาดบ่อย</Text>} style={{marginBottom:4, background:C.redBg, borderColor:C.red}}>
+        <ul style={{margin:0, paddingLeft:20}}>
+          {pitfalls.map((p,i)=><li key={i} style={{marginBottom:4}}><Text style={{color:C.text}}>{p}</Text></li>)}
+        </ul>
+      </Card>
+    </div>
+  );
+};
+
 const App = () => (
   <ConfigProvider theme={{
     algorithm: theme.defaultAlgorithm,
@@ -719,7 +807,8 @@ const App = () => (
         <Paragraph style={{textAlign:'center', color:C.text3, marginBottom:24}}>
           Cornerstones of Managerial Accounting, 5e · พื้นฐาน → สรุป → ทดลอง → ท่องจำ
         </Paragraph>
-        <Tabs centered type="card" defaultActiveKey="basics" items={[
+        <Tabs centered type="card" defaultActiveKey="easy" items={[
+          { key:'easy', label:'📖 อ่านง่าย', children:<ReadEasyTab/> },
           { key:'basics', label:'🌱 ปูพื้นก่อน', children:<BasicsTab/> },
           { key:'sum', label:'📚 สรุปเนื้อหา', children:<SummaryTab/> },
           { key:'lab', label:'🧪 ห้องทดลอง', children:<LabTab/> },

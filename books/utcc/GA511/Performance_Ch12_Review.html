@@ -1183,6 +1183,93 @@ const QuickTab = () => (
 );
 
 /* ============================================================ */
+/* ---------- 📖 อ่านง่าย: ตัวย่อแปลไทย + วิธีทำทีละขั้น ---------- */
+const REStep = ({title, color, items}) => (
+  <Card size="small" style={{marginBottom:12, background:C.white, borderColor:color, borderLeft:`5px solid ${color}`}}>
+    <Text strong style={{color, fontSize:15}}>{title}</Text>
+    <div style={{marginTop:8}}>
+      {items.map((s,i)=>(
+        <div key={i} style={{display:'flex', gap:10, alignItems:'flex-start', marginBottom:7}}>
+          <div style={{flex:'0 0 26px', width:26, height:26, borderRadius:'50%', background:color, color:'#fff', display:'grid', placeItems:'center', fontWeight:700, fontSize:13}}>{i+1}</div>
+          <Text style={{color:C.text, fontSize:14, lineHeight:1.7}}>{s}</Text>
+        </div>
+      ))}
+    </div>
+  </Card>
+);
+const ReadEasyTab = () => {
+  const glossary = [
+    {k:'ROI', e:'Return on Investment', m:'ผลตอบแทนต่อสินทรัพย์ = กำไรดำเนินงาน ÷ สินทรัพย์เฉลี่ย (เป็น %)'},
+    {k:'RI', e:'Residual Income', m:'กำไรส่วนที่เกินต้นทุนเงินขั้นต่ำ = กำไร − (อัตราขั้นต่ำ × สินทรัพย์) (เป็นบาท)'},
+    {k:'EVA', e:'Economic Value Added', m:'มูลค่าเพิ่มเชิงเศรษฐกิจ = NOPAT − (WACC × เงินทุนที่ใช้)'},
+    {k:'OI', e:'Operating Income', m:'กำไรจากการดำเนินงาน (ก่อนดอกเบี้ย/ภาษี)'},
+    {k:'Margin', e:'Profit Margin', m:'อัตรากำไร = OI ÷ ยอดขาย'},
+    {k:'Turnover', e:'Asset Turnover', m:'อัตราหมุนสินทรัพย์ = ยอดขาย ÷ สินทรัพย์'},
+    {k:'TP', e:'Transfer Price', m:'ราคาโอนสินค้า/บริการภายในระหว่างแผนก'},
+    {k:'WACC', e:'Weighted Avg Cost of Capital', m:'ต้นทุนเงินทุนถัวเฉลี่ย (หนี้ + ทุน)'},
+    {k:'NOPAT', e:'Net Operating Profit After Tax', m:'กำไรดำเนินงานหลังภาษี (ใช้ใน EVA)'},
+  ];
+  const formulas = [
+    ['ROI = OI ÷ สินทรัพย์เฉลี่ย', 'ทุก 1 บาทของสินทรัพย์ ทำกำไรได้กี่ %'],
+    ['ROI = Margin × Turnover', '= (OI ÷ ยอดขาย) × (ยอดขาย ÷ สินทรัพย์) — ปรับได้ 2 ทาง'],
+    ['RI = OI − (อัตราขั้นต่ำ % × สินทรัพย์)', 'กำไรที่เหลือหลังจ่าย "ค่าเช่าเงินทุน" ขั้นต่ำ'],
+    ['EVA = NOPAT − (WACC × เงินทุน)', 'สร้างมูลค่าจริงเมื่อ EVA > 0'],
+    ['TP floor (ผู้ขาย) = VC ต่อหน่วย + ต้นทุนเสียโอกาส', 'ต่ำสุดที่ผู้ขายยอมรับ'],
+    ['TP ceiling (ผู้ซื้อ) = ราคาตลาดภายนอก', 'สูงสุดที่ผู้ซื้อยอมจ่าย'],
+  ];
+  const pitfalls = [
+    'ROI ทำให้ผู้จัดการ "ปฏิเสธโครงการดี" ได้ (ถ้า ROI โครงการ < ROI ปัจจุบัน แต่ยัง > ขั้นต่ำ) → RI แก้จุดนี้',
+    'RI เป็น "จำนวนเงิน" · ROI เป็น "%" — เทียบแผนกขนาดต่างกันด้วย RI ต้องระวัง',
+    'Transfer price: floor ต่างกันเมื่อผู้ขาย "มีกำลังเหลือ" กับ "เต็มกำลัง"',
+    'EVA ใช้ NOPAT (หลังภาษี) และหักต้นทุนทุนทั้งก้อน',
+  ];
+  return (
+    <div className="fadein">
+      <Alert type="success" showIcon style={{marginBottom:14, background:C.greenBg, border:`1px solid ${C.green}`}}
+        message={<Text strong style={{color:C.text}}>อ่านง่ายทีละขั้น — ยังงงเริ่มจากแท็บนี้</Text>}
+        description={<Text style={{color:C.text2}}>บทนี้วัดว่า "แผนก/ผู้จัดการทำได้ดีแค่ไหน" ด้วย ROI · RI · EVA และเรื่องตั้ง "ราคาโอนภายใน" (Transfer Price)</Text>}/>
+      <Card size="small" title={<Text strong style={{color:C.goldDark}}>🔤 ตัวย่อในบทนี้ (แปลไทย)</Text>} style={{marginBottom:12, background:C.surface3, borderColor:C.border}}>
+        <Table size="small" pagination={false}
+          columns={[
+            {title:'ตัวย่อ', dataIndex:'k', key:'k', width:110, render:t=><Text strong style={{color:C.goldDark}}>{t}</Text>},
+            {title:'ย่อมาจาก', dataIndex:'e', key:'e', width:220, render:t=><Text style={{color:C.text3, fontSize:13}}>{t}</Text>},
+            {title:'ความหมายแบบเข้าใจง่าย', dataIndex:'m', key:'m', render:t=><Text style={{color:C.text}}>{t}</Text>},
+          ]}
+          dataSource={glossary.map((r,i)=>({...r, key:i}))}/>
+      </Card>
+      <Card size="small" title={<Text strong style={{color:C.blue}}>🧮 สูตรที่ต้องแม่น (อ่านออกเสียงได้)</Text>} style={{marginBottom:12, background:C.blueBg, borderColor:C.blue}}>
+        {formulas.map((f,i)=>(
+          <div key={i} style={{marginBottom:8}}>
+            <Text strong style={{color:C.text, fontSize:15}}>{f[0]}</Text><br/>
+            <Text style={{color:C.text3, fontSize:13}}>↳ {f[1]}</Text>
+          </div>
+        ))}
+      </Card>
+      <REStep title="📝 หา ROI ทีละขั้น" color={C.green} items={[
+        'หา OI (กำไรดำเนินงาน) และสินทรัพย์ดำเนินงานเฉลี่ย',
+        'ROI = OI ÷ สินทรัพย์เฉลี่ย',
+        'แตกเป็น Margin × Turnover เพื่อดูว่าจะปรับ "อัตรากำไร" หรือ "การหมุนสินทรัพย์"',
+      ]}/>
+      <REStep title="💰 หา RI ทีละขั้น" color={C.purple} items={[
+        'ต้นทุนเงินขั้นต่ำ = อัตราขั้นต่ำ (%) × สินทรัพย์',
+        'RI = OI − ต้นทุนเงินขั้นต่ำ',
+        'RI บวก = สร้างกำไรเกินที่ต้องการ (ดี) · ลบ = ต่ำกว่าเกณฑ์',
+      ]}/>
+      <REStep title="🔁 Transfer Pricing ทีละขั้น" color={C.gold} items={[
+        'ผู้ขายมีกำลังการผลิตเหลือ → floor = ต้นทุนผันแปรต่อหน่วย',
+        'ผู้ขายเต็มกำลัง → floor = VC + กำไรที่เสียไป (opportunity cost)',
+        'ผู้ซื้อยอมจ่ายไม่เกินราคาตลาดภายนอก (ceiling)',
+        'ตกลงกันได้ถ้า floor ≤ ceiling (ช่วงระหว่างนั้นคือราคาที่ต่อรอง)',
+      ]}/>
+      <Card size="small" title={<Text strong style={{color:C.red}}>⚠️ จุดพลาดบ่อย</Text>} style={{marginBottom:4, background:C.redBg, borderColor:C.red}}>
+        <ul style={{margin:0, paddingLeft:20}}>
+          {pitfalls.map((p,i)=><li key={i} style={{marginBottom:4}}><Text style={{color:C.text}}>{p}</Text></li>)}
+        </ul>
+      </Card>
+    </div>
+  );
+};
+
 const App = () => (
   <ConfigProvider theme={{
     algorithm: theme.defaultAlgorithm,
@@ -1198,7 +1285,8 @@ const App = () => (
         <Paragraph style={{textAlign:'center', color:C.text3, marginBottom:24}}>
           Cornerstones of Managerial Accounting, 5e · เรียนแบบ case method: พื้นฐาน → กรอบคิด → ทดลอง → เคสจริง → ท่องจำ
         </Paragraph>
-        <Tabs centered type="card" defaultActiveKey="basics" items={[
+        <Tabs centered type="card" defaultActiveKey="easy" items={[
+          { key:'easy', label:'📖 อ่านง่าย', children:<ReadEasyTab/> },
           { key:'basics', label:'🌱 ปูพื้นก่อน', children:<BasicsTab/> },
           { key:'sum', label:'📚 สรุปเนื้อหา', children:<SummaryTab/> },
           { key:'lab', label:'🧪 ห้องทดลอง', children:<LabTab/> },
