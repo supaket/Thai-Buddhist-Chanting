@@ -16,10 +16,31 @@
 <body>
   <h1>Ink Tool — หน้าเป้าหมายสำหรับทดสอบ (เนื้อหาสูง 3000px เพื่อทดสอบการเลื่อน)</h1>
   <div id="filler">เนื้อหาจำลอง — ใช้ยืนยันว่าเส้นวาดตรงตำแหน่งเอกสารทั้งก่อน/หลังเลื่อนหน้า</div>
+
+  <!-- ฉากจำลองสำหรับทดสอบ "เปิดทุกเฉลย" ตอนสั่งพิมพ์ -->
+  <div id="revealFixture">
+    <button id="btnOpen1" onclick="document.getElementById('ans1').hidden=false">คิดแล้ว — เปิดเฉลย</button>
+    <button id="btnOpen2" onclick="document.getElementById('ans2').hidden=false">👀 ลองคิดเองก่อน แล้วกดดูเฉลย</button>
+    <button id="btnShowAll" onclick="window.__shownAll=true">แสดงทั้งหมด</button>
+    <button id="btnHide" onclick="window.__hideClicked=true">ซ่อนเฉลย</button>
+    <button id="btnNav" onclick="window.__navClicked=true">ถัดไป →</button>
+    <div id="ans1" hidden>เฉลยข้อ 1</div>
+    <div id="ans2" hidden>เฉลยข้อ 2</div>
+  </div>
+
   <div id="report">กำลังโหลด…</div>
 
+  <script>
+    // ข้อมูลแฟลชการ์ดจำลอง (เลียนแบบหน้าจริงที่ babel ทำให้เป็น global)
+    window.flashcards = [
+      { q: 'NPV คืออะไร?', a: 'มูลค่าปัจจุบันสุทธิ', d: 'PV เงินเข้า − เงินลงทุน', star: 3, exam: true },
+      { q: 'IRR คืออะไร?', a: 'อัตราที่ทำให้ NPV = 0', d: 'เทียบกับ hurdle rate', star: 2, exam: false },
+      { q: 'ทดสอบ escape <b>&amp;</b>', a: 'ต้อง escape ปลอดภัย', d: '', star: 1, exam: false }
+    ];
+  </script>
+
   <!-- ตัวเครื่องมือจริง -->
-  <script src="../assets/ink-tool.js?v=7" defer></script>
+  <script src="../assets/ink-tool.js?v=8" defer></script>
 
   <script>
   // ============ ชุดทดสอบ ============
@@ -172,15 +193,34 @@
     ok('กดปริ้นแล้วเรียก window.print()', printed);
     ok('กดปริ้นแล้วหุบแถบ (tool=null)', D.tool() === null);
     ok('ใส่ class ink-print-all สำหรับ A4/ทุกแท็บ', document.body.classList.contains('ink-print-all'));
+
+    // 14b) เปิดทุกเฉลย: ปุ่ม "เปิดเฉลย/ดูเฉลย/แสดงทั้งหมด" ต้องถูกกด · ปุ่ม "ซ่อน"/ปุ่มนำทาง ต้องไม่ถูกแตะ
+    ok('เปิดเฉลยข้อ 1 ให้อัตโนมัติ', document.getElementById('ans1').hidden === false);
+    ok('เปิดเฉลยข้อ 2 ให้อัตโนมัติ', document.getElementById('ans2').hidden === false);
+    ok('กดปุ่ม "แสดงทั้งหมด" ให้ด้วย', window.__shownAll === true);
+    ok('ไม่กดปุ่ม "ซ่อนเฉลย"', !window.__hideClicked);
+    ok('ไม่กดปุ่มนำทาง (ถัดไป)', !window.__navClicked);
+
+    // 14c) ภาคผนวกแฟลชการ์ด: ต้องมีครบทุกใบพร้อมเฉลย + escape HTML ปลอดภัย
+    const ap = document.getElementById('inkPrintAppendix');
+    ok('สร้างภาคผนวกแฟลชการ์ด', !!ap);
+    ok('ภาคผนวกมีการ์ดครบทุกใบ', ap && ap.querySelectorAll('.ink-fc').length === window.flashcards.length,
+      (ap ? ap.querySelectorAll('.ink-fc').length : 0) + '/' + window.flashcards.length);
+    ok('ภาคผนวกมีเฉลยของการ์ด', !!ap && /มูลค่าปัจจุบันสุทธิ/.test(ap.textContent));
+    ok('escape HTML ในภาคผนวก (ไม่ inject tag)', !!ap && ap.querySelectorAll('.ink-fc b').length === 0);
     window.print = realPrint;
 
-    // 14b) printAll บนหน้าไม่มีแท็บ (หน้านี้) ต้องไม่พังและเรียก print ได้
-    printed = false; window.print = function () { printed = true; };
-    D.printAll();
-    await sleep(700);
-    ok('printAll ทำงานบนหน้าไม่มี antd tabs', printed);
-    window.print = realPrint;
-    document.body.classList.remove('ink-print-all');
+    // 14d) หลังพิมพ์เสร็จต้องคืนสภาพ: ถอด class + ลบภาคผนวก
+    window.dispatchEvent(new Event('afterprint'));
+    await sleep(120);
+    ok('afterprint: ถอด class ink-print-all', !document.body.classList.contains('ink-print-all'));
+    ok('afterprint: ลบภาคผนวกออกจากหน้า', !document.getElementById('inkPrintAppendix'));
+
+    // 14e) print CSS: กำหนด A4 + ความกว้างพื้นที่พิมพ์
+    const pcss = document.getElementById('inkPrintCss');
+    ok('มี print stylesheet', !!pcss);
+    ok('ตั้งขนาดกระดาษ A4', !!pcss && /@page\{size:A4/.test(pcss.textContent));
+    ok('บังคับความกว้างเนื้อหาให้พอดีหน้าพิมพ์', !!pcss && /width:190mm/.test(pcss.textContent));
 
     // 15) close
     D.open(); D.close();

@@ -351,25 +351,53 @@
   var printCss = document.createElement('style');
   printCss.id = 'inkPrintCss';
   printCss.textContent =
-    '@page{size:A4;margin:11mm}' +
+    '#inkPrintAppendix{display:none}' +
+    '@page{size:A4 portrait;margin:10mm}' +
     '@media print{' +
-      'html,body{background:#fff !important}' +
+      'html,body{background:#fff !important;margin:0 !important;padding:0 !important}' +
       '#inkToolbar,#inkBusy,#inkToolCanvas{display:none !important}' +
       '*{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}' +
-      // กางทุกแท็บให้เห็นพร้อมกัน (ตอนกด 🖨️ จะ mount แท็บครบก่อน)
+      // ---- พอดีหน้า A4: บังคับความกว้างเนื้อหา = พื้นที่พิมพ์ (190mm) แล้วให้ทุกอย่างไหลตาม ----
+      'body.ink-print-all{width:190mm !important;max-width:190mm !important;font-size:10pt !important}' +
+      'body.ink-print-all #root,body.ink-print-all .ant-layout,body.ink-print-all .ant-layout-content,' +
+        'body.ink-print-all .ant-tabs,body.ink-print-all main,body.ink-print-all section,body.ink-print-all .container{' +
+        'width:auto !important;max-width:100% !important;min-width:0 !important;margin:0 !important;padding:0 !important}' +
+      // กันล้นขอบกระดาษทุกกรณี (กล่อง/รูป/โค้ด/SVG/ตารางที่มีสกรอลล์)
+      'body.ink-print-all *{max-width:100% !important;box-shadow:none !important}' +
+      'body.ink-print-all img,body.ink-print-all svg{max-width:100% !important;height:auto !important}' +
+      'body.ink-print-all pre,body.ink-print-all code{white-space:pre-wrap !important;word-break:break-word !important}' +
+      'body.ink-print-all .ant-table-wrapper,body.ink-print-all .ant-table,body.ink-print-all .ant-table-container,' +
+        'body.ink-print-all .ant-table-content,body.ink-print-all .ant-table-body,body.ink-print-all .ant-card-body{' +
+        'overflow:visible !important}' +
+      'body.ink-print-all table{width:100% !important;table-layout:fixed !important;font-size:8.5pt !important}' +
+      'body.ink-print-all th,body.ink-print-all td{overflow-wrap:anywhere !important;word-break:break-word !important;padding:3px 5px !important;line-height:1.45 !important}' +
+      'body.ink-print-all thead{display:table-header-group}' +          // ตารางยาวข้ามหน้า → หัวตารางซ้ำ
+      'body.ink-print-all .ant-col{padding:0 4px !important}' +
+      // ---- เปิดทุกแท็บพร้อมกัน (แต่ละแท็บขึ้นหน้าใหม่ อ่านเป็นเล่ม) ----
       'body.ink-print-all .ant-tabs-nav{display:none !important}' +
       'body.ink-print-all .ant-tabs-content,body.ink-print-all .ant-tabs-content-holder{display:block !important;height:auto !important;overflow:visible !important;transform:none !important}' +
       'body.ink-print-all .ant-tabs-tabpane,body.ink-print-all .ant-tabs-tabpane-hidden{display:block !important;visibility:visible !important;opacity:1 !important;height:auto !important;overflow:visible !important}' +
-      'body.ink-print-all .ant-tabs-tabpane[data-ink-label]::before{content:attr(data-ink-label);display:block;font-weight:700;font-size:13pt;margin:16px 0 8px;padding:6px 10px;background:#efe9df;border-left:5px solid #A8906C;border-radius:3px;break-after:avoid;break-before:auto}' +
-      // กาง Collapse/accordion ที่กางไว้
+      'body.ink-print-all .ant-tabs-tabpane[data-ink-label]::before{content:attr(data-ink-label);display:block;font-weight:700;font-size:12pt;margin:0 0 8px;padding:5px 9px;background:#efe9df;border-left:5px solid #A8906C;border-radius:3px;break-after:avoid}' +
+      'body.ink-print-all .ant-tabs-tabpane[data-ink-label]{break-before:page}' +
+      'body.ink-print-all .ant-tabs-tabpane[data-ink-first]{break-before:auto}' +
+      // ---- เปิดทุกส่วนที่ซ่อน ----
       'body.ink-print-all .ant-collapse-content,body.ink-print-all .ant-collapse-content-hidden{display:block !important;height:auto !important;overflow:visible !important}' +
       'body.ink-print-all .ant-collapse-item{break-inside:avoid}' +
-      // ให้พอดีความกว้าง A4 + กันตัดกลางบล็อก
-      '#root,.ant-layout,.ant-layout-content,.ant-tabs,main,section,.container{width:auto !important;max-width:100% !important}' +
-      'img{max-width:100% !important;height:auto !important}' +
-      'table{width:100% !important;font-size:10pt}' +
-      '.ant-card,.chcard,table,tr,img,.ant-alert,.ant-statistic,.flashcard,.ant-collapse-item,li{break-inside:avoid;page-break-inside:avoid}' +
-      'h1,h2,h3,h4{break-after:avoid}' +
+      // ---- ตัดปุ่ม/ตัวควบคุมที่ใช้ไม่ได้บนกระดาษ (print-friendly) ----
+      'body.ink-print-all .ant-btn,body.ink-print-all .ant-slider,body.ink-print-all .ant-switch,' +
+        'body.ink-print-all input[type=range],body.ink-print-all .ant-pagination,body.ink-print-all .fc-perspective{display:none !important}' +
+      // ---- ภาคผนวกแฟลชการ์ด (สร้างตอนสั่งพิมพ์) ----
+      'body.ink-print-all #inkPrintAppendix{display:block !important;break-before:page}' +
+      '#inkPrintAppendix h2{font-size:13pt;margin:0 0 10px;padding:5px 9px;background:#efe9df;border-left:5px solid #A8906C;border-radius:3px}' +
+      '#inkPrintAppendix .ink-fc{break-inside:avoid;border:1px solid #C4B49A;border-radius:6px;padding:7px 10px;margin-bottom:7px}' +
+      '#inkPrintAppendix .ink-q{font-weight:700;color:#3D3229}' +
+      '#inkPrintAppendix .ink-a{color:#8B7355;font-weight:600}' +
+      '#inkPrintAppendix .ink-d{color:#5C4F42;font-size:9pt}' +
+      // ---- กันตัดกลาง "บล็อกเล็ก" เท่านั้น (การ์ด/ตารางใหญ่ปล่อยให้ไหลข้ามหน้าได้ ไม่งั้นเหลือที่ว่างทั้งหน้า) ----
+      'body.ink-print-all tr,body.ink-print-all img,body.ink-print-all .ant-alert,' +
+        'body.ink-print-all .ant-statistic,body.ink-print-all li{break-inside:avoid;page-break-inside:avoid}' +
+      'body.ink-print-all .ant-card,body.ink-print-all table,body.ink-print-all .ant-collapse-item{break-inside:auto}' +
+      'body.ink-print-all h1,body.ink-print-all h2,body.ink-print-all h3,body.ink-print-all h4{break-after:avoid}' +
     '}';
   document.head.appendChild(printCss);
 
@@ -379,12 +407,78 @@
     });
   }
   function labelPanes() {                                       // ใส่หัวข้อชื่อแท็บก่อนแต่ละส่วน
+    var first = true;
     document.querySelectorAll('.ant-tabs-tab').forEach(function (t) {
       var btn = t.querySelector('.ant-tabs-tab-btn') || t;
       var paneId = btn.getAttribute('aria-controls') || t.getAttribute('aria-controls');
       var label = (btn.textContent || '').trim();
-      if (paneId) { var p = document.getElementById(paneId); if (p && label) p.setAttribute('data-ink-label', label); }
+      if (paneId) {
+        var p = document.getElementById(paneId);
+        if (p && label) {
+          p.setAttribute('data-ink-label', label);
+          if (first) { p.setAttribute('data-ink-first', '1'); first = false; }   // แท็บแรกไม่ต้องขึ้นหน้าใหม่
+          else p.removeAttribute('data-ink-first');
+        }
+      }
     });
+  }
+
+  // เปิดทุกอย่างที่ซ่อน/เฉลย: กดปุ่มที่มีความหมายว่า "เปิดเฉลย/แสดงทั้งหมด" (ข้ามปุ่มที่สั่งซ่อน)
+  var RE_REVEAL = /(เปิดเฉลย|ดูเฉลย|แสดงเฉลย|เฉลย|ดูคำตอบ|แสดงคำตอบ|เปิดคำตอบ|แสดงทั้งหมด|ดูทั้งหมด|เฉลยทั้งหมด|show answer|reveal)/i;
+  // ระวัง: "เปิดเฉลย" มีสตริง "ปิดเฉลย" ซ้อนอยู่ → ต้องกันไม่ให้ถูกมองว่าเป็นปุ่มซ่อน
+  var RE_HIDE = /(ซ่อน|hide|(^|[^เ])ปิดเฉลย)/i;
+  function revealAll() {
+    var n = 0;
+    document.querySelectorAll('button,.ant-btn,[role="button"]').forEach(function (b) {
+      if (b.__inkRevealed) return;
+      if (b.closest('#inkToolbar,#inkBusy')) return;
+      if (b.disabled) return;
+      var txt = (b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '');
+      if (!RE_REVEAL.test(txt) || RE_HIDE.test(txt)) return;
+      b.__inkRevealed = 1; n++;
+      try { b.click(); } catch (_) {}
+    });
+    return n;
+  }
+
+  // ภาคผนวก: แฟลชการ์ดทุกใบ (หน้า+หลัง) — บนจอเห็นทีละใบ กระดาษต้องได้ครบ
+  function buildAppendix() {
+    removeAppendix();
+    var cards = null;
+    try {                                                       // หา array แฟลชการ์ดแบบไม่ผูกกับชื่อตัวแปร
+      var best = null;
+      Object.keys(window).forEach(function (k) {
+        var v; try { v = window[k]; } catch (_) { return; }
+        if (!Array.isArray(v) || !v.length || v.length > 400) return;
+        var it = v[0];
+        if (!it || typeof it !== 'object') return;
+        if (typeof it.q === 'string' && typeof it.a === 'string') { if (!best || v.length > best.length) best = v; }
+      });
+      cards = best;
+    } catch (_) {}
+    if (!cards || !cards.length) return 0;
+    var box = document.createElement('section');
+    box.id = 'inkPrintAppendix';
+    var html = '<h2>🎴 ภาคผนวก — แฟลชการ์ดครบทุกใบ พร้อมเฉลย (' + cards.length + ' ใบ)</h2>';
+    cards.forEach(function (c, i) {
+      var star = c.star ? ' ' + new Array(Number(c.star) + 1).join('★') : '';
+      var exam = c.exam ? ' [แนวข้อสอบ]' : '';
+      html += '<div class="ink-fc">' +
+        '<div class="ink-q">' + (i + 1) + '. ' + esc(c.q) + esc(star + exam) + '</div>' +
+        '<div class="ink-a">เฉลย: ' + esc(c.a) + '</div>' +
+        (c.d ? '<div class="ink-d">' + esc(c.d) + '</div>' : '') +
+        '</div>';
+    });
+    box.innerHTML = html;
+    document.body.appendChild(box);
+    return cards.length;
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>]/g, function (m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; });
+  }
+  function removeAppendix() {
+    var el = document.getElementById('inkPrintAppendix');
+    if (el) el.remove();
   }
   function visitAllTabs(done) {                                 // คลิกวนทุกแท็บให้ React mount pane (รวมแท็บซ้อน)
     var rounds = 0;
@@ -404,26 +498,37 @@
   }
   function printAll() {
     if (tool) closeBar();
+    setBusy(true); busy.textContent = '🖨️ กำลังกางทุกแท็บ/ทุกเฉลย…';
     var actives = Array.prototype.slice.call(document.querySelectorAll('.ant-tabs')).map(function (g) {
       return g.querySelector(':scope > .ant-tabs-nav .ant-tabs-tab-active');
     });
     expandAllCollapse();
     visitAllTabs(function () {
-      expandAllCollapse();                                      // เผื่อ Collapse ในแท็บที่เพิ่ง mount
-      labelPanes();
-      setTimeout(function () {
-        document.body.classList.add('ink-print-all');
-        var restored = false;
-        function restore() {
-          if (restored) return; restored = true;
-          window.removeEventListener('afterprint', restore);
-          document.body.classList.remove('ink-print-all');
-          actives.forEach(function (a) { if (a && document.contains(a)) { try { a.click(); } catch (_) {} } });
-        }
-        window.addEventListener('afterprint', restore);
-        window.print();
-        setTimeout(restore, 4000);                              // สำรอง เผื่อ afterprint ไม่ยิงบางเบราว์เซอร์
-      }, 250);
+      // กางซ้ำหลายรอบ: เปิดเฉลยแล้วอาจมีของซ่อนชั้นถัดไปโผล่ตามมา
+      var round = 0;
+      (function sweep() {
+        expandAllCollapse();
+        var opened = revealAll();
+        round++;
+        if (opened > 0 && round < 6) return setTimeout(sweep, 120);
+        labelPanes();
+        buildAppendix();
+        setTimeout(function () {
+          setBusy(false);
+          document.body.classList.add('ink-print-all');
+          var restored = false;
+          function restore() {
+            if (restored) return; restored = true;
+            window.removeEventListener('afterprint', restore);
+            document.body.classList.remove('ink-print-all');
+            removeAppendix();
+            actives.forEach(function (a) { if (a && document.contains(a)) { try { a.click(); } catch (_) {} } });
+          }
+          window.addEventListener('afterprint', restore);
+          window.print();
+          setTimeout(restore, 4000);                            // สำรอง เผื่อ afterprint ไม่ยิงบางเบราว์เซอร์
+        }, 300);
+      })();
     });
   }
 
@@ -558,6 +663,9 @@
     open: openBar,
     close: closeBar,
     printAll: printAll,
+    revealAll: revealAll,
+    buildAppendix: buildAppendix,
+    removeAppendix: removeAppendix,
     setTool: function (t) { if (!bar.classList.contains('open')) openBar(); tool = t; refreshUI(); },
     setPalm: setPalm,
     clearAll: clearAll,
