@@ -351,7 +351,34 @@
   var printCss = document.createElement('style');
   printCss.id = 'inkPrintCss';
   printCss.textContent =
-    '#inkPrintAppendix{display:none}' +
+    '#inkPrintAppendix,#inkExamSheet{display:none}' +
+    // ---- โหมดชีทเข้าห้องสอบ: ซ่อนทั้งหน้า เหลือเฉพาะชีทย่อ 2 คอลัมน์ ----
+    '@media print{' +
+      'body.ink-print-exam > *{display:none !important}' +
+      'body.ink-print-exam #inkExamSheet{display:block !important;width:190mm !important;max-width:190mm !important;' +
+        'font:9pt/1.42 -apple-system,"Noto Sans Thai","IBM Plex Sans Thai",Sarabun,sans-serif;color:#1f2430}' +
+      'body.ink-print-exam{width:190mm !important;max-width:190mm !important;background:#fff !important}' +
+      '#inkExamSheet .xs-head{display:flex;justify-content:space-between;align-items:baseline;' +
+        'border-bottom:2px solid #A8906C;padding-bottom:3px;margin-bottom:5px;column-span:all}' +
+      '#inkExamSheet .xs-head b{font-size:12pt}' +
+      '#inkExamSheet .xs-head span{font-size:8pt;color:#7A6E62}' +
+      '#inkExamSheet{column-count:2;column-gap:6mm}' +
+      '#inkExamSheet .xs-sec{break-inside:avoid;margin:0 0 5px;padding:4px 6px;border:1px solid #DDD3C1;border-radius:4px;background:#FDFCFA}' +
+      '#inkExamSheet h3{font-size:9.5pt;margin:0 0 3px;padding-bottom:2px;border-bottom:1px dashed #C4B49A;color:#8B7355}' +
+      '#inkExamSheet dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1px 6px}' +
+      '#inkExamSheet dt{font-weight:700;color:#3D3229;white-space:nowrap}' +
+      '#inkExamSheet dd{margin:0;color:#2b2b2b}' +
+      '#inkExamSheet .xs-form dt,#inkExamSheet .xs-pick dt{color:#2563eb}' +
+      '#inkExamSheet .xs-pick{grid-template-columns:1fr}' +
+      '#inkExamSheet .xs-pick dt{white-space:normal;color:#8B7355}' +
+      '#inkExamSheet .xs-pick dd{margin:0 0 3px 8px;border-left:2px solid #C4B49A;padding-left:6px}' +
+      '#inkExamSheet .xs-flow{margin-bottom:4px}' +
+      '#inkExamSheet .xs-flow b{color:#5D8A66}' +
+      '#inkExamSheet ol,#inkExamSheet ul{margin:2px 0 0;padding-left:15px}' +
+      '#inkExamSheet li{margin-bottom:1px}' +
+      '#inkExamSheet .xs-trap li{color:#B85C5C}' +
+      '#inkExamSheet .xs-num dt{color:#5B8A8A}' +
+    '}' +
     '@page{size:A4 portrait;margin:10mm}' +
     '@media print{' +
       'html,body{background:#fff !important;margin:0 !important;padding:0 !important}' +
@@ -553,12 +580,16 @@
     }
     var wrap = document.createElement('div');
     wrap.className = 'ink-inpage-print';
+    var hasExam = !!(window.examSheet || (window.quickSections && window.quickSections.length));
     wrap.innerHTML =
       '<button type="button" class="ink-inpage-btn">🖨️ พิมพ์ / บันทึกเป็น PDF</button>' +
-      '<div class="ink-inpage-note">ฉบับพิมพ์รวมทุกแท็บ + กางทุกเฉลย + แฟลชการ์ดครบทุกใบ พอดีกระดาษ A4</div>';
+      (hasExam ? '<button type="button" class="ink-inpage-btn ink-exam-btn">📄 ชีทเข้าห้องสอบ (2–3 หน้า)</button>' : '') +
+      '<div class="ink-inpage-note">🖨️ ฉบับเต็ม = ทุกแท็บ + ทุกเฉลย + แฟลชการ์ดครบ · 📄 ชีทย่อ = สูตร ตัวย่อ วิธีเลือกสูตร กับดัก</div>';
     wrap.querySelector('.ink-inpage-btn').addEventListener('click', function (e) {
       e.preventDefault(); e.stopPropagation(); printAll();
     });
+    var ex = wrap.querySelector('.ink-exam-btn');
+    if (ex) ex.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); printExam(); });
     if (anchor && anchor.parentNode === host) host.insertBefore(wrap, anchor);
     else host.appendChild(wrap);
     return true;
@@ -574,6 +605,77 @@
         if (!document.querySelector('.ink-inpage-print')) injectInPageButton();
       }).observe(document.body, { childList: true, subtree: true });
     }
+  }
+
+  /* ---------- 📄 ชีทเข้าห้องสอบ: ย่อเหลือ 2–3 หน้า A4 ---------- */
+  // ใช้ window.examSheet ของหน้านั้นถ้ามี (ละเอียดกว่า) ไม่มีก็ย่อจาก window.quickSections
+  function removeExamSheet() { var el = document.getElementById('inkExamSheet'); if (el) el.remove(); }
+  function esc2(s) { return esc(s); }
+  function buildExamSheet() {
+    removeExamSheet();
+    var E = window.examSheet, Q = window.quickSections;
+    if (!E && !(Q && Q.length)) return 0;
+    var title = (E && E.title) || (document.querySelector('h1,h2') || {}).textContent || document.title || '';
+    var h = '<header class="xs-head"><b>' + esc2(String(title).trim()) + '</b><span>ชีทเข้าห้องสอบ</span></header>';
+
+    function sec(t, body) { return body ? '<section class="xs-sec"><h3>' + t + '</h3>' + body + '</section>' : ''; }
+    function pairs(list, cls) {
+      if (!list || !list.length) return '';
+      return '<dl class="' + (cls || '') + '">' + list.map(function (p) {
+        return '<dt>' + esc2(p[0]) + '</dt><dd>' + esc2(p[1]) + '</dd>';
+      }).join('') + '</dl>';
+    }
+    if (E) {
+      h += sec('🔤 ตัวย่อ', pairs(E.abbr, 'xs-abbr'));
+      h += sec('🧮 สูตรที่ต้องเขียนได้', pairs(E.formulas, 'xs-form'));
+      h += sec('🔎 โจทย์แบบนี้ → ใช้อะไร', pairs(E.picker, 'xs-pick'));
+      if (E.steps && E.steps.length) {
+        h += sec('📝 ทำทีละขั้น', E.steps.map(function (s) {
+          return '<div class="xs-flow"><b>' + esc2(s[0]) + '</b><ol>' +
+            (s[1] || []).map(function (x) { return '<li>' + esc2(x) + '</li>'; }).join('') + '</ol></div>';
+        }).join(''));
+      }
+      if (E.traps && E.traps.length) {
+        h += sec('⚠️ กับดักข้อสอบ', '<ul class="xs-trap">' + E.traps.map(function (t) { return '<li>' + esc2(t) + '</li>'; }).join('') + '</ul>');
+      }
+      h += sec('🔢 ตัวเลขเคสตัวอย่าง', pairs(E.numbers, 'xs-num'));
+    } else {                                                    // fallback: ย่อจากการ์ดจำด่วน
+      var cur = '', body = '';
+      Q.forEach(function (r) {
+        if (r.divider) { h += sec(esc2(r.divider), body); body = ''; cur = r.divider; return; }
+        body += '<dl><dt>' + esc2(r.s || r.t || '') + '</dt><dd>' + esc2(r.b || r.t || '') + '</dd></dl>';
+      });
+      h += sec(esc2(cur || 'สรุป'), body);
+    }
+    var box = document.createElement('section');
+    box.id = 'inkExamSheet';
+    box.innerHTML = h;
+    document.body.appendChild(box);
+    return box.querySelectorAll('dt,li').length;
+  }
+  function printExam() {
+    if (tool) closeBar();
+    setBusy(true); busy.textContent = '📄 กำลังจัดชีทเข้าห้องสอบ…';
+    var n = buildExamSheet();
+    if (!n) { setBusy(false); toast('หน้านี้ยังไม่มีข้อมูลสำหรับชีทย่อ'); return; }
+    setTimeout(function () {
+      setBusy(false);
+      document.body.classList.add('ink-print-exam');
+      var restored = false;
+      var mq = window.matchMedia ? window.matchMedia('print') : null;
+      function onMq(e) { if (!e.matches) restore(); }
+      function restore() {
+        if (restored) return; restored = true;
+        window.removeEventListener('afterprint', restore);
+        if (mq) { if (mq.removeEventListener) mq.removeEventListener('change', onMq); else if (mq.removeListener) mq.removeListener(onMq); }
+        document.body.classList.remove('ink-print-exam');
+        removeExamSheet();
+      }
+      window.addEventListener('afterprint', restore);
+      if (mq) { if (mq.addEventListener) mq.addEventListener('change', onMq); else if (mq.addListener) mq.addListener(onMq); }
+      window.print();
+      setTimeout(restore, 300000);
+    }, 200);
   }
 
   function printAll() {
@@ -643,6 +745,7 @@
     '#inkBusy{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:999999;' +
       'background:rgba(17,24,39,.95);color:#fde68a;border-radius:999px;padding:9px 20px;font-size:.9rem;display:none}' +
     '.ink-inpage-print{text-align:center;margin:10px 0 14px}' +
+    '.ink-inpage-print .ink-inpage-btn+.ink-inpage-btn{margin-left:8px}' +
     '.ink-inpage-btn{font:600 15px/1.2 -apple-system,"Noto Sans Thai","IBM Plex Sans Thai",Sarabun,sans-serif;' +
       'padding:10px 20px;min-height:44px;border-radius:8px;border:1px solid #C4B49A;background:#FAF7F2;color:#3D3229;' +
       'cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 1px 3px rgba(61,50,41,.12)}' +
@@ -664,7 +767,8 @@
     '<button class="ink-b" data-act="palm" title="โหมดกันฝ่ามือ: Pencil เขียน / นิ้วเลื่อน-กดหน้าได้" aria-label="โหมดกันฝ่ามือ">✋</button>' +
     '<button class="ink-b" data-act="save-view" title="บันทึกภาพเฉพาะที่เห็นบนจอ" aria-label="บันทึกภาพหน้าจอ">📸</button>' +
     '<button class="ink-b" data-act="save-full" title="บันทึกภาพทั้งเอกสาร" aria-label="บันทึกภาพทั้งเอกสาร">📰</button>' +
-    '<button class="ink-b" data-act="print" title="ปริ้นครบทุกแท็บ · พอดี A4 (สำหรับอ่าน/เข้าห้องสอบ)" aria-label="ปริ้นหน้านี้ พอดี A4">🖨️</button>';
+    '<button class="ink-b" data-act="print" title="ปริ้นฉบับเต็ม ครบทุกแท็บ · พอดี A4" aria-label="ปริ้นฉบับเต็ม พอดี A4">🖨️</button>' +
+    '<button class="ink-b" data-act="print-exam" title="ปริ้นชีทย่อเข้าห้องสอบ (2–3 หน้า)" aria-label="ปริ้นชีทเข้าห้องสอบ">📄</button>';
   bar.innerHTML = '<div class="ink-tray">' + trayBtns + '</div><button class="ink-b ink-fab" data-act="fab" title="ปากกาเขียนหน้า (เปิด/หุบ)" aria-label="เปิดหรือหุบเครื่องมือปากกา">✎</button>';
   document.body.appendChild(bar);
   document.body.appendChild(canvas);
@@ -721,6 +825,7 @@
     else if (act === 'save-view') saveImage('view');
     else if (act === 'save-full') saveImage('full');
     else if (act === 'print') { printAll(); return; }
+    else if (act === 'print-exam') { printExam(); return; }
     else if (act === 'clear') {                                 // แตะยืนยัน 2 ครั้ง — ไม่บล็อกจอ
       if (b.classList.contains('armed')) { clearAll(); disarmClear(); }
       else {
@@ -756,6 +861,9 @@
     open: openBar,
     close: closeBar,
     printAll: printAll,
+    printExam: printExam,
+    buildExamSheet: buildExamSheet,
+    removeExamSheet: removeExamSheet,
     tagKeepBlocks: tagKeepBlocks,
     revealAll: revealAll,
     buildAppendix: buildAppendix,
