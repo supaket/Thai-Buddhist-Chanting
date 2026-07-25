@@ -398,13 +398,51 @@
       '#inkPrintAppendix .ink-q{font-weight:700;color:#3D3229}' +
       '#inkPrintAppendix .ink-a{color:#8B7355;font-weight:600}' +
       '#inkPrintAppendix .ink-d{color:#5C4F42;font-size:9pt}' +
-      // ---- กันตัดกลาง "บล็อกเล็ก" เท่านั้น (การ์ด/ตารางใหญ่ปล่อยให้ไหลข้ามหน้าได้ ไม่งั้นเหลือที่ว่างทั้งหน้า) ----
+      // ---- กันตัดกลางบล็อก ----
+      // ค่าเริ่มต้น: การ์ด/ตารางใหญ่ไหลข้ามหน้าได้ (ไม่งั้นเหลือที่ว่างทั้งหน้า)
+      'body.ink-print-all .ant-card,body.ink-print-all table,body.ink-print-all .ant-collapse-item{break-inside:auto}' +
       'body.ink-print-all tr,body.ink-print-all img,body.ink-print-all .ant-alert,' +
         'body.ink-print-all .ant-statistic,body.ink-print-all li{break-inside:avoid;page-break-inside:avoid}' +
-      'body.ink-print-all .ant-card,body.ink-print-all table,body.ink-print-all .ant-collapse-item{break-inside:auto}' +
+      // แต่บล็อกที่วัดแล้ว "สูงไม่เกิน 1 หน้า" → ห้ามตัดกลางเด็ดขาด (กล่องสรุป/กล่องเตือนจะได้ไม่ถูกหั่น)
+      'body.ink-print-all [data-ink-keep]{break-inside:avoid !important;page-break-inside:avoid !important}' +
       'body.ink-print-all h1,body.ink-print-all h2,body.ink-print-all h3,body.ink-print-all h4{break-after:avoid}' +
     '}';
   document.head.appendChild(printCss);
+
+  // ---- วัดความสูงบล็อก "ที่ความกว้างกระดาษจริง" เพื่อตัดสินว่าอันไหนห้ามตัดกลาง ----
+  // จำลองเลย์เอาต์พิมพ์ชั่วคราวบนจอ (คลาสนี้ไม่อยู่ใน @media print) แล้ววัด → ติดป้าย → ถอดคลาสทิ้ง
+  var measureCss = document.createElement('style');
+  measureCss.id = 'inkMeasureCss';
+  measureCss.textContent =
+    'body.ink-measure{width:190mm !important;max-width:190mm !important;font-size:10pt !important}' +
+    'body.ink-measure #root,body.ink-measure .ant-layout,body.ink-measure .ant-layout-content,' +
+      'body.ink-measure .ant-tabs,body.ink-measure main,body.ink-measure section{' +
+      'width:auto !important;max-width:100% !important;min-width:0 !important;margin:0 !important;padding:0 !important}' +
+    'body.ink-measure .ant-tabs-nav{display:none !important}' +
+    'body.ink-measure .ant-tabs-content,body.ink-measure .ant-tabs-content-holder{display:block !important;height:auto !important;overflow:visible !important;transform:none !important}' +
+    'body.ink-measure .ant-tabs-tabpane,body.ink-measure .ant-tabs-tabpane-hidden{display:block !important;visibility:visible !important;height:auto !important;overflow:visible !important}' +
+    'body.ink-measure .ant-collapse-content,body.ink-measure .ant-collapse-content-hidden{display:block !important;height:auto !important;overflow:visible !important}' +
+    'body.ink-measure table{table-layout:fixed !important;width:100% !important;font-size:8.5pt !important}' +
+    'body.ink-measure th,body.ink-measure td{padding:3px 5px !important;line-height:1.45 !important}' +
+    'body.ink-measure *{animation:none !important;transition:none !important}';
+  document.head.appendChild(measureCss);
+
+  var PAGE_USABLE_H = 950;        // A4 สูง 297mm − ขอบ 20mm ≈ 1047px @96dpi (เผื่อหัวข้อด้านบน)
+  function tagKeepBlocks() {
+    document.body.classList.add('ink-measure');
+    try {
+      var els = document.querySelectorAll('.ant-card,.ant-alert,.ant-collapse-item,table,blockquote,figure,.ink-fc');
+      var keep = 0;
+      Array.prototype.forEach.call(els, function (el) {
+        var h = el.getBoundingClientRect().height;
+        if (h > 0 && h <= PAGE_USABLE_H) { el.setAttribute('data-ink-keep', '1'); keep++; }
+        else el.removeAttribute('data-ink-keep');
+      });
+      return keep;
+    } finally {
+      document.body.classList.remove('ink-measure');
+    }
+  }
 
   function expandAllCollapse() {
     document.querySelectorAll('.ant-collapse-header').forEach(function (h) {
@@ -555,6 +593,7 @@
         if (opened > 0 && round < 6) return setTimeout(sweep, 120);
         labelPanes();
         buildAppendix();
+        tagKeepBlocks();                                        // วัดที่ความกว้าง A4 → กล่องที่พอดีหน้าห้ามตัดกลาง
         setTimeout(function () {
           setBusy(false);
           document.body.classList.add('ink-print-all');
@@ -717,6 +756,7 @@
     open: openBar,
     close: closeBar,
     printAll: printAll,
+    tagKeepBlocks: tagKeepBlocks,
     revealAll: revealAll,
     buildAppendix: buildAppendix,
     removeAppendix: removeAppendix,
