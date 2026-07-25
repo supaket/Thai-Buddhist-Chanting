@@ -40,7 +40,7 @@
   </script>
 
   <!-- ตัวเครื่องมือจริง -->
-  <script src="../assets/ink-tool.js?v=8" defer></script>
+  <script src="../assets/ink-tool.js?v=11" defer></script>
 
   <script>
   // ============ ชุดทดสอบ ============
@@ -221,6 +221,22 @@
     ok('มี print stylesheet', !!pcss);
     ok('ตั้งขนาดกระดาษ A4', !!pcss && /@page\{size:A4/.test(pcss.textContent));
     ok('บังคับความกว้างเนื้อหาให้พอดีหน้าพิมพ์', !!pcss && /width:190mm/.test(pcss.textContent));
+    // กันบั๊ก "พิมพ์ออกมาหน้าว่าง": .fadein ใช้ animation…both เริ่มที่ opacity 0
+    ok('ปิดแอนิเมชันตอนพิมพ์ (กันหน้าว่าง)', !!pcss && /animation:none !important/.test(pcss.textContent));
+    ok('บังคับ .fadein ให้ทึบตอนพิมพ์', !!pcss && /\.fadein[^{]*\{[^}]*opacity:1 !important/.test(pcss.textContent));
+
+    // 14f) ปุ่มพิมพ์ "ในหน้า" (แบบหน้า GA513-VAT)
+    const inBtn = document.querySelector('.ink-inpage-print .ink-inpage-btn');
+    ok('มีปุ่มพิมพ์ในหน้า', !!inBtn);
+    ok('ปุ่มในหน้าเขียนว่าพิมพ์/บันทึก PDF', !!inBtn && /พิมพ์/.test(inBtn.textContent));
+    ok('ปุ่มในหน้าเห็นได้บนจอ', !!inBtn && inBtn.offsetParent !== null);
+    printed = false; window.print = function () { printed = true; };
+    if (inBtn) inBtn.click();
+    await sleep(900);
+    ok('กดปุ่มในหน้าแล้วสั่งพิมพ์จริง', printed);
+    window.print = realPrint;
+    window.dispatchEvent(new Event('afterprint'));
+    await sleep(100);
 
     // 15) close
     D.open(); D.close();

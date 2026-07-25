@@ -355,8 +355,13 @@
     '@page{size:A4 portrait;margin:10mm}' +
     '@media print{' +
       'html,body{background:#fff !important;margin:0 !important;padding:0 !important}' +
-      '#inkToolbar,#inkBusy,#inkToolCanvas{display:none !important}' +
+      '#inkToolbar,#inkBusy,#inkToolCanvas,.ink-inpage-print{display:none !important}' +
       '*{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}' +
+      // สำคัญ: หน้าเหล่านี้ใช้ .fadein = animation ... both (เริ่มที่ opacity 0)
+      // ตอนพิมพ์ แอนิเมชันไม่ทำงาน เนื้อหาจึงค้างที่ opacity 0 = หน้าว่าง → ปิดแอนิเมชันและบังคับให้เห็น
+      '*,*::before,*::after{animation:none !important;animation-delay:0s !important;transition:none !important}' +
+      '.fadein,.pop,[class*="fade"],[class*="anim"]{opacity:1 !important;transform:none !important;visibility:visible !important}' +
+      '.ant-card,.ant-alert,.ant-table,.ant-typography,.ant-statistic,section,article,div,p,li,td,th{opacity:1 !important}' +
       // ---- พอดีหน้า A4: บังคับความกว้างเนื้อหา = พื้นที่พิมพ์ (190mm) แล้วให้ทุกอย่างไหลตาม ----
       'body.ink-print-all{width:190mm !important;max-width:190mm !important;font-size:10pt !important}' +
       'body.ink-print-all #root,body.ink-print-all .ant-layout,body.ink-print-all .ant-layout-content,' +
@@ -496,6 +501,43 @@
       })();
     })();
   }
+  // ปุ่มพิมพ์ "ในหน้า" (แบบเดียวกับหน้า GA513-VAT) — วางใต้ชื่อบท เหนือแถบแท็บ
+  function injectInPageButton() {
+    if (document.querySelector('.ink-inpage-print')) return true;
+    var tabs = document.querySelector('.ant-tabs');
+    var host = tabs ? tabs.parentNode : (document.querySelector('.ant-layout-content') || document.querySelector('#root'));
+    var anchor = tabs;                                          // แทรกก่อนแถบแท็บ (ถ้ามี)
+    if (!host || !host.parentNode) {                            // หน้า HTML ล้วน (ไม่มี React/antd) → วางใต้หัวเรื่องแรก
+      host = document.body;
+      if (!host) return false;
+      var h = host.querySelector('h1,h2');
+      anchor = h ? h.nextSibling : host.firstChild;
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'ink-inpage-print';
+    wrap.innerHTML =
+      '<button type="button" class="ink-inpage-btn">🖨️ พิมพ์ / บันทึกเป็น PDF</button>' +
+      '<div class="ink-inpage-note">ฉบับพิมพ์รวมทุกแท็บ + กางทุกเฉลย + แฟลชการ์ดครบทุกใบ พอดีกระดาษ A4</div>';
+    wrap.querySelector('.ink-inpage-btn').addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation(); printAll();
+    });
+    if (anchor && anchor.parentNode === host) host.insertBefore(wrap, anchor);
+    else host.appendChild(wrap);
+    return true;
+  }
+  function keepInPageButton() {                                 // React re-render อาจถอดปุ่มออก → ใส่กลับ
+    var tries = 0;
+    (function tick() {
+      injectInPageButton();
+      if (tries++ < 40) setTimeout(tick, 500);                  // เฝ้า ~20 วิแรก (รอ babel/React mount)
+    })();
+    if (window.MutationObserver) {
+      new MutationObserver(function () {
+        if (!document.querySelector('.ink-inpage-print')) injectInPageButton();
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+  }
+
   function printAll() {
     if (tool) closeBar();
     setBusy(true); busy.textContent = '🖨️ กำลังกางทุกแท็บ/ทุกเฉลย…';
@@ -556,7 +598,13 @@
     '@media (max-height:560px){.ink-b{width:40px;height:40px;min-height:40px;font-size:1rem}.ink-fab{width:46px;height:46px;min-height:46px}#inkToolbar{gap:7px}#inkToolbar .ink-tray{gap:7px}}' +
     '#inkBusy{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:999999;' +
       'background:rgba(17,24,39,.95);color:#fde68a;border-radius:999px;padding:9px 20px;font-size:.9rem;display:none}' +
-    '@media print{#inkToolbar,#inkToolCanvas,#inkBusy{display:none!important}}';
+    '.ink-inpage-print{text-align:center;margin:10px 0 14px}' +
+    '.ink-inpage-btn{font:600 15px/1.2 -apple-system,"Noto Sans Thai","IBM Plex Sans Thai",Sarabun,sans-serif;' +
+      'padding:10px 20px;min-height:44px;border-radius:8px;border:1px solid #C4B49A;background:#FAF7F2;color:#3D3229;' +
+      'cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 1px 3px rgba(61,50,41,.12)}' +
+    '.ink-inpage-btn:active{transform:scale(.97);background:#EDE8DF}' +
+    '.ink-inpage-note{font:400 12px/1.6 -apple-system,"Noto Sans Thai",Sarabun,sans-serif;color:#7A6E62;margin-top:5px}' +
+    '@media print{#inkToolbar,#inkToolCanvas,#inkBusy,.ink-inpage-print{display:none!important}}';
   document.head.appendChild(css);
 
   var bar = document.createElement('div');
@@ -650,6 +698,7 @@
   if (window.ResizeObserver) new ResizeObserver(scheduleSize).observe(document.body);
   window.addEventListener('load', scheduleSize);
   restore();
+  keepInPageButton();      // แทรกปุ่มก่อน แล้วค่อยวัดขนาด canvas (ปุ่มทำให้หน้ายาวขึ้น)
   sizeCanvas();
   refreshUI();
 
