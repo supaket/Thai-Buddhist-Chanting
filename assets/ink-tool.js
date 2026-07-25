@@ -350,6 +350,30 @@
   /* ---------- print: ทุกแท็บ/ทุกส่วน · พอดี A4 (เอาเข้าห้องสอบได้) ---------- */
   var printCss = document.createElement('style');
   printCss.id = 'inkPrintCss';
+  // หน้าไหน "ออกแบบการพิมพ์เอง" (มี @page ของตัวเอง หรือใช้ .print-only/.screen-only)
+  // → ห้าม ink-tool ไปทับเลย์เอาต์ ไม่งั้นของที่เขาจูนไว้ (เช่น .page กว้าง 200mm ขอบ 5mm) จะล้นขอบ
+  function pageHasOwnPrintDesign() {
+    try {
+      if (document.querySelector('.print-only,.screen-only')) return true;
+      var sheets = document.styleSheets;
+      for (var i = 0; i < sheets.length; i++) {
+        var node = sheets[i].ownerNode;
+        if (node && node.id && /^ink(PrintCss|PrintFit|MeasureCss)$/.test(node.id)) continue;
+        var rules; try { rules = sheets[i].cssRules; } catch (e) { continue; }   // ข้าม cross-origin
+        if (!rules) continue;
+        for (var j = 0; j < rules.length; j++) {
+          if (rules[j].type === 6 || /^@page/.test(rules[j].cssText || '')) return true;
+        }
+      }
+    } catch (e) {}
+    return false;
+  }
+  function applyFitPolicy() {                                   // เรียกก่อนสั่งพิมพ์ทุกครั้ง
+    var fit = document.getElementById('inkPrintFit');
+    if (fit) fit.disabled = pageHasOwnPrintDesign();
+    return fit ? !fit.disabled : false;
+  }
+
   printCss.textContent =
     '#inkPrintAppendix,#inkExamSheet{display:none}' +
     // ---- โหมดชีทเข้าห้องสอบ: ซ่อนทั้งหน้า เหลือเฉพาะชีทย่อ 2 คอลัมน์ ----
@@ -389,6 +413,27 @@
       '*,*::before,*::after{animation:none !important;animation-delay:0s !important;transition:none !important}' +
       '.fadein,.pop,[class*="fade"],[class*="anim"]{opacity:1 !important;transform:none !important;visibility:visible !important}' +
       '.ant-card,.ant-alert,.ant-table,.ant-typography,.ant-statistic,section,article,div,p,li,td,th{opacity:1 !important}' +
+      // ---- ภาคผนวกแฟลชการ์ด (ต้องพิมพ์ได้ทุกหน้า แม้หน้านั้นจัดการพิมพ์เอง) ----
+      'body.ink-print-all #inkPrintAppendix{display:block !important;break-before:page}' +
+      '#inkPrintAppendix h2{font-size:13pt;margin:0 0 10px;padding:5px 9px;background:#efe9df;border-left:5px solid #A8906C;border-radius:3px}' +
+      '#inkPrintAppendix .ink-fc{break-inside:avoid;border:1px solid #C4B49A;border-radius:6px;padding:7px 10px;margin-bottom:7px}' +
+      '#inkPrintAppendix .ink-q{font-weight:700;color:#3D3229}' +
+      '#inkPrintAppendix .ink-a{color:#8B7355;font-weight:600}' +
+      '#inkPrintAppendix .ink-d{color:#5C4F42;font-size:9pt}' +
+      // ---- กันตัดกลางบล็อก (บล็อกที่วัดแล้วสูงไม่เกิน 1 หน้า) ----
+      'body.ink-print-all tr,body.ink-print-all img,body.ink-print-all .ant-alert,' +
+        'body.ink-print-all .ant-statistic,body.ink-print-all li{break-inside:avoid;page-break-inside:avoid}' +
+      'body.ink-print-all [data-ink-keep]{break-inside:avoid !important;page-break-inside:avoid !important}' +
+      'body.ink-print-all h1,body.ink-print-all h2,body.ink-print-all h3,body.ink-print-all h4{break-after:avoid}' +
+    '}';
+  document.head.appendChild(printCss);
+
+  // ---- สไตล์ "จัดให้พอดี A4" (ปิดได้) — ใช้เฉพาะหน้าที่ยังไม่มีเลย์เอาต์พิมพ์ของตัวเอง ----
+  var printFit = document.createElement('style');
+  printFit.id = 'inkPrintFit';
+  printFit.textContent =
+    '@page{size:A4 portrait;margin:10mm}' +
+    '@media print{' +
       // ---- พอดีหน้า A4: บังคับความกว้างเนื้อหา = พื้นที่พิมพ์ (190mm) แล้วให้ทุกอย่างไหลตาม ----
       'body.ink-print-all{width:190mm !important;max-width:190mm !important;font-size:10pt !important}' +
       'body.ink-print-all #root,body.ink-print-all .ant-layout,body.ink-print-all .ant-layout-content,' +
@@ -418,23 +463,8 @@
       // ---- ตัดปุ่ม/ตัวควบคุมที่ใช้ไม่ได้บนกระดาษ (print-friendly) ----
       'body.ink-print-all .ant-btn,body.ink-print-all .ant-slider,body.ink-print-all .ant-switch,' +
         'body.ink-print-all input[type=range],body.ink-print-all .ant-pagination,body.ink-print-all .fc-perspective{display:none !important}' +
-      // ---- ภาคผนวกแฟลชการ์ด (สร้างตอนสั่งพิมพ์) ----
-      'body.ink-print-all #inkPrintAppendix{display:block !important;break-before:page}' +
-      '#inkPrintAppendix h2{font-size:13pt;margin:0 0 10px;padding:5px 9px;background:#efe9df;border-left:5px solid #A8906C;border-radius:3px}' +
-      '#inkPrintAppendix .ink-fc{break-inside:avoid;border:1px solid #C4B49A;border-radius:6px;padding:7px 10px;margin-bottom:7px}' +
-      '#inkPrintAppendix .ink-q{font-weight:700;color:#3D3229}' +
-      '#inkPrintAppendix .ink-a{color:#8B7355;font-weight:600}' +
-      '#inkPrintAppendix .ink-d{color:#5C4F42;font-size:9pt}' +
-      // ---- กันตัดกลางบล็อก ----
-      // ค่าเริ่มต้น: การ์ด/ตารางใหญ่ไหลข้ามหน้าได้ (ไม่งั้นเหลือที่ว่างทั้งหน้า)
-      'body.ink-print-all .ant-card,body.ink-print-all table,body.ink-print-all .ant-collapse-item{break-inside:auto}' +
-      'body.ink-print-all tr,body.ink-print-all img,body.ink-print-all .ant-alert,' +
-        'body.ink-print-all .ant-statistic,body.ink-print-all li{break-inside:avoid;page-break-inside:avoid}' +
-      // แต่บล็อกที่วัดแล้ว "สูงไม่เกิน 1 หน้า" → ห้ามตัดกลางเด็ดขาด (กล่องสรุป/กล่องเตือนจะได้ไม่ถูกหั่น)
-      'body.ink-print-all [data-ink-keep]{break-inside:avoid !important;page-break-inside:avoid !important}' +
-      'body.ink-print-all h1,body.ink-print-all h2,body.ink-print-all h3,body.ink-print-all h4{break-after:avoid}' +
     '}';
-  document.head.appendChild(printCss);
+  document.head.appendChild(printFit);
 
   // ---- วัดความสูงบล็อก "ที่ความกว้างกระดาษจริง" เพื่อตัดสินว่าอันไหนห้ามตัดกลาง ----
   // จำลองเลย์เอาต์พิมพ์ชั่วคราวบนจอ (คลาสนี้ไม่อยู่ใน @media print) แล้ววัด → ติดป้าย → ถอดคลาสทิ้ง
@@ -680,6 +710,7 @@
 
   function printAll() {
     if (tool) closeBar();
+    var fitting = applyFitPolicy();                             // หน้าที่จัดการพิมพ์เองอยู่แล้ว → ไม่ไปทับเลย์เอาต์
     setBusy(true); busy.textContent = '🖨️ กำลังกางทุกแท็บ/ทุกเฉลย…';
     var actives = Array.prototype.slice.call(document.querySelectorAll('.ant-tabs')).map(function (g) {
       return g.querySelector(':scope > .ant-tabs-nav .ant-tabs-tab-active');
@@ -695,7 +726,7 @@
         if (opened > 0 && round < 6) return setTimeout(sweep, 120);
         labelPanes();
         buildAppendix();
-        tagKeepBlocks();                                        // วัดที่ความกว้าง A4 → กล่องที่พอดีหน้าห้ามตัดกลาง
+        if (fitting) tagKeepBlocks();                           // วัดที่ความกว้าง A4 → กล่องที่พอดีหน้าห้ามตัดกลาง
         setTimeout(function () {
           setBusy(false);
           document.body.classList.add('ink-print-all');
