@@ -20,6 +20,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="บทสวดมนต์">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1008' width='100' height='100' rx='20'/><text x='50' y='68' font-size='54' text-anchor='middle' fill='%23C5973E'>&#3595;</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1008' width='100' height='100' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle'>🙏</text></svg>">
     <link rel="manifest" href="manifest.json">
     
@@ -258,7 +259,15 @@
                 transition-duration: 0.01ms !important;
                 scroll-behavior: auto !important;
             }
-            .hero-title { animation: none !important; }
+            /* สำคัญ: ชิ้นส่วนที่เริ่มด้วย opacity:0 แล้วรอแอนิเมชันเผย
+               ถ้าปิดแอนิเมชันเฉย ๆ จะกลายเป็นหน้าว่าง — ต้องบังคับให้เห็น */
+            .hero-cover > *, .hero-content > *,
+            .chant-section, .extended-section {
+                opacity: 1 !important;
+                transform: none !important;
+                animation: none !important;
+            }
+            .hero-medallion-glow { animation: none !important; }
         }
 
         /* Global focus-visible for keyboard accessibility */
@@ -550,10 +559,9 @@
             letter-spacing: -0.01em;
             color: var(--ink);
             margin: 0;
-            /* Fallback — override earlier gold-clip rules */
+            /* ล้างสไตล์ทองแบบเก่า (ไม่ล้าง animation — ชื่อเรื่องใช้ heroReveal ร่วมกับพี่น้อง) */
             background: none !important;
             -webkit-text-fill-color: currentColor !important;
-            animation: none !important;
             text-shadow: none !important;
             position: relative;
         }
@@ -789,129 +797,78 @@
         .scroll-top:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(197,151,62,0.5); }
         .scroll-top:active { transform: scale(0.95); }
 
-        /* ===========================================
-           THEME SELECTOR - Gold ribbon sash
-           =========================================== */
-        .theme-selector {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 1rem;
-            background: rgba(245,230,200,0.95);
-            border-radius: 0;
-            margin: 0;
-            box-shadow: none;
-            border-top: 3px solid;
-            border-bottom: 3px solid;
-            border-image: repeating-linear-gradient(90deg, #C5973E 0px, #F5E6C8 10px, #C5973E 20px) 3;
-        }
-
-        /* ===========================================
-           CONTROL PANEL - Wooden drawer feel
-           =========================================== */
-        .control-panel {
-            background: linear-gradient(180deg, #5C4425 0%, #3A2A15 100%);
-            padding: 0.75rem 1rem;
-            border-bottom: 2px solid var(--gold);
-            transition: background 0.5s ease;
-        }
-
-        .control-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .control-row:last-child { margin-bottom: 0; }
-
-        .control-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            min-height: 44px;
-            padding: 0.55rem 0.9rem;
-            font-family: 'Prompt', sans-serif;
-            font-size: 0.82rem;
-            font-weight: 400;
-            border: 1.5px solid rgba(197,151,62,0.5);
-            border-radius: 2rem;
-            background: rgba(245,230,200,0.15);
-            color: #F5E6C8;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-        .control-btn:hover {
-            border-color: var(--gold);
-            background: rgba(197,151,62,0.2);
-        }
-        .control-btn.active {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%);
-            color: #F5E6C8;
-            border-color: var(--accent);
-        }
-        .control-btn .icon { font-size: 0.9rem; }
-
-        .control-divider {
-            width: 1px; height: 1.5rem;
-            background: rgba(197,151,62,0.3);
-            margin: 0 0.25rem;
-        }
-
         /* Font Size Controls */
         .font-controls {
-            display: flex; align-items: center; gap: 0.25rem;
-            background: rgba(245,230,200,0.15);
-            border: 1.5px solid rgba(197,151,62,0.5);
-            border-radius: 2rem;
-            padding: 0.2rem;
+            display: inline-flex; align-items: center; gap: 2px;
+            background: var(--paper-deep);
+            border: 1px solid var(--hairline);
+            border-radius: 999px;
+            padding: 3px;
         }
         .font-btn {
-            width: 2.75rem; height: 2.75rem;
+            width: 44px; height: 44px;
             border: none; border-radius: 50%;
             background: transparent;
-            color: #F5E6C8;
+            color: var(--ink);
             font-family: 'Prompt', sans-serif;
-            font-size: 0.9rem; font-weight: 500;
-            cursor: pointer; transition: all 0.2s ease;
+            font-size: 0.95rem; font-weight: 500;
+            cursor: pointer; transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
         }
-        .font-btn:hover { background: rgba(197,151,62,0.3); }
-        .font-btn:active { background: rgba(197,151,62,0.5); }
+        .font-btn:hover { background: var(--paper); }
+        .font-btn:active { background: var(--paper-soft); }
+        .font-btn:disabled { opacity: 0.38; cursor: not-allowed; }
         .font-size-label {
             font-family: 'Prompt', sans-serif;
-            font-size: 0.7rem;
-            color: rgba(245,230,200,0.7);
-            padding: 0 0.25rem;
-            min-width: 2.5rem;
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+            padding: 0 0.35rem;
+            min-width: 3rem;
             text-align: center;
+            font-variant-numeric: tabular-nums;
         }
 
         /* Auto Scroll Controls */
         .scroll-controls {
-            display: none; align-items: center; gap: 0.5rem;
-            background: rgba(245,230,200,0.15);
-            border: 1.5px solid rgba(197,151,62,0.5);
-            border-radius: 2rem;
-            padding: 0.3rem 0.75rem;
+            display: none; align-items: center; gap: 0.75rem;
+            margin: 0 1.25rem 0.5rem;
+            background: var(--paper-deep);
+            border: 1px solid var(--hairline);
+            border-radius: 999px;
+            padding: 0.35rem 0.9rem 0.35rem 0.35rem;
         }
         .scroll-controls.visible { display: flex; }
         .speed-slider {
-            width: 60px; height: 4px;
+            flex: 1; min-width: 90px; height: 22px;
             -webkit-appearance: none; appearance: none;
-            background: rgba(197,151,62,0.3);
-            border-radius: 2px; outline: none;
+            background: transparent; outline: none; cursor: pointer;
+        }
+        .speed-slider::-webkit-slider-runnable-track {
+            height: 4px; border-radius: 2px;
+            background: color-mix(in srgb, var(--ink) 20%, transparent);
+        }
+        .speed-slider::-moz-range-track {
+            height: 4px; border-radius: 2px;
+            background: color-mix(in srgb, var(--ink) 20%, transparent);
         }
         .speed-slider::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none;
-            width: 14px; height: 14px;
-            background: var(--gold); border-radius: 50%; cursor: pointer;
+            width: 20px; height: 20px; margin-top: -8px;
+            background: var(--accent);
+            border: 2px solid var(--paper);
+            border-radius: 50%; cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+        }
+        .speed-slider::-moz-range-thumb {
+            width: 18px; height: 18px;
+            background: var(--accent);
+            border: 2px solid var(--paper);
+            border-radius: 50%; cursor: pointer;
         }
         .speed-label {
             font-family: 'Prompt', sans-serif;
-            font-size: 0.65rem;
-            color: rgba(245,230,200,0.7);
+            font-size: 0.75rem;
+            color: var(--ink-soft);
+            min-width: 3.5rem;
         }
 
         /* ===========================================
@@ -960,42 +917,15 @@
             background: rgba(197,151,62,0.2);
             color: #F5E6C8;
         }
-        body.dark-mode .control-panel {
-            background: linear-gradient(180deg, #1a1520 0%, #0D0B14 100%);
-        }
-        body.dark-mode .settings-toggle {
-            background: #0D0B10;
-            color: #A09680;
-            border-color: rgba(232,222,203,0.15);
-        }
-        body.dark-mode .settings-toggle:hover { color: #E8DECB; background: #12101C; }
-        body.dark-mode .settings-panel { background: #0D0B10; border-color: rgba(232,222,203,0.15); }
-        body.dark-mode .panel-row { border-color: rgba(232,222,203,0.12); }
         body.dark-mode .panel-label { color: rgba(232,222,203,0.45); }
         body.dark-mode .seg-group { background: #1a1520; border-color: rgba(232,222,203,0.12); }
         body.dark-mode .seg-btn { color: #B8A890; }
         body.dark-mode .seg-btn.active { background: #E8DECB; color: #0D0B10; }
 
-        body.dark-mode .theme-container,
-        body.dark-mode .mode-container {
-            background: rgba(197,151,62,0.03);
-        }
-        body.dark-mode .theme-label,
-        body.dark-mode .mode-label { color: #E8D8C0; }
         body.dark-mode .wish-instruction,
         body.dark-mode .wish-counter { color: #B8A890; }
         body.dark-mode .wish-result-title { color: #C5973E; }
         body.dark-mode .wish-result-text { color: #D0C0A0; }
-        body.dark-mode .theme-selector {
-            background: rgba(13,11,20,0.95);
-            border-image: repeating-linear-gradient(90deg, rgba(197,151,62,0.5) 0px, rgba(197,151,62,0.2) 10px, rgba(197,151,62,0.5) 20px) 3;
-        }
-        body.dark-mode .control-btn {
-            color: #E8D8C0;
-            border-color: rgba(197,151,62,0.3);
-            background: rgba(197,151,62,0.08);
-        }
-        body.dark-mode .control-btn:hover { background: rgba(197,151,62,0.15); }
         body.dark-mode .font-controls,
         body.dark-mode .scroll-controls {
             background: rgba(197,151,62,0.08);
@@ -1143,10 +1073,13 @@
 
         /* Print Styles */
         @media print {
-            .nav-container, .theme-container, .mode-container,
-            .control-panel, .settings-toggle, .settings-panel,
+            .nav-container, .settings-panel, .sheet, .sheet-scrim,
+            .reader-bar, .chant-dock, .resume-btn, .immersive-hint,
             .scroll-top, .home-btn, .progress-bar,
             .timer-modal, .auto-scroll-indicator, .hero-cover { display: none !important; }
+            .c-line, .chant-section { opacity: 1 !important; transform: none !important; }
+            .c-line.is-current { background: none !important; }
+            .main-content, .footer { padding-bottom: 0 !important; }
             body { background: white !important; color: black !important; font-size: 11pt; }
             .chant-section { break-inside: avoid; page-break-inside: avoid; margin: 1rem 0; box-shadow: none !important; border: 1px solid #ccc !important; }
             .chant-header { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1157,27 +1090,6 @@
         }
 
         /* TTS Controls */
-        .tts-controls {
-            display: none; position: fixed; bottom: 5rem; left: 50%;
-            transform: translateX(-50%);
-            background: var(--gold);
-            padding: 0.5rem 1rem;
-            border-radius: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 98; gap: 0.5rem;
-            align-items: center;
-        }
-        .tts-controls.visible { display: flex; }
-        .tts-btn {
-            width: 2.25rem; height: 2.25rem;
-            border: none; background: rgba(26,16,8,0.2);
-            border-radius: 50%; color: var(--lacquer);
-            font-size: 1rem; cursor: pointer; transition: all 0.2s ease;
-        }
-        .tts-btn:hover { background: rgba(26,16,8,0.3); }
-        .tts-btn.active { background: var(--lacquer); color: var(--gold); }
-        .tts-progress { width: 100px; height: 4px; background: rgba(26,16,8,0.2); border-radius: 2px; overflow: hidden; }
-        .tts-progress-bar { height: 100%; background: var(--lacquer); width: 0%; transition: width 0.1s linear; }
 
         /* ===========================================
            SECTION DIVIDER - Lotus shape
@@ -1303,7 +1215,7 @@
         .wish-result.visible { display: block; animation: fadeInUp 0.5s ease; }
         .wish-result-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(197,151,62,0.3); }
         .wish-result-title { font-family: 'Noto Serif Thai', serif; font-size: 1rem; font-weight: 500; color: var(--gold); transition: color 0.5s ease; }
-        .wish-result-text { font-family: 'Noto Serif Thai', serif; font-size: 1rem; line-height: 2; color: var(--text); text-align: justify; transition: color 0.5s ease; }
+        .wish-result-text { font-family: 'Noto Serif Thai', serif; font-size: 1rem; line-height: 2; color: var(--text); text-align: left; text-wrap: pretty; transition: color 0.5s ease; }
         .wish-result-text .highlight { color: var(--gold); font-weight: 500; }
         .wish-result-actions { display: flex; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(197,151,62,0.3); }
         .wish-action-btn {
@@ -1338,45 +1250,10 @@
         /* ===========================================
            SETTINGS + THEME — Quiet Museum (2026)
            =========================================== */
-        .settings-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-            width: 100%;
-            padding: 1rem 1.5rem;
-            background: var(--paper);
-            border: none;
-            border-top: 1px solid var(--hairline);
-            border-bottom: 1px solid var(--hairline);
-            color: var(--ink-soft);
-            font-family: 'Prompt', sans-serif;
-            font-size: 0.78rem;
-            font-weight: 400;
-            letter-spacing: 0.25em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: color 0.25s ease, background 0.25s ease;
-            user-select: none;
-        }
-        .settings-toggle:hover { color: var(--ink); background: var(--paper-soft); }
-        .settings-toggle-text { display: inline-flex; align-items: center; gap: 0.5rem; }
-        .settings-toggle-icon { display: inline-flex; transition: transform 0.3s ease; color: var(--ink-soft); }
-        .settings-toggle.collapsed .settings-toggle-icon { transform: rotate(-90deg); }
-
-        .settings-panel {
-            background: var(--paper);
-            max-height: 640px;
-            overflow: hidden;
-            transition: max-height 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.3s ease;
-            opacity: 1;
-            border-bottom: 1px solid var(--hairline);
-        }
-        .settings-panel.collapsed { max-height: 0; opacity: 0; border-bottom-color: transparent; }
 
         .panel-row {
             display: grid;
-            grid-template-columns: 72px 1fr;
+            grid-template-columns: 88px 1fr;
             align-items: center;
             gap: 1rem;
             padding: 1rem 1.5rem;
@@ -1385,9 +1262,9 @@
         .panel-row:last-child { border-bottom: none; }
         .panel-label {
             font-family: 'Prompt', sans-serif;
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             font-weight: 400;
-            letter-spacing: 0.25em;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             color: var(--ink-faint);
         }
@@ -1435,10 +1312,10 @@
         /* Day-theme chips */
         .theme-selector {
             display: flex;
-            flex-wrap: wrap;
             gap: 0.5rem;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
+            padding-bottom: 1.4rem;
         }
         .theme-btn {
             width: 36px; height: 36px;
@@ -1452,19 +1329,18 @@
         }
         .theme-btn::after {
             content: attr(data-day);
-            position: absolute; bottom: -1.5rem; left: 50%;
+            position: absolute; bottom: -1.35rem; left: 50%;
             transform: translateX(-50%);
             font-size: 0.62rem;
             font-family: 'Prompt', sans-serif;
-            letter-spacing: 0.1em;
-            color: var(--ink-soft);
+            letter-spacing: 0.02em;
+            color: var(--ink-faint);
             white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.25s ease;
             pointer-events: none;
+            transition: color 0.25s ease;
         }
         .theme-btn:hover { transform: scale(1.12); }
-        .theme-btn:hover::after, .theme-btn.active::after { opacity: 1; }
+        .theme-btn:hover::after, .theme-btn.active::after { color: var(--ink); }
         .theme-btn.active {
             outline-color: var(--ink);
             box-shadow: 0 0 0 1px var(--paper) inset;
@@ -1477,28 +1353,6 @@
         .theme-btn[data-theme="friday"]    { background: #4A5A8B; }
         .theme-btn[data-theme="saturday"]  { background: #7A4A98; }
 
-        /* Legacy aliases kept for any old references */
-        .theme-label, .theme-container, .mode-container, .mode-label,
-        .mode-selector { /* no-op — moved into .panel-row / .seg-group */ }
-        .mode-btn {
-            min-height: 44px;
-            padding: 0.6rem 1.25rem;
-            font-family: 'Prompt', sans-serif;
-            font-size: 0.9rem; font-weight: 400;
-            border: 2px solid rgba(197,151,62,0.4);
-            border-radius: 2rem;
-            background: rgba(245,230,200,0.1);
-            color: #F5E6C8;
-            cursor: pointer; transition: all 0.3s ease;
-        }
-        .mode-btn:hover { border-color: var(--gold); background: rgba(197,151,62,0.15); }
-        .mode-btn.active {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%);
-            color: #F5E6C8;
-            border-color: var(--accent);
-            box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 40%, transparent);
-        }
-        .mode-btn .mode-count { font-size: 0.7rem; opacity: 0.8; margin-left: 0.25rem; }
 
         /* Extended sections */
         .extended-section { display: none; opacity: 0; transform: translateY(20px); }
@@ -1517,6 +1371,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         body {
+            /* ประกาศตรงนี้เพราะ body คือตัวที่ถือ data-theme — สีเน้นจึงเปลี่ยนตามวันจริง */
+            --accent: var(--primary-main);
+            --accent-soft: var(--primary-light);
             font-family: 'Noto Serif Thai', serif;
             background: var(--paper);
             color: var(--ink);
@@ -1584,7 +1441,9 @@
             border: 1px solid rgba(197,151,62,0.3);
             transition: box-shadow 0.5s ease, border-color 0.5s ease;
             position: relative;
-            /* Staggered entrance animation */
+        }
+        /* แอนิเมชันเข้า — เปิดเมื่อ JS ทำงานเท่านั้น */
+        body.js-anim .chant-section {
             opacity: 0;
             transform: translateY(15px) scale(0.98);
             transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.5s ease;
@@ -1612,7 +1471,7 @@
             pointer-events: none;
             border-radius: 0 0 0.5rem 0;
         }
-        .chant-section.visible { opacity: 1; transform: translateY(0) scale(1); }
+        body.js-anim .chant-section.visible { opacity: 1; transform: translateY(0) scale(1); }
 
         /* Section header - Dark lacquer background */
         .chant-header {
@@ -1698,7 +1557,8 @@
         .story-text {
             font-size: 0.92rem;
             color: var(--text-soft);
-            text-align: justify;
+            text-align: left;
+            text-wrap: pretty;
             text-indent: 1.5em;
             line-height: 1.85;
             transition: color 0.5s ease;
@@ -1758,10 +1618,11 @@
             transition: color 0.5s ease;
         }
         .translation-text {
-            font-size: 0.95rem;
+            font-size: calc(0.95rem * var(--read-scale));
             color: var(--text-soft);
-            line-height: 1.85;
-            text-align: justify;
+            line-height: calc(var(--read-lead) * 0.86);
+            text-align: left;
+            text-wrap: pretty;
             transition: color 0.5s ease;
         }
 
@@ -1849,7 +1710,8 @@
         .credit-line strong { color: #C5973E; }
         .credit-contact { font-family: 'Prompt', sans-serif; font-size: 0.8rem; color: rgba(245,230,200,0.8); margin-bottom: 0.75rem; }
         .credit-email {
-            display: inline-block; padding: 0.5rem 1.25rem;
+            display: inline-flex; align-items: center; min-height: 44px;
+            padding: 0.5rem 1.25rem;
             background: rgba(197,151,62,0.15);
             border-radius: 2rem; color: var(--gold-pale);
             text-decoration: none;
@@ -1884,14 +1746,10 @@
         }
 
         /* Interactive Feedback */
-        .control-btn, .theme-btn, .mode-btn, .nav-item a,
-        .timer-btn, .timer-preset, .wish-category,
-        .wish-generate-btn, .wish-action-btn, .settings-toggle { transition: all 0.2s ease !important; }
-        .control-btn:active, .theme-btn:active, .mode-btn:active,
+        .theme-btn:active, .seg-btn:active,
         .timer-btn:active, .timer-preset:active,
         .wish-generate-btn:active, .wish-action-btn:active,
-        .settings-toggle:active { transform: scale(0.92) !important; }
-        .nav-item a:active { transform: scale(0.95) !important; }
+        .tool-btn:active, .dock-btn:active { transform: scale(0.94); }
 
         /* Ripple */
         .ripple { position: relative; overflow: hidden; }
@@ -1940,6 +1798,493 @@
             background: linear-gradient(90deg, var(--gold), var(--gold-light));
             z-index: 101;
             transition: width 0.1s ease;
+        }
+
+        /* ===========================================
+           READER SHELL — โครงการอ่าน/สวด (2026)
+           หลักคิด: บทสวดคือพระเอก ทุกอย่างอื่นหลบให้
+           =========================================== */
+        :root {
+            --read-scale: 1;      /* ขนาดตัวอักษรบทสวด (A- / A+) */
+            --read-lead: 2.15;    /* ระยะบรรทัดบทสวด */
+            --bar-h: 56px;        /* ความสูงแถบบน */
+            --dock-h: 66px;       /* ความสูงแถบล่าง */
+            --safe-b: env(safe-area-inset-bottom, 0px);
+            --ease-out: cubic-bezier(0.2, 0.8, 0.3, 1);
+            --sheet-shadow: 0 -18px 48px rgba(0,0,0,0.22);
+        }
+        body[data-lead="snug"]  { --read-lead: 1.75; }
+        body[data-lead="airy"]  { --read-lead: 2.6; }
+
+        body.dark-mode {
+            --paper: #0D0B14;
+            --paper-soft: #161420;
+            --paper-deep: #201C2E;
+            --ink: #EDE0CC;
+            --ink-soft: #B8A890;
+            --ink-faint: rgba(237,224,204,0.58);
+            --hairline: rgba(197,151,62,0.20);
+            --hairline-strong: rgba(197,151,62,0.42);
+            --sheet-shadow: 0 -18px 48px rgba(0,0,0,0.6);
+        }
+
+        /* ---------- แถบบน: อยู่บทไหน ---------- */
+        .reader-bar {
+            position: sticky; top: 0; z-index: 100;
+            display: grid;
+            grid-template-columns: 44px minmax(0, 1fr) 44px;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: var(--bar-h);
+            padding: 0.35rem 0.6rem;
+            padding-top: calc(0.35rem + env(safe-area-inset-top, 0px));
+            background: color-mix(in srgb, var(--paper) 88%, transparent);
+            -webkit-backdrop-filter: blur(18px) saturate(150%);
+            backdrop-filter: blur(18px) saturate(150%);
+            border-bottom: 1px solid var(--hairline);
+            transition: transform 0.3s var(--ease-out), opacity 0.2s ease;
+        }
+        .reader-bar.is-hidden { transform: translateY(-101%); }
+        body.immersive .reader-bar { transform: translateY(-101%); }
+
+        .rb-icon {
+            display: grid; place-items: center;
+            width: 44px; height: 44px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            color: var(--ink-soft);
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .rb-icon:hover, .rb-icon[aria-expanded="true"] {
+            background: var(--paper-deep); color: var(--ink); border-color: var(--hairline);
+        }
+        .rb-aa { font-family: 'Prompt', sans-serif; font-size: 1rem; font-weight: 500; letter-spacing: 0.02em; }
+
+        .rb-now {
+            display: flex; align-items: center; gap: 0.6rem;
+            min-width: 0; min-height: 44px;
+            padding: 0.25rem 0.5rem;
+            background: transparent; border: none; border-radius: 12px;
+            cursor: pointer; text-align: left;
+            transition: background 0.2s ease;
+        }
+        .rb-now:hover { background: var(--paper-deep); }
+        .rb-now-num {
+            flex: none;
+            font-family: 'Noto Serif Thai', serif;
+            font-size: 1.35rem; line-height: 1;
+            color: var(--accent);
+            transition: color 0.6s ease;
+        }
+        .rb-now-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+        .rb-now-title {
+            font-family: 'Noto Serif Thai', serif;
+            font-size: 0.98rem; font-weight: 500; color: var(--ink);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .rb-now-meta {
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.68rem; color: var(--ink-faint);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---------- Sheets (สารบัญ / ตั้งค่า) ---------- */
+        .sheet-scrim {
+            position: fixed; inset: 0; z-index: 400;
+            background: rgba(10,7,4,0.5);
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity 0.28s var(--ease-out);
+        }
+        .sheet-scrim.is-open { opacity: 1; }
+
+        .sheet {
+            position: fixed; z-index: 401;
+            left: 0; right: 0; bottom: 0;
+            max-height: min(84vh, 720px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: calc(1.25rem + var(--safe-b));
+            background: var(--paper);
+            border-top: 1px solid var(--hairline-strong);
+            border-radius: 20px 20px 0 0;
+            box-shadow: var(--sheet-shadow);
+            transform: translateY(101%);
+            transition: transform 0.32s var(--ease-out);
+        }
+        .sheet.is-open { transform: translateY(0); }
+        .sheet-grip {
+            width: 40px; height: 4px; margin: 0.6rem auto 0.2rem;
+            border-radius: 999px; background: var(--hairline-strong);
+        }
+        .sheet-head {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 1rem; padding: 0.75rem 1.25rem 0.5rem;
+        }
+        .sheet-title {
+            font-family: 'Noto Serif Thai', serif;
+            font-size: 1.1rem; font-weight: 500; color: var(--ink);
+        }
+        .sheet-close {
+            display: grid; place-items: center;
+            width: 44px; height: 44px;
+            background: var(--paper-deep);
+            border: 1px solid var(--hairline);
+            border-radius: 50%;
+            color: var(--ink-soft); cursor: pointer;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .sheet-close:hover { color: var(--ink); background: var(--paper-soft); }
+        .sheet-note {
+            padding: 0 1.25rem 0.75rem;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.8rem; color: var(--ink-faint);
+        }
+        .sheet-foot { padding: 0.75rem 1.25rem 0; border-top: 1px solid var(--hairline); margin-top: 0.5rem; }
+        .sheet-link {
+            display: flex; align-items: center; min-height: 44px;
+            font-family: 'Prompt', sans-serif; font-size: 0.88rem;
+            color: var(--ink-soft); text-decoration: none;
+        }
+        .sheet-link:hover { color: var(--ink); }
+
+        /* สารบัญ */
+        .sheet .nav-container {
+            position: static; background: none; border: none;
+            padding: 0 0.75rem; backdrop-filter: none; -webkit-backdrop-filter: none;
+        }
+        .sheet .nav-list { display: block; }
+        .sheet .nav-item a {
+            display: grid;
+            grid-template-columns: 2rem minmax(0, 1fr) 1.5rem;
+            align-items: center; gap: 0.85rem;
+            min-height: 56px;
+            padding: 0.6rem 0.75rem;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            color: var(--ink-soft);
+            text-decoration: none;
+        }
+        .sheet .nav-item a:hover { background: var(--paper-deep); border-color: var(--hairline); }
+        .toc-num {
+            font-family: 'Noto Serif Thai', serif;
+            font-size: 1.15rem; color: var(--accent);
+            text-align: center; transition: color 0.6s ease;
+        }
+        .toc-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .toc-title {
+            font-family: 'Noto Serif Thai', serif;
+            font-size: 1rem; font-weight: 500; color: var(--ink);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .toc-sub {
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.72rem; color: var(--ink-faint);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .toc-mark { display: grid; place-items: center; color: var(--accent); font-size: 0.9rem; }
+        .nav-item.is-current a {
+            background: color-mix(in srgb, var(--accent) 10%, transparent);
+            border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+        }
+        .nav-item.is-current .toc-mark::before { content: '◆'; }
+        .nav-item.is-done .toc-mark::before { content: '✓'; font-weight: 700; }
+        .nav-item.is-current.is-done .toc-mark::before { content: '✓'; }
+
+        /* ตั้งค่า: แถวสวิตช์ */
+        .switch-list { padding: 0.25rem 0.75rem; }
+        .switch-row {
+            display: grid;
+            grid-template-columns: 24px minmax(0, 1fr) 44px;
+            align-items: center; gap: 0.9rem;
+            width: 100%; min-height: 56px;
+            padding: 0.6rem 0.75rem;
+            background: transparent; border: none; border-radius: 12px;
+            color: var(--ink-soft); cursor: pointer; text-align: left;
+            transition: background 0.2s ease;
+        }
+        .switch-row:hover { background: var(--paper-deep); }
+        .switch-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .switch-name { font-family: 'Prompt', sans-serif; font-size: 0.9rem; color: var(--ink); }
+        .switch-desc { font-family: 'Prompt', sans-serif; font-size: 0.72rem; color: var(--ink-faint); line-height: 1.35; }
+        .switch-knob {
+            justify-self: end;
+            width: 44px; height: 26px; padding: 3px;
+            border-radius: 999px;
+            background: var(--paper-deep);
+            border: 1px solid var(--hairline-strong);
+            transition: background 0.22s var(--ease-out), border-color 0.22s ease;
+        }
+        .switch-knob::after {
+            content: ''; display: block;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--ink-faint);
+            transition: transform 0.22s var(--ease-out), background 0.22s ease;
+        }
+        .switch-row[aria-checked="true"] .switch-knob {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .switch-row[aria-checked="true"] .switch-knob::after {
+            transform: translateX(18px);
+            background: var(--paper);
+        }
+
+        /* ตั้งค่า: ปุ่มเครื่องมือ */
+        .tool-row {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem; padding: 0.75rem 1.25rem 0.25rem;
+        }
+        .tool-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 0.4rem; min-height: 72px; padding: 0.6rem 0.4rem;
+            background: var(--paper-deep);
+            border: 1px solid var(--hairline);
+            border-radius: 14px;
+            font-family: 'Prompt', sans-serif; font-size: 0.72rem;
+            color: var(--ink-soft); text-align: center; line-height: 1.3;
+            cursor: pointer;
+            transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+        .tool-btn:hover { color: var(--ink); border-color: var(--hairline-strong); }
+        .tool-btn[aria-pressed="true"] {
+            color: var(--paper); background: var(--ink); border-color: var(--ink);
+        }
+        .panel-row--stack { grid-template-columns: 1fr; gap: 0.6rem; }
+        .pace-control { display: flex; align-items: center; gap: 0.85rem; }
+        .pace-control .speed-slider { flex: 1; }
+        .panel-hint {
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.72rem; color: var(--ink-faint); line-height: 1.5;
+        }
+
+        /* ---------- แถบล่าง: ควบคุมการสวด ---------- */
+        .chant-dock {
+            position: fixed; z-index: 300;
+            left: 0; right: 0; bottom: 0;
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 0.25rem;
+            padding: 0.3rem 0.5rem calc(0.3rem + var(--safe-b));
+            background: color-mix(in srgb, var(--paper) 92%, transparent);
+            -webkit-backdrop-filter: blur(18px) saturate(150%);
+            backdrop-filter: blur(18px) saturate(150%);
+            border-top: 1px solid var(--hairline);
+            transition: transform 0.3s var(--ease-out);
+        }
+        body.immersive .chant-dock,
+        body.at-cover .chant-dock { transform: translateY(calc(100% + var(--safe-b))); }
+        body.at-cover .chant-dock { pointer-events: none; }
+        body.at-cover .main-content { padding-bottom: 2rem; }
+        .dock-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 0.15rem;
+            min-height: 56px;
+            padding: 0.35rem 0.2rem;
+            background: transparent; border: none; border-radius: 14px;
+            color: var(--ink-soft); cursor: pointer;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .dock-btn:hover { background: var(--paper-deep); color: var(--ink); }
+        .dock-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+        .dock-label {
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.66rem; letter-spacing: 0.02em;
+            font-variant-numeric: tabular-nums;
+        }
+        .dock-btn--play { color: var(--ink); }
+        .dock-btn--play[aria-pressed="true"] { color: var(--accent); }
+        /* วงแหวนลูกประคำ: เป็นโดนัท ไอคอนตรงกลางจึงอ่านออกเสมอ */
+        .beads-ring {
+            position: relative;
+            display: grid; place-items: center;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: conic-gradient(
+                var(--accent) calc(var(--beads-pct, 0) * 1%),
+                color-mix(in srgb, var(--ink) 14%, transparent) 0);
+            transition: background 0.3s var(--ease-out);
+        }
+        .beads-ring::before {
+            content: '';
+            position: absolute; inset: 4px;
+            border-radius: 50%;
+            background: var(--paper);
+        }
+        .beads-ring > .ui-icon { position: relative; width: 15px; height: 15px; }
+        .dock-btn--beads.is-complete { color: var(--accent); }
+
+        /* ---------- บทสวดระดับบรรทัด ---------- */
+        .c-lines { display: flex; flex-direction: column; }
+        .c-line {
+            position: relative;
+            margin: 0;
+            padding: 0.15em 0.65rem;
+            border-radius: 8px;
+            font-size: calc(1.12rem * var(--read-scale));
+            line-height: var(--read-lead);
+            text-wrap: balance;
+            overflow-wrap: break-word;
+            color: inherit;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.25s ease, opacity 0.25s ease, color 0.25s ease;
+            scroll-margin-top: calc(var(--bar-h) + 12vh);
+            scroll-margin-bottom: calc(var(--dock-h) + 12vh);
+        }
+        .c-line--cue {
+            font-family: 'Prompt', sans-serif;
+            font-size: calc(0.8rem * var(--read-scale));
+            line-height: 1.8;
+            color: var(--ink-faint);
+            cursor: default;
+        }
+        .c-break { height: calc(0.55em * var(--read-lead)); }
+        .c-line::before {
+            content: '';
+            position: absolute; left: 0; top: 12%; bottom: 12%;
+            width: 3px; border-radius: 999px;
+            background: var(--accent);
+            opacity: 0; transform: scaleY(0.4);
+            transition: opacity 0.2s ease, transform 0.25s var(--ease-out);
+        }
+        .c-line.is-current {
+            background: color-mix(in srgb, var(--accent) 12%, transparent);
+            color: var(--ink);
+        }
+        .c-line.is-current::before { opacity: 1; transform: scaleY(1); }
+        body.dark-mode .c-line.is-current { background: color-mix(in srgb, var(--gold) 16%, transparent); }
+
+        /* ขณะสวดตาม: หรี่บรรทัดอื่นให้ตาโฟกัสบรรทัดเดียว */
+        body.is-chanting .c-line:not(.is-current):not(.c-line--cue) { opacity: 0.5; }
+        body.is-chanting .chant-section:not(.is-active-chant) { opacity: 0.55; }
+
+        /* ---------- โหมดแสดงผล: บาลี / บาลี+แปล / แปล ---------- */
+        body[data-view="pali"] .translation-section { display: none; }
+        body[data-view="thai"] .pali-container { display: none; }
+        body[data-view="thai"] .translation-section { border-top: none; padding-top: 0; }
+
+        /* ---------- ซ่อนส่วนศึกษา ---------- */
+        body.hide-study .story-section,
+        body.hide-study .benefits-section { display: none; }
+
+        .scroll-top { bottom: calc(var(--dock-h) + var(--safe-b) + 0.75rem); }
+        body.immersive .scroll-top { opacity: 0; visibility: hidden; }
+        @media (min-width: 760px) { .scroll-top { bottom: calc(var(--dock-h) + 2.5rem); } }
+
+        /* ---------- ป้ายอ่านต่อ ---------- */
+        .resume-btn {
+            position: fixed;
+            bottom: calc(var(--dock-h) + var(--safe-b) + 0.75rem);
+            left: 50%; transform: translateX(-50%);
+            z-index: 290;
+            display: flex; align-items: center; gap: 0.5rem;
+            min-height: 44px;
+            padding: 0.6rem 1.15rem;
+            font-family: 'Prompt', sans-serif; font-size: 0.85rem;
+            color: var(--paper);
+            background: var(--ink);
+            border: none; border-radius: 999px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+            cursor: pointer;
+            white-space: nowrap;
+            max-width: min(88vw, 340px);
+            transition: opacity 0.25s ease, transform 0.25s var(--ease-out);
+        }
+        .resume-btn.hiding { opacity: 0; transform: translateX(-50%) translateY(12px); pointer-events: none; }
+        .resume-btn .resume-where {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: color-mix(in srgb, var(--paper) 72%, transparent);
+        }
+        /* ที่หน้าปกไม่มีแถบล่าง — ป้ายจึงลงมาอยู่ล่างสุดได้ ไม่ทับปุ่ม "เริ่มสวด" */
+        body.at-cover .resume-btn { bottom: calc(var(--safe-b) + 1.25rem); }
+
+        /* ---------- ระยะเผื่อแถบล่าง + จุดยึด scroll ---------- */
+        .main-content { padding-bottom: calc(var(--dock-h) + var(--safe-b) + 2rem); }
+        .chant-section { scroll-margin-top: calc(var(--bar-h) + 0.75rem); }
+        .footer { padding-bottom: calc(2.5rem + var(--dock-h) + var(--safe-b)); }
+
+        /* บทสวดที่กำลังอ่าน: ขอบทองบาง ๆ */
+        .chant-section.is-active-chant {
+            border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+            box-shadow: 0 4px 24px color-mix(in srgb, var(--accent) 14%, transparent), 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        /* ---------- โหมดสวดเต็มจอ ---------- */
+        body.immersive .chant-section { box-shadow: none; border-color: transparent; background: transparent; }
+        body.immersive .chant-section::before,
+        body.immersive .chant-section::after { opacity: 0; }
+        body.immersive .pali-container { background: none; border-color: transparent; box-shadow: none; }
+        body.immersive .pali-container::before { display: none; }
+        body.immersive .chant-header { background: none; padding-bottom: 0.5rem; }
+        body.immersive .chant-title { color: var(--ink); }
+        body.immersive .chant-subtitle { color: var(--ink-faint); }
+        body.immersive .chant-number { color: var(--accent); }
+        body.immersive .story-section,
+        body.immersive .benefits-section,
+        body.immersive .wish-section,
+        body.immersive .footer { display: none; }
+        .immersive-hint {
+            position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%);
+            z-index: 280;
+            padding: 0.5rem 1rem; border-radius: 999px;
+            font-family: 'Prompt', sans-serif; font-size: 0.75rem;
+            color: var(--paper); background: rgba(26,20,16,0.82);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .immersive-hint.show { opacity: 1; }
+
+        /* ---------- เข้าถึงได้ ---------- */
+        :where(button, a, input, [tabindex]):focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+            border-radius: 8px;
+        }
+        .sheet:focus { outline: none; }
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+        }
+
+        /* ---------- จอใหญ่: sheet กลายเป็นการ์ดกลางจอ ---------- */
+        @media (min-width: 760px) {
+            .sheet {
+                left: 50%; bottom: auto; top: 50%;
+                width: min(560px, 92vw);
+                transform: translate(-50%, -46%) scale(0.98);
+                opacity: 0;
+                border-radius: 18px;
+                border: 1px solid var(--hairline-strong);
+                box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+                transition: transform 0.28s var(--ease-out), opacity 0.22s ease;
+            }
+            .sheet.is-open { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            .sheet-grip { display: none; }
+            .chant-dock {
+                left: 50%; right: auto; bottom: 1.25rem;
+                width: min(520px, 92vw);
+                transform: translateX(-50%);
+                grid-template-columns: repeat(4, 1fr);
+                border: 1px solid var(--hairline);
+                border-radius: 18px;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+            }
+            body.immersive .chant-dock,
+            body.at-cover .chant-dock { transform: translateX(-50%) translateY(calc(100% + 2rem)); }
+            .resume-btn { bottom: calc(var(--dock-h) + 2.5rem); }
+        }
+
+        /* ---------- ลดการเคลื่อนไหว ---------- */
+        @media (prefers-reduced-motion: reduce) {
+            .sheet, .sheet-scrim, .reader-bar, .chant-dock, .c-line, .resume-btn {
+                transition-duration: 0.01ms !important;
+            }
+            html { scroll-behavior: auto; }
         }
 
         /* Responsive */
@@ -2277,12 +2622,11 @@
     <div class="watermark-pattern"></div>
     
     <!-- Progress bar -->
-    <div class="progress-bar" id="progressBar"></div>
-
     <div class="watermark-pattern"></div>
 
-    <!-- Progress bar -->
-    <div class="progress-bar" id="progressBar"></div>
+    <!-- แถบความคืบหน้าการอ่าน -->
+    <div class="progress-bar" id="progressBar" role="progressbar"
+         aria-label="ความคืบหน้าการอ่าน" aria-valuemin="0" aria-valuemax="100"></div>
 
     <!-- Hero Cover -->
     <section class="hero-cover" id="top">
@@ -2333,21 +2677,108 @@
         </footer>
     </section>
 
-    <!-- Settings Toggle (minimal, inline) -->
-    <button class="settings-toggle" id="settingsToggle" type="button" aria-expanded="true">
-        <span class="settings-toggle-text">
-            <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
-            ตั้งค่าและรูปแบบ
-        </span>
-        <span class="settings-toggle-icon" aria-hidden="true">
-            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        </span>
-    </button>
+    <!-- ===========================================
+         READER BAR — บอกว่ากำลังอยู่บทไหน + ทางเข้าสารบัญ/ตั้งค่า
+         ซ่อนตัวเองเมื่อเลื่อนลง เพื่อให้บทสวดเต็มจอ
+         =========================================== -->
+    <div class="reader-bar" id="readerBar">
+        <button class="rb-icon" id="tocBtn" type="button"
+                aria-label="สารบัญบทสวด" aria-expanded="false" aria-controls="tocSheet">
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg>
+        </button>
 
-    <!-- Collapsible Settings Panel -->
-    <div class="settings-panel" id="settingsPanel">
+        <button class="rb-now" id="readerNow" type="button" aria-label="เปิดสารบัญบทสวด">
+            <span class="rb-now-num" id="readerNowNum">๑</span>
+            <span class="rb-now-text">
+                <span class="rb-now-title" id="readerNowTitle">อิมินา สักกาเรนะ</span>
+                <span class="rb-now-meta" id="readerNowMeta">บทที่ ๑ จาก ๖</span>
+            </span>
+        </button>
 
-        <!-- Row 1: Mode (segmented) -->
+        <button class="rb-icon" id="settingsToggle" type="button"
+                aria-label="ตั้งค่าการอ่าน" aria-expanded="false" aria-controls="settingsPanel">
+            <span class="rb-aa" aria-hidden="true">Aa</span>
+        </button>
+    </div>
+
+    <!-- ===========================================
+         TOC SHEET — สารบัญ: อยู่บทไหน สวดจบบทไหนแล้ว
+         =========================================== -->
+    <div class="sheet-scrim" id="sheetScrim" hidden></div>
+
+    <aside class="sheet sheet--toc" id="tocSheet" role="dialog" aria-modal="true" tabindex="-1"
+           aria-labelledby="tocSheetTitle" hidden>
+        <div class="sheet-grip" aria-hidden="true"></div>
+        <header class="sheet-head">
+            <h2 class="sheet-title" id="tocSheetTitle">สารบัญบทสวด</h2>
+            <button class="sheet-close" data-sheet-close type="button" aria-label="ปิดสารบัญ">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
+            </button>
+        </header>
+        <p class="sheet-note" id="tocProgressNote">วันนี้สวดแล้ว ๐ จาก ๖ บท</p>
+        <nav class="nav-container" aria-label="บทสวดทั้งหมด">
+            <ol class="nav-list" id="tocList">
+                <li class="nav-item"><a href="#imina-sakkara"><span class="toc-num">๑</span><span class="toc-text"><span class="toc-title">อิมินา สักกาเรนะ</span><span class="toc-sub">บทบูชาพระรัตนตรัย</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item"><a href="#namo"><span class="toc-num">๒</span><span class="toc-text"><span class="toc-title">นะโม ตัสสะ</span><span class="toc-sub">บทนมัสการพระพุทธเจ้า</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item"><a href="#metta"><span class="toc-num">๓</span><span class="toc-text"><span class="toc-title">บทแผ่เมตตา</span><span class="toc-sub">พรหมวิหาร ๔</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item"><a href="#itipiso"><span class="toc-num">๔</span><span class="toc-text"><span class="toc-title">อิติปิ โส</span><span class="toc-sub">บทสรรเสริญพระรัตนตรัย</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item extended-nav"><a href="#pahung"><span class="toc-num">๕</span><span class="toc-text"><span class="toc-title">พาหุงมหากา</span><span class="toc-sub">ชัยมงคลคาถา</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item extended-nav"><a href="#mahakruniko"><span class="toc-num">๖</span><span class="toc-text"><span class="toc-title">มหาการุณิโก</span><span class="toc-sub">บทชัยปริตร</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item extended-nav"><a href="#bhavatu"><span class="toc-num">๗</span><span class="toc-text"><span class="toc-title">ภะวะตุ สัพ</span><span class="toc-sub">บทให้พร</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item"><a href="#chinabanchorn"><span class="toc-num">๘</span><span class="toc-text"><span class="toc-title">ชินบัญชร</span><span class="toc-sub">คาถาสมเด็จโต</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item"><a href="#imina-punna"><span class="toc-num">๙</span><span class="toc-text"><span class="toc-title">บทกรวดน้ำ</span><span class="toc-sub">อุทิศส่วนกุศล</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+                <li class="nav-item"><a href="#yantun"><span class="toc-num">✦</span><span class="toc-text"><span class="toc-title">ยันทุนนิมิต</span><span class="toc-sub">บทพิเศษ — ปัดเป่าสิ่งไม่ดี</span></span><span class="toc-mark" aria-hidden="true"></span></a></li>
+            </ol>
+        </nav>
+        <div class="sheet-foot">
+            <a class="sheet-link" href="#wish-generator" data-sheet-close>คำอธิษฐานหลังสวดมนต์</a>
+        </div>
+    </aside>
+
+    <!-- ===========================================
+         SETTINGS SHEET — ทุกอย่างที่ปรับได้ อยู่ที่เดียว
+         =========================================== -->
+    <aside class="sheet sheet--settings settings-panel" id="settingsPanel" role="dialog" aria-modal="true" tabindex="-1"
+           aria-labelledby="settingsSheetTitle" hidden>
+        <div class="sheet-grip" aria-hidden="true"></div>
+        <header class="sheet-head">
+            <h2 class="sheet-title" id="settingsSheetTitle">ตั้งค่าการอ่าน</h2>
+            <button class="sheet-close" data-sheet-close type="button" aria-label="ปิดตั้งค่า">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
+            </button>
+        </header>
+
+        <!-- แสดงผล: บาลี / บาลี+แปล / แปล -->
+        <div class="panel-row">
+            <span class="panel-label">แสดงผล</span>
+            <div class="seg-group" role="radiogroup" aria-label="เลือกสิ่งที่แสดงในบทสวด">
+                <button class="seg-btn view-btn" data-view="pali" role="radio" aria-checked="false">บาลี</button>
+                <button class="seg-btn view-btn active" data-view="both" role="radio" aria-checked="true">บาลี + แปล</button>
+                <button class="seg-btn view-btn" data-view="thai" role="radio" aria-checked="false">คำแปล</button>
+            </div>
+        </div>
+
+        <!-- ขนาดตัวอักษร -->
+        <div class="panel-row">
+            <span class="panel-label">ขนาดตัวอักษร</span>
+            <div class="font-controls">
+                <button class="font-btn" id="fontDecrease" type="button" aria-label="ลดขนาดตัวอักษร">A-</button>
+                <span class="font-size-label" id="fontSizeLabel" aria-live="polite">100%</span>
+                <button class="font-btn" id="fontIncrease" type="button" aria-label="เพิ่มขนาดตัวอักษร">A+</button>
+            </div>
+        </div>
+
+        <!-- ระยะห่างบรรทัด -->
+        <div class="panel-row">
+            <span class="panel-label">ระยะบรรทัด</span>
+            <div class="seg-group" role="radiogroup" aria-label="ระยะห่างระหว่างบรรทัด">
+                <button class="seg-btn lead-btn" data-lead="snug" role="radio" aria-checked="false">แน่น</button>
+                <button class="seg-btn lead-btn active" data-lead="normal" role="radio" aria-checked="true">ปกติ</button>
+                <button class="seg-btn lead-btn" data-lead="airy" role="radio" aria-checked="false">โปร่ง</button>
+            </div>
+        </div>
+
+        <!-- รูปแบบการสวด -->
         <div class="panel-row">
             <span class="panel-label">รูปแบบ</span>
             <div class="seg-group" role="radiogroup" aria-label="รูปแบบการสวด">
@@ -2360,92 +2791,81 @@
             </div>
         </div>
 
-        <!-- Row 2: Day-theme (7 chips) -->
-        <div class="panel-row">
-            <span class="panel-label">สีมงคล</span>
+        <!-- สีมงคลประจำวัน -->
+        <div class="panel-row panel-row--stack">
+            <span class="panel-label">สีมงคลประจำวัน</span>
             <div class="theme-selector" role="radiogroup" aria-label="สีมงคลประจำวัน">
-                <button class="theme-btn" data-theme="sunday"   data-day="อาทิตย์" aria-label="ธีมวันอาทิตย์ สีแดง"></button>
-                <button class="theme-btn" data-theme="monday"   data-day="จันทร์"  aria-label="ธีมวันจันทร์ สีเหลือง"></button>
-                <button class="theme-btn" data-theme="tuesday"  data-day="อังคาร"  aria-label="ธีมวันอังคาร สีชมพู"></button>
-                <button class="theme-btn" data-theme="wednesday" data-day="พุธ"     aria-label="ธีมวันพุธ สีเขียว"></button>
-                <button class="theme-btn active" data-theme="thursday" data-day="พฤหัส" aria-label="ธีมวันพฤหัสบดี สีส้ม"></button>
-                <button class="theme-btn" data-theme="friday"   data-day="ศุกร์"   aria-label="ธีมวันศุกร์ สีฟ้า"></button>
-                <button class="theme-btn" data-theme="saturday" data-day="เสาร์"   aria-label="ธีมวันเสาร์ สีม่วง"></button>
+                <button class="theme-btn" data-theme="sunday"    data-day="อาทิตย์" role="radio" aria-checked="false" aria-label="ธีมวันอาทิตย์ สีแดง"></button>
+                <button class="theme-btn" data-theme="monday"    data-day="จันทร์"  role="radio" aria-checked="false" aria-label="ธีมวันจันทร์ สีเหลือง"></button>
+                <button class="theme-btn" data-theme="tuesday"   data-day="อังคาร"  role="radio" aria-checked="false" aria-label="ธีมวันอังคาร สีชมพู"></button>
+                <button class="theme-btn" data-theme="wednesday" data-day="พุธ"     role="radio" aria-checked="false" aria-label="ธีมวันพุธ สีเขียว"></button>
+                <button class="theme-btn" data-theme="thursday"  data-day="พฤหัส"   role="radio" aria-checked="false" aria-label="ธีมวันพฤหัสบดี สีส้ม"></button>
+                <button class="theme-btn" data-theme="friday"    data-day="ศุกร์"   role="radio" aria-checked="false" aria-label="ธีมวันศุกร์ สีฟ้า"></button>
+                <button class="theme-btn" data-theme="saturday"  data-day="เสาร์"   role="radio" aria-checked="false" aria-label="ธีมวันเสาร์ สีม่วง"></button>
             </div>
         </div>
 
-        <!-- Control Panel -->
-        <div class="control-panel">
-            <div class="control-row">
-                <!-- Dark Mode -->
-                <button class="control-btn" id="darkModeBtn" title="โหมดกลางคืน">
-                    <svg class="ui-icon" aria-hidden="true"><use href="#icon-moon"/></svg>
-                    <span>กลางคืน</span>
-                </button>
+        <!-- สวิตช์ -->
+        <div class="switch-list">
+            <button class="switch-row" id="darkModeBtn" type="button" role="switch" aria-checked="false">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-moon"/></svg>
+                <span class="switch-text"><span class="switch-name">โหมดกลางคืน</span><span class="switch-desc">พื้นหลังเข้ม ถนอมสายตาตอนกลางคืน</span></span>
+                <span class="switch-knob" aria-hidden="true"></span>
+            </button>
 
-                <div class="control-divider"></div>
+            <button class="switch-row" id="ttsBtn" type="button" role="switch" aria-checked="false">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-speaker"/></svg>
+                <span class="switch-text"><span class="switch-name">เสียงอ่านนำ</span><span class="switch-desc">ให้เครื่องอ่านออกเสียงตามบรรทัดที่ไฮไลต์</span></span>
+                <span class="switch-knob" aria-hidden="true"></span>
+            </button>
 
-                <!-- Font Size -->
-                <div class="font-controls">
-                    <button class="font-btn" id="fontDecrease" title="ลดขนาด">A-</button>
-                    <span class="font-size-label" id="fontSizeLabel">100%</span>
-                    <button class="font-btn" id="fontIncrease" title="เพิ่มขนาด">A+</button>
-                </div>
+            <button class="switch-row" id="wakeLockBtn" type="button" role="switch" aria-checked="true">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-phone"/></svg>
+                <span class="switch-text"><span class="switch-name">หน้าจอไม่ดับ</span><span class="switch-desc">คาหน้าจอไว้ขณะสวด</span></span>
+                <span class="switch-knob" aria-hidden="true"></span>
+            </button>
 
-                <div class="control-divider"></div>
-
-                <!-- Auto Scroll -->
-                <button class="control-btn" id="autoScrollBtn" title="เลื่อนอัตโนมัติ">
-                    <svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg>
-                    <span>เลื่อนอัตโนมัติ</span>
-                </button>
-
-                <!-- Scroll Speed Controls -->
-                <div class="scroll-controls" id="scrollControls">
-                    <button class="font-btn" id="scrollPause" title="หยุด/เล่น" aria-label="หยุดหรือเล่น"><svg class="ui-icon" aria-hidden="true"><use href="#icon-pause"/></svg></button>
-                    <input type="range" class="speed-slider" id="speedSlider" min="1" max="5" value="2">
-                    <span class="speed-label" id="speedLabel">ปกติ</span>
-                </div>
-            </div>
-
-            <div class="control-row">
-                <!-- Timer -->
-                <button class="control-btn" id="timerBtn" title="ตั้งเวลา">
-                    <svg class="ui-icon" aria-hidden="true"><use href="#icon-bell"/></svg>
-                    <span>ตั้งเวลา</span>
-                </button>
-
-                <div class="control-divider"></div>
-
-                <!-- TTS -->
-                <button class="control-btn" id="ttsBtn" title="อ่านให้ฟัง">
-                    <svg class="ui-icon" aria-hidden="true"><use href="#icon-speaker"/></svg>
-                    <span>อ่านให้ฟัง</span>
-                </button>
-
-                <div class="control-divider"></div>
-
-            </div>
+            <button class="switch-row" id="storyBtn" type="button" role="switch" aria-checked="true">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-bulb"/></svg>
+                <span class="switch-text"><span class="switch-name">เรื่องราวและอานิสงส์</span><span class="switch-desc">แสดงส่วนศึกษาเพิ่มเติมใต้บทสวด</span></span>
+                <span class="switch-knob" aria-hidden="true"></span>
+            </button>
         </div>
-    </div>
 
-    <!-- Navigation -->
-    <nav class="nav-container">
-        <ul class="nav-list">
-            <li class="nav-item"><a href="#imina-sakkara">อิมินา สักกาเรนะ</a></li>
-            <li class="nav-item"><a href="#namo">นะโมตัสสะ</a></li>
-            <li class="nav-item"><a href="#metta">แผ่เมตตา</a></li>
-            <li class="nav-item"><a href="#itipiso">อิติปิโส</a></li>
-            <li class="nav-item extended-nav"><a href="#pahung">พาหุง</a></li>
-            <li class="nav-item extended-nav"><a href="#mahakruniko">มหากรุณิโก</a></li>
-            <li class="nav-item extended-nav"><a href="#bhavatu">ภวตุสัพพ</a></li>
-            <li class="nav-item"><a href="#chinabanchorn">ชินบัญชร</a></li>
-            <li class="nav-item"><a href="#imina-punna">กรวดน้ำ</a></li>
-            <li class="nav-item extended-nav"><a href="#yantun">ยันทุน</a></li>
-        </ul>
-    </nav>
+        <!-- จังหวะสวด -->
+        <div class="panel-row panel-row--stack">
+            <span class="panel-label">จังหวะไฮไลต์</span>
+            <div class="pace-control">
+                <input type="range" class="speed-slider" id="paceSlider" min="1" max="5" value="3"
+                       aria-label="ความเร็วจังหวะสวด">
+                <span class="speed-label" id="paceLabel" aria-live="polite">ปกติ</span>
+            </div>
+            <p class="panel-hint">แตะบรรทัดใดก็ได้ในบทสวด เพื่อเริ่มไฮไลต์จากบรรทัดนั้น</p>
+        </div>
 
-    <div class="lotus-divider"><span>☘️</span></div>
+        <!-- เครื่องมือ -->
+        <div class="tool-row">
+            <button class="tool-btn" id="timerBtn" type="button">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-bell"/></svg>
+                <span>ตั้งเวลาสวด</span>
+            </button>
+            <button class="tool-btn" id="autoScrollBtn" type="button" aria-pressed="false">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg>
+                <span>เลื่อนหน้าอัตโนมัติ</span>
+            </button>
+            <button class="tool-btn" id="resetProgressBtn" type="button">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"/></svg>
+                <span>ล้างจำนวนจบวันนี้</span>
+            </button>
+        </div>
+
+        <!-- ความเร็วเลื่อนหน้า (โผล่เมื่อเปิดเลื่อนอัตโนมัติ) -->
+        <div class="scroll-controls" id="scrollControls">
+            <button class="font-btn" id="scrollPause" type="button" title="หยุด/เล่น" aria-label="หยุดหรือเล่นการเลื่อน"><svg class="ui-icon" aria-hidden="true"><use href="#icon-pause"/></svg></button>
+            <input type="range" class="speed-slider" id="speedSlider" min="1" max="5" value="2" aria-label="ความเร็วการเลื่อนหน้า">
+            <span class="speed-label" id="speedLabel" aria-live="polite">ปกติ</span>
+        </div>
+    </aside>
 
     <!-- Main Content -->
     <main class="main-content" id="main-content">
@@ -2473,18 +2893,20 @@
             <div class="chant-body">
                 <div class="pali-container">
                     <div class="pali-label">~ บทบูชาพระรัตนตรัย ~</div>
-                    <div class="pali-text">
-                        อิมินา สักกาเรนะ<br>
-                        ตัง พุทธัง อะภิปูชะยามิ<br><br>
-                        อิมินา สักกาเรนะ<br>
-                        ตัง ธัมมัง อะภิปูชะยามิ<br><br>
-                        อิมินา สักกาเรนะ<br>
-                        ตัง สังฆัง อะภิปูชะยามิ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">อิมินา สักกาเรนะ</p>
+                        <p class="c-line">ตัง พุทธัง อะภิปูชะยามิ</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">อิมินา สักกาเรนะ</p>
+                        <p class="c-line">ตัง ธัมมัง อะภิปูชะยามิ</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">อิมินา สักกาเรนะ</p>
+                        <p class="c-line">ตัง สังฆัง อะภิปูชะยามิ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         ข้าพเจ้าขอบูชาพระพุทธเจ้าพระองค์นั้น ด้วยเครื่องสักการะนี้<br>
                         ข้าพเจ้าขอบูชาพระธรรมนั้น ด้วยเครื่องสักการะนี้<br>
@@ -2494,23 +2916,23 @@
 
                 <div class="pali-container" style="margin-top: 1.5rem;">
                     <div class="pali-label">~ บทนมัสการพระรัตนตรัย ~</div>
-                    <div class="pali-text">
-                        อะระหัง สัมมาสัมพุทโธ ภะคะวา<br>
-                        พุทธัง ภะคะวันตัง อะภิวาเทมิ<br>
-                        <span style="font-size: 0.85rem; color: var(--text-soft);">(กราบ)</span><br><br>
-                        
-                        สวากขาโต ภะคะวะตา ธัมโม<br>
-                        ธัมมัง นะมัสสามิ<br>
-                        <span style="font-size: 0.85rem; color: var(--text-soft);">(กราบ)</span><br><br>
-                        
-                        สุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ<br>
-                        สังฆัง นะมามิ<br>
-                        <span style="font-size: 0.85rem; color: var(--text-soft);">(กราบ)</span>
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">อะระหัง สัมมาสัมพุทโธ ภะคะวา</p>
+                        <p class="c-line">พุทธัง ภะคะวันตัง อะภิวาเทมิ</p>
+                        <p class="c-line c-line--cue" data-cue>(กราบ)</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">สวากขาโต ภะคะวะตา ธัมโม</p>
+                        <p class="c-line">ธัมมัง นะมัสสามิ</p>
+                        <p class="c-line c-line--cue" data-cue>(กราบ)</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">สุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ</p>
+                        <p class="c-line">สังฆัง นะมามิ</p>
+                        <p class="c-line c-line--cue" data-cue>(กราบ)</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         พระผู้มีพระภาคเจ้า เป็นพระอรหันต์ ตรัสรู้ชอบได้โดยพระองค์เอง<br>
                         ข้าพเจ้าขอกราบไหว้พระผู้มีพระภาคเจ้า ผู้รู้ ผู้ตื่น ผู้เบิกบาน (กราบ)<br><br>
@@ -2524,7 +2946,7 @@
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>จิตใจน้อมนำสู่ความสงบ ดุจป่าหิมพานต์</li>
                         <li>เป็นการแสดงความเคารพสูงสุดต่อพระรัตนตรัย</li>
@@ -2559,28 +2981,30 @@
             <div class="chant-body">
                 <div class="pali-container">
                     <div class="pali-label">~ สวด ๓ จบ ~</div>
-                    <div class="pali-text">
-                        นะโม ตัสสะ ภะคะวะโต<br>
-                        อะระหะโต<br>
-                        สัมมาสัมพุทธัสสะ<br><br>
-                        นะโม ตัสสะ ภะคะวะโต<br>
-                        อะระหะโต<br>
-                        สัมมาสัมพุทธัสสะ<br><br>
-                        นะโม ตัสสะ ภะคะวะโต<br>
-                        อะระหะโต<br>
-                        สัมมาสัมพุทธัสสะ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">นะโม ตัสสะ ภะคะวะโต</p>
+                        <p class="c-line">อะระหะโต</p>
+                        <p class="c-line">สัมมาสัมพุทธัสสะ</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">นะโม ตัสสะ ภะคะวะโต</p>
+                        <p class="c-line">อะระหะโต</p>
+                        <p class="c-line">สัมมาสัมพุทธัสสะ</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">นะโม ตัสสะ ภะคะวะโต</p>
+                        <p class="c-line">อะระหะโต</p>
+                        <p class="c-line">สัมมาสัมพุทธัสสะ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         ขอนอบน้อมแด่พระผู้มีพระภาคเจ้าพระองค์นั้น ซึ่งเป็นผู้ไกลจากกิเลส ตรัสรู้ชอบได้โดยพระองค์เอง (กล่าว ๓ จบ)
                     </p>
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>ระลึกถึงพระคุณของพระพุทธเจ้า</li>
                         <li>จิตใจน้อมไปในทางกุศล</li>
@@ -2614,18 +3038,18 @@
             <div class="chant-body">
                 <div class="pali-container">
                     <div class="pali-label">~ แผ่เมตตาให้ตนเอง ~</div>
-                    <div class="pali-text">
-                        อะหัง สุขิโต โหมิ<br>
-                        นิททุกโข โหมิ<br>
-                        อะเวโร โหมิ<br>
-                        อัพยาปัชโฌ โหมิ<br>
-                        อะนีโฆ โหมิ<br>
-                        สุขี อัตตานัง ปะริหะรามิ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">อะหัง สุขิโต โหมิ</p>
+                        <p class="c-line">นิททุกโข โหมิ</p>
+                        <p class="c-line">อะเวโร โหมิ</p>
+                        <p class="c-line">อัพยาปัชโฌ โหมิ</p>
+                        <p class="c-line">อะนีโฆ โหมิ</p>
+                        <p class="c-line">สุขี อัตตานัง ปะริหะรามิ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         ขอให้ข้าพเจ้าจงมีความสุข ปราศจากทุกข์ ปราศจากเวร ปราศจากความเบียดเบียน ปราศจากความทุกข์กายทุกข์ใจ ขอให้ข้าพเจ้าจงมีความสุขรักษาตนเถิด
                     </p>
@@ -2633,19 +3057,19 @@
                 
                 <div class="pali-container" style="margin-top: 1.5rem;">
                     <div class="pali-label">~ แผ่เมตตาให้สรรพสัตว์ ~</div>
-                    <div class="pali-text">
-                        สัพเพ สัตตา<br>
-                        สุขิตา โหนตุ<br>
-                        นิททุกขา โหนตุ<br>
-                        อะเวรา โหนตุ<br>
-                        อัพยาปัชฌา โหนตุ<br>
-                        อะนีฆา โหนตุ<br>
-                        สุขี อัตตานัง ปะริหะรันตุ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">สัพเพ สัตตา</p>
+                        <p class="c-line">สุขิตา โหนตุ</p>
+                        <p class="c-line">นิททุกขา โหนตุ</p>
+                        <p class="c-line">อะเวรา โหนตุ</p>
+                        <p class="c-line">อัพยาปัชฌา โหนตุ</p>
+                        <p class="c-line">อะนีฆา โหนตุ</p>
+                        <p class="c-line">สุขี อัตตานัง ปะริหะรันตุ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         ขอสัตว์ทั้งหลายทั้งปวง จงมีความสุข ปราศจากทุกข์ ปราศจากเวร ปราศจากการเบียดเบียน ปราศจากความทุกข์กายทุกข์ใจ ขอจงมีความสุขรักษาตนเถิด
                     </p>
@@ -2690,19 +3114,19 @@
                 <!-- พุทธคุณ -->
                 <div class="pali-container">
                     <div class="pali-label">~ พุทธคุณ ~</div>
-                    <div class="pali-text">
-                        อิติปิโส ภะคะวา<br>
-                        อะระหัง สัมมาสัมพุทโธ<br>
-                        วิชชาจะระณะสัมปันโน<br>
-                        สุคะโต โลกะวิทู<br>
-                        อะนุตตะโร ปุริสะทัมมะสาระถิ<br>
-                        สัตถา เทวะมะนุสสานัง<br>
-                        พุทโธ ภะคะวาติ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">อิติปิโส ภะคะวา</p>
+                        <p class="c-line">อะระหัง สัมมาสัมพุทโธ</p>
+                        <p class="c-line">วิชชาจะระณะสัมปันโน</p>
+                        <p class="c-line">สุคะโต โลกะวิทู</p>
+                        <p class="c-line">อะนุตตะโร ปุริสะทัมมะสาระถิ</p>
+                        <p class="c-line">สัตถา เทวะมะนุสสานัง</p>
+                        <p class="c-line">พุทโธ ภะคะวาติ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         พระผู้มีพระภาคเจ้านั้น เป็นผู้ไกลจากกิเลส ตรัสรู้ชอบได้โดยพระองค์เอง ทรงถึงพร้อมด้วยวิชชาและจรณะ เสด็จไปดีแล้ว ทรงรู้แจ้งโลก เป็นนายสารถีฝึกบุรุษที่ควรฝึกไม่มีผู้อื่นยิ่งกว่า เป็นครูของเทวดาและมนุษย์ทั้งหลาย เป็นผู้รู้ ผู้ตื่น ผู้เบิกบาน
                     </p>
@@ -2711,16 +3135,16 @@
                 <!-- ธรรมคุณ -->
                 <div class="pali-container" style="margin-top: 1.5rem;">
                     <div class="pali-label">~ ธรรมคุณ ~</div>
-                    <div class="pali-text">
-                        สวากขาโต ภะคะวะตา ธัมโม<br>
-                        สันทิฏฐิโก อะกาลิโก<br>
-                        เอหิปัสสิโก โอปะนะยิโก<br>
-                        ปัจจัตตัง เวทิตัพโพ วิญญูหีติ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">สวากขาโต ภะคะวะตา ธัมโม</p>
+                        <p class="c-line">สันทิฏฐิโก อะกาลิโก</p>
+                        <p class="c-line">เอหิปัสสิโก โอปะนะยิโก</p>
+                        <p class="c-line">ปัจจัตตัง เวทิตัพโพ วิญญูหีติ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         พระธรรมเป็นธรรมที่พระผู้มีพระภาคเจ้าตรัสไว้ดีแล้ว เป็นสิ่งที่ผู้ศึกษาและปฏิบัติพึงเห็นได้ด้วยตนเอง เป็นสิ่งที่ปฏิบัติได้และให้ผลได้ไม่จำกัดกาล เป็นสิ่งที่ควรกล่าวกับผู้อื่นว่า "ท่านจงมาดูเถิด" เป็นสิ่งที่ควรน้อมเข้ามาใส่ตัว เป็นสิ่งที่ผู้รู้ก็รู้ได้เฉพาะตน
                     </p>
@@ -2729,29 +3153,31 @@
                 <!-- สังฆคุณ -->
                 <div class="pali-container" style="margin-top: 1.5rem;">
                     <div class="pali-label">~ สังฆคุณ ~</div>
-                    <div class="pali-text">
-                        สุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ<br>
-                        อุชุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ<br>
-                        ญายะปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ<br>
-                        สามีจิปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ<br><br>
-                        ยะทิทัง จัตตาริ ปุริสะยุคานิ<br>
-                        อัฏฐะ ปุริสะปุคคะลา<br>
-                        เอสะ ภะคะวะโต สาวะกะสังโฆ<br><br>
-                        อาหุเนยโย ปาหุเนยโย<br>
-                        ทักขิเณยโย อัญชะลีกะระณีโย<br>
-                        อะนุตตะรัง ปุญญักเขตตัง โลกัสสาติ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">สุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ</p>
+                        <p class="c-line">อุชุปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ</p>
+                        <p class="c-line">ญายะปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ</p>
+                        <p class="c-line">สามีจิปะฏิปันโน ภะคะวะโต สาวะกะสังโฆ</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">ยะทิทัง จัตตาริ ปุริสะยุคานิ</p>
+                        <p class="c-line">อัฏฐะ ปุริสะปุคคะลา</p>
+                        <p class="c-line">เอสะ ภะคะวะโต สาวะกะสังโฆ</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">อาหุเนยโย ปาหุเนยโย</p>
+                        <p class="c-line">ทักขิเณยโย อัญชะลีกะระณีโย</p>
+                        <p class="c-line">อะนุตตะรัง ปุญญักเขตตัง โลกัสสาติ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         พระสงฆ์สาวกของพระผู้มีพระภาคเจ้า ปฏิบัติดีแล้ว ปฏิบัติตรงแล้ว ปฏิบัติเพื่อรู้ธรรมเป็นเครื่องออกจากทุกข์แล้ว ปฏิบัติสมควรแล้ว ได้แก่บุคคลเหล่านี้คือ คู่แห่งบุรุษ ๔ คู่ นับเรียงตัวบุรุษได้ ๘ บุรุษ นั่นแหละพระสงฆ์สาวกของพระผู้มีพระภาคเจ้า เป็นผู้ควรแก่สักการะที่เขานำมาบูชา เป็นผู้ควรแก่สักการะที่เขาจัดไว้ต้อนรับ เป็นผู้ควรรับทักษิณาทาน เป็นผู้ที่บุคคลทั่วไปควรทำอัญชลี เป็นนาบุญของโลกไม่มีนาบุญอื่นยิ่งกว่า
                     </p>
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>เป็นผู้ไม่หวาดกลัว ไม่สะดุ้ง</li>
                         <li>มีสติระลึกถึงพระรัตนตรัย</li>
@@ -2788,92 +3214,92 @@
                     
                     <div class="verse-group">
                         <div class="verse-number">บทที่ ๑ - ชนะพญามาร</div>
-                        <div class="verse-text">
-                            พาหุง สะหัสสะมะภินิมมิตะสาวุธันตัง<br>
-                            ครีเมขะลัง อุทิตะโฆระสะเสนะมารัง<br>
-                            ทานาทิธัมมะวิธินา ชิตะวา มุนินโท<br>
-                            ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">พาหุง สะหัสสะมะภินิมมิตะสาวุธันตัง</p>
+                        <p class="c-line">ครีเมขะลัง อุทิตะโฆระสะเสนะมารัง</p>
+                        <p class="c-line">ทานาทิธัมมะวิธินา ชิตะวา มุนินโท</p>
+                        <p class="c-line">ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">บทที่ ๒ - ชนะอาฬวกยักษ์</div>
-                        <div class="verse-text">
-                            มาราติเรกะมะภิยุชฌิตะสัพพะรัตติง<br>
-                            โฆรัมปะนาฬะวะกะมักขะมะถัทธะยักขัง<br>
-                            ขันตีสุทันตะวิธินา ชิตะวา มุนินโท<br>
-                            ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">มาราติเรกะมะภิยุชฌิตะสัพพะรัตติง</p>
+                        <p class="c-line">โฆรัมปะนาฬะวะกะมักขะมะถัทธะยักขัง</p>
+                        <p class="c-line">ขันตีสุทันตะวิธินา ชิตะวา มุนินโท</p>
+                        <p class="c-line">ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">บทที่ ๓ - ชนะช้างนาฬาคิรี</div>
-                        <div class="verse-text">
-                            นาฬาคิริง คะชะวะรัง อะติมัตตะภูตัง<br>
-                            ทาวัคคิจักกะมะสะนีวะ สุทารุณันตัง<br>
-                            เมตตัมพุเสกะวิธินา ชิตะวา มุนินโท<br>
-                            ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">นาฬาคิริง คะชะวะรัง อะติมัตตะภูตัง</p>
+                        <p class="c-line">ทาวัคคิจักกะมะสะนีวะ สุทารุณันตัง</p>
+                        <p class="c-line">เมตตัมพุเสกะวิธินา ชิตะวา มุนินโท</p>
+                        <p class="c-line">ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">บทที่ ๔ - ชนะองคุลิมาล</div>
-                        <div class="verse-text">
-                            อุกขิตตะขัคคะมะติหัตถะสุทารุณันตัง<br>
-                            ธาวันติโยชะนะปะถังคุลิมาละวันตัง<br>
-                            อิทธีภิสังขะตะมะโน ชิตะวา มุนินโท<br>
-                            ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">อุกขิตตะขัคคะมะติหัตถะสุทารุณันตัง</p>
+                        <p class="c-line">ธาวันติโยชะนะปะถังคุลิมาละวันตัง</p>
+                        <p class="c-line">อิทธีภิสังขะตะมะโน ชิตะวา มุนินโท</p>
+                        <p class="c-line">ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">บทที่ ๕ - ชนะนางจิญจมาณวิกา</div>
-                        <div class="verse-text">
-                            กัตวานะ กัฏฐะมุทะรัง อิวะ คัพภินียา<br>
-                            จิญจายะ ทุฏฐะวะจะนัง ชะนะกายะมัชเฌ<br>
-                            สันเตนะ โสมะวิธินา ชิตะวา มุนินโท<br>
-                            ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">กัตวานะ กัฏฐะมุทะรัง อิวะ คัพภินียา</p>
+                        <p class="c-line">จิญจายะ ทุฏฐะวะจะนัง ชะนะกายะมัชเฌ</p>
+                        <p class="c-line">สันเตนะ โสมะวิธินา ชิตะวา มุนินโท</p>
+                        <p class="c-line">ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">บทที่ ๖ - ชนะสัจจกนิครนถ์</div>
-                        <div class="verse-text">
-                            สัจจัง วิหายะ มะติสัจจะกะวาทะเกตุง<br>
-                            วาทาภิโรปิตะมะนัง อะติอันธะภูตัง<br>
-                            ปัญญาปะทีปะชะลิโต ชิตะวา มุนินโท<br>
-                            ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">สัจจัง วิหายะ มะติสัจจะกะวาทะเกตุง</p>
+                        <p class="c-line">วาทาภิโรปิตะมะนัง อะติอันธะภูตัง</p>
+                        <p class="c-line">ปัญญาปะทีปะชะลิโต ชิตะวา มุนินโท</p>
+                        <p class="c-line">ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">บทที่ ๗ - ชนะพญานันโทปนันทนาคราช</div>
-                        <div class="verse-text">
-                            นันโทปะนันทะภุชะคัง วิพุธัง มะหิทธิง<br>
-                            ปุตเตนะ เถระภุชะเคนะ ทะมาปะยันโต<br>
-                            อิทธูปะเทสะวิธินา ชิตะวา มุนินโท<br>
-                            ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">นันโทปะนันทะภุชะคัง วิพุธัง มะหิทธิง</p>
+                        <p class="c-line">ปุตเตนะ เถระภุชะเคนะ ทะมาปะยันโต</p>
+                        <p class="c-line">อิทธูปะเทสะวิธินา ชิตะวา มุนินโท</p>
+                        <p class="c-line">ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">บทที่ ๘ - ชนะพกาพรหม</div>
-                        <div class="verse-text">
-                            ทุคคาหะทิฏฐิภุชะเคนะ สุทัฏฐะหัตถัง<br>
-                            พรัหมัง วิสุทธิชุติมิทธิพะกาภิธานัง<br>
-                            ญาณาคะเทนะ วิธินา ชิตะวา มุนินโท<br>
-                            ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ทุคคาหะทิฏฐิภุชะเคนะ สุทัฏฐะหัตถัง</p>
+                        <p class="c-line">พรัหมัง วิสุทธิชุติมิทธิพะกาภิธานัง</p>
+                        <p class="c-line">ญาณาคะเทนะ วิธินา ชิตะวา มุนินโท</p>
+                        <p class="c-line">ตันเตชะสา ภะวะตุ เต ชะยะมังคะลานิ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• บทสรุป (เอตาปิ) •</div>
-                        <div class="verse-text">
-                            เอตาปิ พุทธะชะยะมังคะละอัฏฐะคาถา<br>
-                            โย วาจะโน ทินะทิเน สะระเต มะตันที<br>
-                            หิตวานะเนกะวิวิธานิ จุปัททะวานิ<br>
-                            โมกขัง สุขัง อะธิคะเมยยะ นะโร สะปัญโญ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">เอตาปิ พุทธะชะยะมังคะละอัฏฐะคาถา</p>
+                        <p class="c-line">โย วาจะโน ทินะทิเน สะระเต มะตันที</p>
+                        <p class="c-line">หิตวานะเนกะวิวิธานิ จุปัททะวานิ</p>
+                        <p class="c-line">โมกขัง สุขัง อะธิคะเมยยะ นะโร สะปัญโญ</p>
+                    </div>
                     </div>
                 </div>
                 
@@ -2885,7 +3311,7 @@
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>มีชัยชนะเหนืออุปสรรคทั้งปวง</li>
                         <li>แคล้วคลาดจากภัยอันตราย</li>
@@ -2919,18 +3345,18 @@
             <div class="chant-body">
                 <div class="pali-container">
                     <div class="pali-label">~ บทมหากรุณิโก ~</div>
-                    <div class="pali-text">
-                        มะหากะรุณิโก นาโถ<br>
-                        หิตายะ สัพพะปาณินัง<br>
-                        ปูเรตวา ปาระมี สัพพา<br>
-                        ปัตโต สัมโพธิมุตตะมัง<br>
-                        เอเตนะ สัจจะวัชเชนะ<br>
-                        โหตุ เต ชะยะมังคะลัง
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">มะหากะรุณิโก นาโถ</p>
+                        <p class="c-line">หิตายะ สัพพะปาณินัง</p>
+                        <p class="c-line">ปูเรตวา ปาระมี สัพพา</p>
+                        <p class="c-line">ปัตโต สัมโพธิมุตตะมัง</p>
+                        <p class="c-line">เอเตนะ สัจจะวัชเชนะ</p>
+                        <p class="c-line">โหตุ เต ชะยะมังคะลัง</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         พระพุทธเจ้าผู้ทรงเป็นที่พึ่ง มีพระมหากรุณาธิคุณ เพื่อประโยชน์เกื้อกูลแก่สรรพสัตว์ทั้งหลาย ทรงบำเพ็ญพระบารมีทั้งปวงครบถ้วนแล้ว ได้บรรลุพระสัมโพธิญาณอันสูงสุด ด้วยการกล่าวคำสัตย์นี้ ขอชัยมงคลจงมีแก่ท่าน
                     </p>
@@ -2938,20 +3364,20 @@
                 
                 <div class="pali-container" style="margin-top: 1.5rem;">
                     <div class="pali-label">~ บทชยันโต ~</div>
-                    <div class="pali-text">
-                        ชะยันโต โพธิยา มูเล<br>
-                        สักยานัง นันทิวัฑฒะโน<br>
-                        เอวัง ตวัง วิชะโย โหหิ<br>
-                        ชะยัสสุ ชะยะมังคะเล<br>
-                        อะปะราชิตะปัลลังเก<br>
-                        สีเส ปะฐะวิโปกขะเร<br>
-                        อะภิเสเก สัพพะพุทธานัง<br>
-                        อัคคัปปัตโต ปะโมทะติ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">ชะยันโต โพธิยา มูเล</p>
+                        <p class="c-line">สักยานัง นันทิวัฑฒะโน</p>
+                        <p class="c-line">เอวัง ตวัง วิชะโย โหหิ</p>
+                        <p class="c-line">ชะยัสสุ ชะยะมังคะเล</p>
+                        <p class="c-line">อะปะราชิตะปัลลังเก</p>
+                        <p class="c-line">สีเส ปะฐะวิโปกขะเร</p>
+                        <p class="c-line">อะภิเสเก สัพพะพุทธานัง</p>
+                        <p class="c-line">อัคคัปปัตโต ปะโมทะติ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         พระพุทธเจ้าผู้มีชัยชนะ ณ ควงไม้โพธิ์ ทรงเป็นผู้เพิ่มพูนความยินดีแก่เหล่าศากยวงศ์ ขอท่านจงมีชัยชนะเช่นเดียวกัน ขอท่านจงชนะในชัยมงคลทั้งหลาย พระพุทธเจ้าประทับบนบัลลังก์ที่ไม่มีใครชนะได้ อันเป็นยอดแห่งปฐพี ทรงบรรลุถึงความเป็นสูงสุดในการอภิเษกของพระพุทธเจ้าทั้งปวง ทรงบันเทิงพระหฤทัย
                     </p>
@@ -2959,29 +3385,29 @@
                 
                 <div class="pali-container" style="margin-top: 1.5rem;">
                     <div class="pali-label">~ บทท้าย ~</div>
-                    <div class="pali-text">
-                        สุนักขัตตัง สุมังคะลัง<br>
-                        สุปะภาตัง สุหุฏฐิตัง<br>
-                        สุขะโณ สุมุหุตโต จะ<br>
-                        สุยิฏฐัง พรัหมะจาริสุ<br>
-                        ปะทักขิณัง กายะกัมมัง<br>
-                        วาจากัมมัง ปะทักขิณัง<br>
-                        ปะทักขิณัง มะโนกัมมัง<br>
-                        ปะณิธี เต ปะทักขิณา<br>
-                        ปะทักขิณานิ กัตวานะ<br>
-                        ละภันตัตเถ ปะทักขิเณ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">สุนักขัตตัง สุมังคะลัง</p>
+                        <p class="c-line">สุปะภาตัง สุหุฏฐิตัง</p>
+                        <p class="c-line">สุขะโณ สุมุหุตโต จะ</p>
+                        <p class="c-line">สุยิฏฐัง พรัหมะจาริสุ</p>
+                        <p class="c-line">ปะทักขิณัง กายะกัมมัง</p>
+                        <p class="c-line">วาจากัมมัง ปะทักขิณัง</p>
+                        <p class="c-line">ปะทักขิณัง มะโนกัมมัง</p>
+                        <p class="c-line">ปะณิธี เต ปะทักขิณา</p>
+                        <p class="c-line">ปะทักขิณานิ กัตวานะ</p>
+                        <p class="c-line">ละภันตัตเถ ปะทักขิเณ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         ฤกษ์ดี มงคลดี รุ่งอรุณดี ความเพียรดี ขณะดี ครู่ดี การบูชาดีในพรหมจารีบุคคลทั้งหลาย กายกรรมเป็นประทักษิณ วจีกรรมเป็นประทักษิณ มโนกรรมเป็นประทักษิณ ความปรารถนาของท่านเป็นประทักษิณ กระทำกรรมอันเป็นประทักษิณแล้ว ย่อมได้รับประโยชน์อันเป็นประทักษิณ
                     </p>
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>ได้รับพรจากพระมหากรุณาธิคุณ</li>
                         <li>มีชัยชนะในทุกๆ ด้านของชีวิต</li>
@@ -3015,26 +3441,26 @@
             <div class="chant-body">
                 <div class="pali-container">
                     <div class="pali-label">~ บทอำนวยพรมงคล ~</div>
-                    <div class="pali-text">
-                        ภะวะตุ สัพพะมังคะลัง<br>
-                        รักขันตุ สัพพะเทวะตา<br>
-                        สัพพะพุทธานุภาเวนะ<br>
-                        สะทา โสตถี ภะวันตุ เต<br><br>
-                        
-                        ภะวะตุ สัพพะมังคะลัง<br>
-                        รักขันตุ สัพพะเทวะตา<br>
-                        สัพพะธัมมานุภาเวนะ<br>
-                        สะทา โสตถี ภะวันตุ เต<br><br>
-                        
-                        ภะวะตุ สัพพะมังคะลัง<br>
-                        รักขันตุ สัพพะเทวะตา<br>
-                        สัพพะสังฆานุภาเวนะ<br>
-                        สะทา โสตถี ภะวันตุ เต
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">ภะวะตุ สัพพะมังคะลัง</p>
+                        <p class="c-line">รักขันตุ สัพพะเทวะตา</p>
+                        <p class="c-line">สัพพะพุทธานุภาเวนะ</p>
+                        <p class="c-line">สะทา โสตถี ภะวันตุ เต</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">ภะวะตุ สัพพะมังคะลัง</p>
+                        <p class="c-line">รักขันตุ สัพพะเทวะตา</p>
+                        <p class="c-line">สัพพะธัมมานุภาเวนะ</p>
+                        <p class="c-line">สะทา โสตถี ภะวันตุ เต</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">ภะวะตุ สัพพะมังคะลัง</p>
+                        <p class="c-line">รักขันตุ สัพพะเทวะตา</p>
+                        <p class="c-line">สัพพะสังฆานุภาเวนะ</p>
+                        <p class="c-line">สะทา โสตถี ภะวันตุ เต</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         ขอสรรพมงคลจงมีแก่ท่าน ขอเหล่าเทวดาทั้งปวงจงรักษาท่าน ด้วยอานุภาพแห่งพระพุทธเจ้าทั้งปวง ขอความสวัสดีจงมีแก่ท่านทุกเมื่อ<br><br>
                         ขอสรรพมงคลจงมีแก่ท่าน ขอเหล่าเทวดาทั้งปวงจงรักษาท่าน ด้วยอานุภาพแห่งพระธรรมทั้งปวง ขอความสวัสดีจงมีแก่ท่านทุกเมื่อ<br><br>
@@ -3043,7 +3469,7 @@
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>ได้รับมงคลจากพระรัตนตรัย</li>
                         <li>เทวดาคุ้มครองรักษา</li>
@@ -3078,166 +3504,166 @@
                 <div class="pali-container">
                     <div class="verse-group">
                         <div class="verse-number">• บทนำ •</div>
-                        <div class="verse-text">
-                            ปุตตะกาโม ละเภ ปุตตัง<br>
-                            ธะนะกาโม ละเภ ธะนัง<br>
-                            อัตถิ กาเย กายะญายะ<br>
-                            เทวานัง ปิยะตัง สุตวา
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ปุตตะกาโม ละเภ ปุตตัง</p>
+                        <p class="c-line">ธะนะกาโม ละเภ ธะนัง</p>
+                        <p class="c-line">อัตถิ กาเย กายะญายะ</p>
+                        <p class="c-line">เทวานัง ปิยะตัง สุตวา</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๑ •</div>
-                        <div class="verse-text">
-                            ชะยาสะนาคะตา พุทธา<br>
-                            เชตวา มารัง สะวาหะนัง<br>
-                            จะตุสัจจาสะภัง ระสัง<br>
-                            เย ปิวิงสุ นะราสะภา
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ชะยาสะนาคะตา พุทธา</p>
+                        <p class="c-line">เชตวา มารัง สะวาหะนัง</p>
+                        <p class="c-line">จะตุสัจจาสะภัง ระสัง</p>
+                        <p class="c-line">เย ปิวิงสุ นะราสะภา</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๒ •</div>
-                        <div class="verse-text">
-                            ตัณหังกะราทะโย พุทธา<br>
-                            อัฏฐะวีสะติ นายะกา<br>
-                            สัพเพ ปะติฏฐิตา มัยหัง<br>
-                            มัตถะเก เต มุนิสสะรา
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ตัณหังกะราทะโย พุทธา</p>
+                        <p class="c-line">อัฏฐะวีสะติ นายะกา</p>
+                        <p class="c-line">สัพเพ ปะติฏฐิตา มัยหัง</p>
+                        <p class="c-line">มัตถะเก เต มุนิสสะรา</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๓ •</div>
-                        <div class="verse-text">
-                            สีเส ปะติฏฐิโต มัยหัง<br>
-                            พุทโธ ธัมโม ทะวิโลจะเน<br>
-                            สังโฆ ปะติฏฐิโต มัยหัง<br>
-                            อุเร สัพพะคุณากะโร
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">สีเส ปะติฏฐิโต มัยหัง</p>
+                        <p class="c-line">พุทโธ ธัมโม ทะวิโลจะเน</p>
+                        <p class="c-line">สังโฆ ปะติฏฐิโต มัยหัง</p>
+                        <p class="c-line">อุเร สัพพะคุณากะโร</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๔ •</div>
-                        <div class="verse-text">
-                            หะทะเย เม อะนุรุทโธ<br>
-                            สารีปุตโต จะ ทักขิเณ<br>
-                            โกณฑัญโญ ปิฏฐิภาคัสมิง<br>
-                            โมคคัลลาโน จะ วามะเก
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">หะทะเย เม อะนุรุทโธ</p>
+                        <p class="c-line">สารีปุตโต จะ ทักขิเณ</p>
+                        <p class="c-line">โกณฑัญโญ ปิฏฐิภาคัสมิง</p>
+                        <p class="c-line">โมคคัลลาโน จะ วามะเก</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๕ •</div>
-                        <div class="verse-text">
-                            ทักขิเณ สะวะเน มัยหัง<br>
-                            อาสุง อานันทะ ราหุโล<br>
-                            กัสสะโป จะ มะหานาโม<br>
-                            อุภาสุง วามะโสตะเก
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ทักขิเณ สะวะเน มัยหัง</p>
+                        <p class="c-line">อาสุง อานันทะ ราหุโล</p>
+                        <p class="c-line">กัสสะโป จะ มะหานาโม</p>
+                        <p class="c-line">อุภาสุง วามะโสตะเก</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๖ •</div>
-                        <div class="verse-text">
-                            เกสันเต ปิฏฐิภาคัสมิง<br>
-                            สุริโย วะ ปะภังกะโร<br>
-                            นิสินโน สิริสัมปันโน<br>
-                            โสภิโต มุนิปุงคะโว
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">เกสันเต ปิฏฐิภาคัสมิง</p>
+                        <p class="c-line">สุริโย วะ ปะภังกะโร</p>
+                        <p class="c-line">นิสินโน สิริสัมปันโน</p>
+                        <p class="c-line">โสภิโต มุนิปุงคะโว</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๗ •</div>
-                        <div class="verse-text">
-                            กุมาระกัสสะโป เถโร<br>
-                            มะเหสี จิตตะวาทะโก<br>
-                            โส มัยหัง วะทะเน นิจจัง<br>
-                            ปะติฏฐาสิ คุณากะโร
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">กุมาระกัสสะโป เถโร</p>
+                        <p class="c-line">มะเหสี จิตตะวาทะโก</p>
+                        <p class="c-line">โส มัยหัง วะทะเน นิจจัง</p>
+                        <p class="c-line">ปะติฏฐาสิ คุณากะโร</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๘ •</div>
-                        <div class="verse-text">
-                            ปุณโณ อังคุลิมาโล จะ<br>
-                            อุปาลี นันทะ สีวะลี<br>
-                            เถรา ปัญจะ อิเม ชาตา<br>
-                            นะลาเฏ ติละกา มะมะ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ปุณโณ อังคุลิมาโล จะ</p>
+                        <p class="c-line">อุปาลี นันทะ สีวะลี</p>
+                        <p class="c-line">เถรา ปัญจะ อิเม ชาตา</p>
+                        <p class="c-line">นะลาเฏ ติละกา มะมะ</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๙ •</div>
-                        <div class="verse-text">
-                            เสสาสีติ มะหาเถรา<br>
-                            วิชิตา ชินะสาวะกา<br>
-                            เอเตสีติ มะหาเถรา<br>
-                            ชิตะวันโต ชิโนระสา<br>
-                            ชะลันตา สีละเตเชนะ<br>
-                            อังคะมังเคสุ สัณฐิตา
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">เสสาสีติ มะหาเถรา</p>
+                        <p class="c-line">วิชิตา ชินะสาวะกา</p>
+                        <p class="c-line">เอเตสีติ มะหาเถรา</p>
+                        <p class="c-line">ชิตะวันโต ชิโนระสา</p>
+                        <p class="c-line">ชะลันตา สีละเตเชนะ</p>
+                        <p class="c-line">อังคะมังเคสุ สัณฐิตา</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๑๐ •</div>
-                        <div class="verse-text">
-                            ระตะนัง ปุระโต อาสิ<br>
-                            ทักขิเณ เมตตะสุตตะกัง<br>
-                            ธะชัคคัง ปัจฉะโต อาสิ<br>
-                            วาเม อังคุลิมาละกัง
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ระตะนัง ปุระโต อาสิ</p>
+                        <p class="c-line">ทักขิเณ เมตตะสุตตะกัง</p>
+                        <p class="c-line">ธะชัคคัง ปัจฉะโต อาสิ</p>
+                        <p class="c-line">วาเม อังคุลิมาละกัง</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๑๑ •</div>
-                        <div class="verse-text">
-                            ขันธะโมระปะริตตัญจะ<br>
-                            อาฏานาฏิยะสุตตะกัง<br>
-                            อากาเส ฉะทะนัง อาสิ<br>
-                            เสสา ปาการะสัณฐิตา
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ขันธะโมระปะริตตัญจะ</p>
+                        <p class="c-line">อาฏานาฏิยะสุตตะกัง</p>
+                        <p class="c-line">อากาเส ฉะทะนัง อาสิ</p>
+                        <p class="c-line">เสสา ปาการะสัณฐิตา</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๑๒ •</div>
-                        <div class="verse-text">
-                            ชินา นานาวะระสังยุตตา<br>
-                            สัตตัปปาการะลังกะตา<br>
-                            วาตะปิตตาทิสัญชาตา<br>
-                            พาหิรัชฌัตตุปัททะวา
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ชินา นานาวะระสังยุตตา</p>
+                        <p class="c-line">สัตตัปปาการะลังกะตา</p>
+                        <p class="c-line">วาตะปิตตาทิสัญชาตา</p>
+                        <p class="c-line">พาหิรัชฌัตตุปัททะวา</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๑๓ •</div>
-                        <div class="verse-text">
-                            อะเสสา วินะยัง ยันตุ<br>
-                            อะนันตะชินะเตชะสา<br>
-                            วะสะโต เม สะกิจเจนะ<br>
-                            สะทา สัมพุทธะปัญชะเร
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">อะเสสา วินะยัง ยันตุ</p>
+                        <p class="c-line">อะนันตะชินะเตชะสา</p>
+                        <p class="c-line">วะสะโต เม สะกิจเจนะ</p>
+                        <p class="c-line">สะทา สัมพุทธะปัญชะเร</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๑๔ •</div>
-                        <div class="verse-text">
-                            ชินะปัญชะระมัชฌัมหิ<br>
-                            วิหะรันตัง มะหีตะเล<br>
-                            สะทา ปาเลนตุ มัง สัพเพ<br>
-                            เต มะหาปุริสาสะภา
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">ชินะปัญชะระมัชฌัมหิ</p>
+                        <p class="c-line">วิหะรันตัง มะหีตะเล</p>
+                        <p class="c-line">สะทา ปาเลนตุ มัง สัพเพ</p>
+                        <p class="c-line">เต มะหาปุริสาสะภา</p>
+                    </div>
                     </div>
                     
                     <div class="verse-group">
                         <div class="verse-number">• คาถาที่ ๑๕ (บทสรุป) •</div>
-                        <div class="verse-text">
-                            อิจเจวะมันโต สุคุตโต สุรักโข<br>
-                            ชินานุภาเวนะ ชิตูปัททะโว<br>
-                            ธัมมานุภาเวนะ ชิตาริสังโฆ<br>
-                            สังฆานุภาเวนะ ชิตันตะราโย<br>
-                            สัทธัมมานุภาวะปาลิโต<br>
-                            จะรามิ ชินะปัญชะเรติ
-                        </div>
+                        <div class="verse-text c-lines" data-chant-lines>
+                        <p class="c-line">อิจเจวะมันโต สุคุตโต สุรักโข</p>
+                        <p class="c-line">ชินานุภาเวนะ ชิตูปัททะโว</p>
+                        <p class="c-line">ธัมมานุภาเวนะ ชิตาริสังโฆ</p>
+                        <p class="c-line">สังฆานุภาเวนะ ชิตันตะราโย</p>
+                        <p class="c-line">สัทธัมมานุภาวะปาลิโต</p>
+                        <p class="c-line">จะรามิ ชินะปัญชะเรติ</p>
+                    </div>
                     </div>
                 </div>
                 
@@ -3249,7 +3675,7 @@
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>ป้องกันภัยอันตรายทั้งปวง</li>
                         <li>แคล้วคลาดจากอุบัติเหตุ</li>
@@ -3285,26 +3711,29 @@
             <div class="chant-body">
                 <div class="pali-container">
                     <div class="pali-label">~ บทกรวดน้ำ ~</div>
-                    <div class="pali-text">
-                        อิมินา ปุญญะกัมเมนะ<br>
-                        อุปัชฌายา คุณุตตะรา<br>
-                        อาจะริยูปะการา จะ<br>
-                        มาตา ปิตา จะ ญาตะกา<br><br>
-                        สุริโย จันทิมา ราชา<br>
-                        คุณะวันตา นะราปิ จะ<br>
-                        พรัหมะมารา จะ อินทา จะ<br>
-                        โลกะปาลา จะ เทวะตา<br><br>
-                        ยะโม มิตตา มะนุสสา จะ<br>
-                        มัชฌัตตา เวริกาปิ จะ<br>
-                        สัพเพ สัตตา สุขี โหนตุ<br>
-                        ปุญญานิ ปะกะตานิ เม<br><br>
-                        สุขัง จะ ติวิธัง เทนตุ<br>
-                        ขิปปัง ปาเปถะ โว มะตัง
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">อิมินา ปุญญะกัมเมนะ</p>
+                        <p class="c-line">อุปัชฌายา คุณุตตะรา</p>
+                        <p class="c-line">อาจะริยูปะการา จะ</p>
+                        <p class="c-line">มาตา ปิตา จะ ญาตะกา</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">สุริโย จันทิมา ราชา</p>
+                        <p class="c-line">คุณะวันตา นะราปิ จะ</p>
+                        <p class="c-line">พรัหมะมารา จะ อินทา จะ</p>
+                        <p class="c-line">โลกะปาลา จะ เทวะตา</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">ยะโม มิตตา มะนุสสา จะ</p>
+                        <p class="c-line">มัชฌัตตา เวริกาปิ จะ</p>
+                        <p class="c-line">สัพเพ สัตตา สุขี โหนตุ</p>
+                        <p class="c-line">ปุญญานิ ปะกะตานิ เม</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">สุขัง จะ ติวิธัง เทนตุ</p>
+                        <p class="c-line">ขิปปัง ปาเปถะ โว มะตัง</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         ด้วยผลบุญที่ข้าพเจ้าได้กระทำนี้ ขอให้พระอุปัชฌาย์ผู้มีพระคุณอันประเสริฐ อาจารย์ผู้มีอุปการคุณ บิดามารดาและญาติทั้งหลาย พระอาทิตย์ พระจันทร์ พระราชา ผู้มีคุณธรรม พรหม มาร อินทร์ ท้าวจตุโลกบาล เทวดาทั้งหลาย พญายม มิตรสหาย มนุษย์ทั้งหลาย ผู้เป็นกลาง และแม้ผู้เป็นศัตรู ขอสรรพสัตว์ทั้งหลายจงมีความสุข ขอบุญที่ข้าพเจ้าได้กระทำแล้ว จงให้ความสุขสามประการ (โลกียสุข โลกุตรสุข และนิพพานสุข) ขอท่านทั้งหลายจงบรรลุถึงพระนิพพานโดยเร็วเทอญ
                     </p>
@@ -3321,7 +3750,7 @@
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>ผู้ล่วงลับได้รับส่วนบุญ พ้นจากความทุกข์</li>
                         <li>เพิ่มพูนบุญกุศลของผู้กรวดน้ำ</li>
@@ -3532,33 +3961,33 @@
             <div class="chant-body">
                 <div class="pali-container">
                     <div class="pali-label">~ พระคาถายันทุนนิสังโส ~</div>
-                    <div class="pali-text">
-                        ยันทุนนิมิตตัง อะวะมังคะลัญจะ<br>
-                        โย จามะนาโป สะกุณัสสะ สัทโท<br>
-                        ปาปัคคะโห ทุสสุปินัง อะกันตัง<br>
-                        พุทธานุภาเวนะ วินาสะเมนตุ<br><br>
-                        
-                        ยันทุนนิมิตตัง อะวะมังคะลัญจะ<br>
-                        โย จามะนาโป สะกุณัสสะ สัทโท<br>
-                        ปาปัคคะโห ทุสสุปินัง อะกันตัง<br>
-                        ธัมมานุภาเวนะ วินาสะเมนตุ<br><br>
-                        
-                        ยันทุนนิมิตตัง อะวะมังคะลัญจะ<br>
-                        โย จามะนาโป สะกุณัสสะ สัทโท<br>
-                        ปาปัคคะโห ทุสสุปินัง อะกันตัง<br>
-                        สังฆานุภาเวนะ วินาสะเมนตุ
+                    <div class="pali-text c-lines" data-chant-lines>
+                        <p class="c-line">ยันทุนนิมิตตัง อะวะมังคะลัญจะ</p>
+                        <p class="c-line">โย จามะนาโป สะกุณัสสะ สัทโท</p>
+                        <p class="c-line">ปาปัคคะโห ทุสสุปินัง อะกันตัง</p>
+                        <p class="c-line">พุทธานุภาเวนะ วินาสะเมนตุ</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">ยันทุนนิมิตตัง อะวะมังคะลัญจะ</p>
+                        <p class="c-line">โย จามะนาโป สะกุณัสสะ สัทโท</p>
+                        <p class="c-line">ปาปัคคะโห ทุสสุปินัง อะกันตัง</p>
+                        <p class="c-line">ธัมมานุภาเวนะ วินาสะเมนตุ</p>
+                        <div class="c-break" aria-hidden="true"></div>
+                        <p class="c-line">ยันทุนนิมิตตัง อะวะมังคะลัญจะ</p>
+                        <p class="c-line">โย จามะนาโป สะกุณัสสะ สัทโท</p>
+                        <p class="c-line">ปาปัคคะโห ทุสสุปินัง อะกันตัง</p>
+                        <p class="c-line">สังฆานุภาเวนะ วินาสะเมนตุ</p>
                     </div>
                 </div>
                 
                 <div class="translation-section">
-                    <div class="translation-label">🌿 คำแปล</div>
+                    <div class="translation-label"><svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg> คำแปล</div>
                     <p class="translation-text">
                         ลางร้ายใดๆ ก็ดี อวมงคลใดๆ ก็ดี เสียงนกที่ไม่น่าชอบใจก็ดี การจับต้องสิ่งชั่วร้ายก็ดี ฝันร้ายที่ไม่น่าปรารถนาก็ดี ขอจงพินาศไปด้วยอานุภาพแห่งพระพุทธเจ้า พระธรรม และพระสงฆ์ เถิด
                     </p>
                 </div>
                 
                 <div class="benefits-section">
-                    <div class="benefits-title">🍃 อานิสงส์</div>
+                    <div class="benefits-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-sparkle"/></svg> อานิสงส์</div>
                     <ul class="benefits-list">
                         <li>ป้องกันภัยพิบัติ ลางร้าย และสิ่งอัปมงคล</li>
                         <li>แก้ฝันร้าย ขจัดอุปสรรค</li>
@@ -3582,7 +4011,7 @@
             <p class="credit-line">จัดทำโดย <strong>ศุภเกศ วงศ์คำภู</strong></p>
             <p class="credit-contact">มีเนื้อหาหรือสิ่งใดให้ปรับปรุง สามารถติดต่อได้ที่</p>
             <a href="mailto:supaket@enersys.co.th" class="credit-email">📧 supaket@enersys.co.th</a>
-            <p class="credit-version">Version 1.6.2-20260707</p>
+            <p class="credit-version">Version 1.7.0-20260904</p>
         </div>
     </footer>
 
@@ -3597,13 +4026,35 @@
 
     <!-- Swipe hint -->
 
-    <!-- TTS Controls -->
-    <div class="tts-controls" id="ttsControls">
-        <button class="tts-btn" id="ttsPrev" title="บทก่อนหน้า" aria-label="บทก่อนหน้า"><svg class="ui-icon" aria-hidden="true"><use href="#icon-prev"/></svg></button>
-        <button class="tts-btn active" id="ttsPlayPause" title="เล่น/หยุด" aria-label="เล่นหรือหยุด"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8V4z" fill="currentColor" stroke="none"/></svg></button>
-        <button class="tts-btn" id="ttsNext" title="บทถัดไป" aria-label="บทถัดไป"><svg class="ui-icon" aria-hidden="true"><use href="#icon-next"/></svg></button>
-        <button class="tts-btn" id="ttsStop" title="หยุด" aria-label="หยุด"><svg class="ui-icon" aria-hidden="true"><use href="#icon-stop"/></svg></button>
+    <!-- ===========================================
+         CHANT DOCK — แถบควบคุมการสวด (ล่างสุด)
+         =========================================== -->
+    <div class="chant-dock" id="chantDock">
+        <button class="dock-btn" id="dockPrev" type="button" aria-label="บทก่อนหน้า">
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-prev"/></svg>
+            <span class="dock-label">ก่อนหน้า</span>
+        </button>
+
+        <button class="dock-btn dock-btn--play" id="dockPlay" type="button"
+                aria-label="เริ่มไฮไลต์ตามจังหวะสวด" aria-pressed="false">
+            <svg class="ui-icon ui-icon--lg" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8V4z" fill="currentColor" stroke="none"/></svg>
+            <span class="dock-label">สวดตาม</span>
+        </button>
+
+        <button class="dock-btn" id="dockNext" type="button" aria-label="บทถัดไป">
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-next"/></svg>
+            <span class="dock-label">ถัดไป</span>
+        </button>
+
+        <button class="dock-btn dock-btn--beads" id="dockBeads" type="button"
+                aria-label="นับจบ แตะเมื่อสวดจบหนึ่งรอบ">
+            <span class="beads-ring" aria-hidden="true">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-beads"/></svg>
+            </span>
+            <span class="dock-label"><span id="beadsCount">๐</span>/<span id="beadsTarget">๓</span> จบ</span>
+        </button>
     </div>
+
 
     <!-- Timer Modal -->
     <div class="timer-modal" id="timerModal">
@@ -3631,26 +4082,6 @@
 
     <script>
         // ==========================================
-        // SETTINGS PANEL TOGGLE
-        // ==========================================
-        const settingsToggle = document.getElementById('settingsToggle');
-        const settingsPanel = document.getElementById('settingsPanel');
-        
-        function initSettingsPanel() {
-            const isCollapsed = localStorage.getItem('chantingSettingsCollapsed') === 'true';
-            if (isCollapsed) {
-                settingsToggle.classList.add('collapsed');
-                settingsPanel.classList.add('collapsed');
-            }
-        }
-        
-        settingsToggle.addEventListener('click', () => {
-            const isCollapsed = settingsPanel.classList.toggle('collapsed');
-            settingsToggle.classList.toggle('collapsed', isCollapsed);
-            localStorage.setItem('chantingSettingsCollapsed', isCollapsed);
-        });
-
-        // ==========================================
         // MAIN VARIABLES
         // ==========================================
         const body = document.body;
@@ -3659,66 +4090,122 @@
         const themeButtons = document.querySelectorAll('.theme-btn');
         const modeButtons = document.querySelectorAll('.mode-btn');
         const allSections = document.querySelectorAll('.chant-section');
-        
-        // ==========================================
-        // 1. DARK MODE
-        // ==========================================
-        const darkModeBtn = document.getElementById('darkModeBtn');
-        
-        function initDarkMode() {
-            const savedDark = localStorage.getItem('chantingDarkMode') === 'true';
-            if (savedDark) {
-                body.classList.add('dark-mode');
-                darkModeBtn.classList.add('active');
-                darkModeBtn.querySelector('span:last-child').textContent = 'กลางวัน';
-                darkModeBtn.querySelector('.icon').textContent = '☀️';
-            }
+
+        const store = {
+            get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } },
+            set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+        };
+        const vibrate = p => { if (navigator.vibrate) navigator.vibrate(p); };
+        const THAI_NUM = ['๐','๑','๒','๓','๔','๕','๖','๗','๘','๙'];
+        const thaiNum = n => String(n).split('').map(c => /\d/.test(c) ? THAI_NUM[+c] : c).join('');
+
+        // บทที่มองเห็นตามรูปแบบที่เลือก (๖ บท / ๙ บท)
+        function visibleSections() {
+            const isLong = body.classList.contains('mode-long');
+            return Array.from(allSections).filter(s => isLong || !s.classList.contains('extended-section'));
         }
-        
-        const ICON_SUN = '<svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
-        const ICON_MOON = '<svg class="ui-icon" aria-hidden="true"><use href="#icon-moon"/></svg>';
-        darkModeBtn.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            const isDark = body.classList.contains('dark-mode');
-            localStorage.setItem('chantingDarkMode', isDark);
-            darkModeBtn.classList.toggle('active', isDark);
-            darkModeBtn.querySelector('span:last-child').textContent = isDark ? 'กลางวัน' : 'กลางคืน';
-            const iconEl = darkModeBtn.querySelector('.ui-icon');
-            if (iconEl) iconEl.outerHTML = isDark ? ICON_SUN : ICON_MOON;
+        // บทที่นับเป็นลำดับ ๑..๖ / ๑..๙ (บทพิเศษแสดงเสมอ แต่ไม่นับ)
+        function countedSections() {
+            return visibleSections().filter(s => !s.classList.contains('bonus-section'));
+        }
+
+        // ==========================================
+        // SHEETS — สารบัญ / ตั้งค่า (มี focus trap + Esc)
+        // ==========================================
+        const scrim = document.getElementById('sheetScrim');
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const tocBtn = document.getElementById('tocBtn');
+        const tocSheet = document.getElementById('tocSheet');
+        const readerNow = document.getElementById('readerNow');
+        let openSheet = null;
+        let lastFocused = null;
+
+        const FOCUSABLE = 'button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])';
+
+        function sheetOpen(sheet, trigger) {
+            if (openSheet) sheetClose(true);
+            lastFocused = trigger || document.activeElement;
+            openSheet = sheet;
+            scrim.hidden = false;
+            sheet.hidden = false;
+            body.style.overflow = 'hidden';
+            requestAnimationFrame(() => {
+                scrim.classList.add('is-open');
+                sheet.classList.add('is-open');
+            });
+            if (trigger) trigger.setAttribute('aria-expanded', 'true');
+            sheet.focus({ preventScroll: true });
+        }
+
+        function sheetClose(silent) {
+            if (!openSheet) return;
+            const sheet = openSheet;
+            openSheet = null;
+            sheet.classList.remove('is-open');
+            scrim.classList.remove('is-open');
+            body.style.overflow = '';
+            [tocBtn, settingsToggle].forEach(b => b.setAttribute('aria-expanded', 'false'));
+            const done = () => { sheet.hidden = true; if (!openSheet) scrim.hidden = true; };
+            setTimeout(done, 320);
+            if (!silent && lastFocused) lastFocused.focus({ preventScroll: true });
+        }
+
+        tocBtn.addEventListener('click', () => openSheet === tocSheet ? sheetClose() : sheetOpen(tocSheet, tocBtn));
+        readerNow.addEventListener('click', () => openSheet === tocSheet ? sheetClose() : sheetOpen(tocSheet, tocBtn));
+        settingsToggle.addEventListener('click', () => openSheet === settingsPanel ? sheetClose() : sheetOpen(settingsPanel, settingsToggle));
+        scrim.addEventListener('click', () => sheetClose());
+        document.querySelectorAll('[data-sheet-close]').forEach(el => el.addEventListener('click', () => sheetClose()));
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && openSheet) { e.preventDefault(); sheetClose(); return; }
+            if (e.key !== 'Tab' || !openSheet) return;
+            const items = Array.from(openSheet.querySelectorAll(FOCUSABLE)).filter(el => el.offsetParent !== null);
+            if (!items.length) return;
+            const first = items[0], last = items[items.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
         });
 
         // ==========================================
-        // 2. FONT SIZE
+        // 1. โหมดกลางคืน (สวิตช์จริง)
+        // ==========================================
+        const darkModeBtn = document.getElementById('darkModeBtn');
+
+        function applyDark(on) {
+            body.classList.toggle('dark-mode', on);
+            darkModeBtn.setAttribute('aria-checked', String(on));
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', on ? '#0D0B14' : '#F2ECDE');
+            store.set('chantingDarkMode', on);
+        }
+        function initDarkMode() { applyDark(store.get('chantingDarkMode', 'false') === 'true'); }
+        darkModeBtn.addEventListener('click', () => {
+            applyDark(!body.classList.contains('dark-mode'));
+            vibrate(10);
+        });
+
+        // ==========================================
+        // 2. ขนาดตัวอักษร — ปรับเฉพาะตัวบทสวด ไม่ยืดทั้ง UI
         // ==========================================
         const fontDecrease = document.getElementById('fontDecrease');
         const fontIncrease = document.getElementById('fontIncrease');
         const fontSizeLabel = document.getElementById('fontSizeLabel');
-        let currentFontSize = parseInt(localStorage.getItem('chantingFontSize')) || 100;
-        
+        let currentFontSize = parseInt(store.get('chantingFontSize', '100'), 10) || 100;
+
         function updateFontSize() {
-            document.documentElement.style.fontSize = currentFontSize + '%';
+            currentFontSize = Math.min(180, Math.max(80, currentFontSize));
+            document.documentElement.style.setProperty('--read-scale', (currentFontSize / 100).toFixed(2));
             fontSizeLabel.textContent = currentFontSize + '%';
-            localStorage.setItem('chantingFontSize', currentFontSize);
+            fontDecrease.disabled = currentFontSize <= 80;
+            fontIncrease.disabled = currentFontSize >= 180;
+            store.set('chantingFontSize', currentFontSize);
         }
-        
-        fontDecrease.addEventListener('click', () => {
-            if (currentFontSize > 70) {
-                currentFontSize -= 10;
-                updateFontSize();
-                trackEvent('font_size_change', { size: currentFontSize });
-            }
-        });
-        
-        fontIncrease.addEventListener('click', () => {
-            if (currentFontSize < 150) {
-                currentFontSize += 10;
-                updateFontSize();
-                trackEvent('font_size_change', { size: currentFontSize });
-            }
-        });
+        fontDecrease.addEventListener('click', () => { currentFontSize -= 10; updateFontSize(); trackEvent('font_size_change', { size: currentFontSize }); });
+        fontIncrease.addEventListener('click', () => { currentFontSize += 10; updateFontSize(); trackEvent('font_size_change', { size: currentFontSize }); });
 
         // ==========================================
-        // 3. AUTO SCROLL (5 ระดับความเร็ว)
+        // 3. เลื่อนหน้าอัตโนมัติ (rAF — ลื่นกว่า setInterval)
         // ==========================================
         const autoScrollBtn = document.getElementById('autoScrollBtn');
         const scrollControls = document.getElementById('scrollControls');
@@ -3726,107 +4213,75 @@
         const speedSlider = document.getElementById('speedSlider');
         const speedLabel = document.getElementById('speedLabel');
         const autoScrollIndicator = document.getElementById('autoScrollIndicator');
-        
-        let isAutoScrolling = false;
-        let autoScrollInterval = null;
-        let scrollSpeed = 2; // Default: กลางๆ
-        
-        // 5 ระดับความเร็ว (pixels per frame) - ปรับให้เร็วขึ้น
-        const speedLevels = {
-            1: { speed: 2, label: 'ช้า' },
-            2: { speed: 5, label: 'ปกติ' },
-            3: { speed: 10, label: 'เร็ว' },
-            4: { speed: 18, label: 'เร็วมาก' },
-            5: { speed: 30, label: 'เร็วสุด' }
-        };
-        
-        function getScrollSpeed() {
-            return speedLevels[scrollSpeed].speed;
-        }
-        
-        const ICON_PAUSE = '<svg class="ui-icon" aria-hidden="true"><use href="#icon-pause"/></svg>';
-        const ICON_PLAY  = '<svg class="ui-icon" aria-hidden="true" style="transform:translateX(1px)"><path d="M6 4l14 8-14 8V4z" fill="currentColor" stroke="none"/></svg>';
 
+        const SCROLL_SPEEDS = {
+            1: { px: 14,  label: 'ช้า' },
+            2: { px: 26,  label: 'ปกติ' },
+            3: { px: 46,  label: 'เร็ว' },
+            4: { px: 78,  label: 'เร็วมาก' },
+            5: { px: 130, label: 'เร็วสุด' }
+        };
+        let isAutoScrolling = false, autoScrollPaused = false, autoScrollRAF = null;
+        let scrollSpeed = parseInt(store.get('chantingScrollSpeed', '2'), 10) || 2;
+        let scrollCarry = 0, lastFrame = 0;
+
+        const ICON_PAUSE = '<svg class="ui-icon" aria-hidden="true"><use href="#icon-pause"/></svg>';
+        const ICON_PLAY  = '<svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8V4z" fill="currentColor" stroke="none"/></svg>';
+
+        function autoScrollStep(ts) {
+            if (!isAutoScrolling) return;
+            if (!lastFrame) lastFrame = ts;
+            const dt = Math.min(64, ts - lastFrame) / 1000;
+            lastFrame = ts;
+            if (!autoScrollPaused) {
+                scrollCarry += SCROLL_SPEEDS[scrollSpeed].px * dt;
+                const whole = Math.floor(scrollCarry);
+                if (whole >= 1) {
+                    scrollCarry -= whole;
+                    const atEnd = window.scrollY + window.innerHeight >=
+                                  document.documentElement.scrollHeight - 2;
+                    window.scrollBy(0, whole);
+                    if (atEnd) { stopAutoScroll(); showToast('ถึงบทสุดท้ายแล้ว'); return; }
+                }
+            }
+            autoScrollRAF = requestAnimationFrame(autoScrollStep);
+        }
         function startAutoScroll() {
-            isAutoScrolling = true;
-            autoScrollBtn.classList.add('active');
+            isAutoScrolling = true; autoScrollPaused = false; scrollCarry = 0; lastFrame = 0;
+            autoScrollBtn.setAttribute('aria-pressed', 'true');
             scrollControls.classList.add('visible');
             autoScrollIndicator.classList.add('visible');
-            scrollPause.innerHTML = ICON_PAUSE;
-            
-            autoScrollInterval = setInterval(() => {
-                window.scrollBy(0, getScrollSpeed());
-                
-                // Stop at bottom
-                if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 10) {
-                    stopAutoScroll();
-                }
-            }, 30); // เร็วขึ้น: 30ms แทน 50ms
-        }
-        
-        function stopAutoScroll() {
-            isAutoScrolling = false;
-            autoScrollBtn.classList.remove('active');
-            scrollControls.classList.remove('visible');
-            autoScrollIndicator.classList.remove('visible');
             autoScrollIndicator.classList.remove('paused');
-            autoScrollIndicator.querySelector('.icon').textContent = '▼';
-            autoScrollIndicator.querySelector('span:last-child').textContent = 'กำลังเลื่อน';
-            if (autoScrollInterval) {
-                clearInterval(autoScrollInterval);
-                autoScrollInterval = null;
-            }
+            scrollPause.innerHTML = ICON_PAUSE;
+            autoScrollRAF = requestAnimationFrame(autoScrollStep);
         }
-        
+        function stopAutoScroll() {
+            isAutoScrolling = false; autoScrollPaused = false;
+            if (autoScrollRAF) cancelAnimationFrame(autoScrollRAF);
+            autoScrollBtn.setAttribute('aria-pressed', 'false');
+            scrollControls.classList.remove('visible');
+            autoScrollIndicator.classList.remove('visible', 'paused');
+        }
         function pauseAutoScroll() {
-            if (autoScrollInterval) {
-                clearInterval(autoScrollInterval);
-                autoScrollInterval = null;
-                scrollPause.innerHTML = ICON_PLAY;
-                autoScrollIndicator.classList.add('paused');
-                autoScrollIndicator.querySelector('.icon').textContent = '⏸';
-                autoScrollIndicator.querySelector('span:last-child').textContent = 'หยุดอยู่';
-            } else {
-                autoScrollInterval = setInterval(() => {
-                    window.scrollBy(0, getScrollSpeed());
-                    if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 10) {
-                        stopAutoScroll();
-                    }
-                }, 30);
-                scrollPause.innerHTML = ICON_PAUSE;
-                autoScrollIndicator.classList.remove('paused');
-                autoScrollIndicator.querySelector('.icon').textContent = '▼';
-                autoScrollIndicator.querySelector('span:last-child').textContent = 'กำลังเลื่อน';
-            }
+            if (!isAutoScrolling) return;
+            autoScrollPaused = !autoScrollPaused;
+            scrollPause.innerHTML = autoScrollPaused ? ICON_PLAY : ICON_PAUSE;
+            autoScrollIndicator.classList.toggle('paused', autoScrollPaused);
         }
-        
         autoScrollBtn.addEventListener('click', () => {
-            if (isAutoScrolling) {
-                stopAutoScroll();
-            } else {
-                startAutoScroll();
-            }
+            if (isAutoScrolling) { stopAutoScroll(); return; }
+            sheetClose();               // ปิดแผ่นตั้งค่าก่อน ไม่งั้นหน้าเลื่อนไม่ได้
+            setTimeout(startAutoScroll, 340);
         });
-        
         scrollPause.addEventListener('click', pauseAutoScroll);
-        
-        // กด indicator เพื่อ pause/resume
         autoScrollIndicator.addEventListener('click', pauseAutoScroll);
-        
         speedSlider.addEventListener('input', () => {
-            scrollSpeed = parseInt(speedSlider.value);
-            speedLabel.textContent = speedLevels[scrollSpeed].label;
+            scrollSpeed = parseInt(speedSlider.value, 10);
+            speedLabel.textContent = SCROLL_SPEEDS[scrollSpeed].label;
+            store.set('chantingScrollSpeed', scrollSpeed);
         });
-
-        speedSlider.addEventListener('change', () => {
-            trackEvent('scroll_speed_change', { 
-                speed_level: scrollSpeed,
-                speed_label: speedLevels[scrollSpeed].label
-            });
-        });
-        
-        // Initialize speed label
-        speedLabel.textContent = speedLevels[scrollSpeed].label;
+        // แตะหน้าจอ = หยุดเลื่อนอัตโนมัติ (คาดเดาได้ ไม่หนีมือ)
+        window.addEventListener('wheel', () => { if (isAutoScrolling) stopAutoScroll(); }, { passive: true });
 
         // ==========================================
         // 4. MEDITATION TIMER + BELL
@@ -4142,218 +4597,481 @@
         }
 
         // ==========================================
-        // 7. SWIPE GESTURES
+        // 7. ปัดเปลี่ยนบท — ต้องเป็นการปัดแนวนอนจริง ๆ เท่านั้น
+        //    (กันชนกับการเลื่อนอ่านปกติ และกับ swipe-back ของ iOS)
         // ==========================================
-        let touchStartX = 0;
-        let touchEndX = 0;
-        function handleSwipe() {
-            const diff = touchStartX - touchEndX;
-            const minSwipe = 80;
-            
-            if (Math.abs(diff) < minSwipe) return;
-            
-            const visibleSections = Array.from(allSections).filter(s => {
-                const isExtended = s.classList.contains('extended-section');
-                const isLongMode = body.classList.contains('mode-long');
-                return !isExtended || isLongMode;
-            });
-            
-            // Find current section
-            let currentIndex = -1;
-            visibleSections.forEach((section, i) => {
-                const rect = section.getBoundingClientRect();
-                if (rect.top <= 200 && rect.bottom > 100) {
-                    currentIndex = i;
-                }
-            });
-            
-            if (diff > 0 && currentIndex < visibleSections.length - 1) {
-                // Swipe left - next section
-                visibleSections[currentIndex + 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else if (diff < 0 && currentIndex > 0) {
-                // Swipe right - previous section
-                visibleSections[currentIndex - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-        
+        let tsX = 0, tsY = 0, tsTime = 0;
         document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
+            const t = e.changedTouches[0];
+            tsX = t.screenX; tsY = t.screenY; tsTime = Date.now();
         }, { passive: true });
-        
+
         document.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
+            if (openSheet) return;
+            const t = e.changedTouches[0];
+            const dx = tsX - t.screenX, dy = tsY - t.screenY;
+            const adx = Math.abs(dx), ady = Math.abs(dy);
+            // ต้องยาวพอ / แนวนอนชัดเจน / เร็วพอ / ไม่เริ่มจากขอบจอ (สงวนให้ระบบ)
+            if (adx < 90 || adx < ady * 2.2) return;
+            if (Date.now() - tsTime > 600) return;
+            if (tsX < 28 || tsX > window.innerWidth - 28) return;
+            gotoChant(dx > 0 ? 1 : -1);
         }, { passive: true });
-        
 
         // ==========================================
-        // 10. TEXT-TO-SPEECH
+        // READER — หัวใจของการอ่าน/สวด
         // ==========================================
-        const ttsBtn = document.getElementById('ttsBtn');
-        const ttsControls = document.getElementById('ttsControls');
-        const ttsPlayPause = document.getElementById('ttsPlayPause');
-        const ttsPrev = document.getElementById('ttsPrev');
-        const ttsNext = document.getElementById('ttsNext');
-        const ttsStop = document.getElementById('ttsStop');
-        
-        let isTTSActive = false;
-        let currentTTSIndex = 0;
-        let utterance = null;
-        let ttsTexts = [];
-        
-        function initTTS() {
-            if (!('speechSynthesis' in window)) {
-                ttsBtn.style.display = 'none';
-                return;
-            }
-            
-            // iOS Safari fix - need user interaction first
-            let speechReady = false;
-            const initSpeech = () => {
-                if (!speechReady) {
-                    const utterance = new SpeechSynthesisUtterance('');
-                    speechSynthesis.speak(utterance);
-                    speechSynthesis.cancel();
-                    speechReady = true;
-                }
-            };
-            document.addEventListener('touchstart', initSpeech, { once: true });
-            document.addEventListener('click', initSpeech, { once: true });
-            
-            // Collect all Pali texts
-            allSections.forEach(section => {
-                const paliTexts = section.querySelectorAll('.pali-text, .verse-text');
-                paliTexts.forEach(text => {
-                    const cleanText = text.textContent.replace(/\s+/g, ' ').trim();
-                    if (cleanText) {
-                        ttsTexts.push({
-                            text: cleanText,
-                            section: section.id
-                        });
-                    }
-                });
+        const readerBar = document.getElementById('readerBar');
+        const readerNowNum = document.getElementById('readerNowNum');
+        const readerNowTitle = document.getElementById('readerNowTitle');
+        const readerNowMeta = document.getElementById('readerNowMeta');
+        const dockPlay = document.getElementById('dockPlay');
+        const dockPrev = document.getElementById('dockPrev');
+        const dockNext = document.getElementById('dockNext');
+        const dockBeads = document.getElementById('dockBeads');
+        const beadsCount = document.getElementById('beadsCount');
+        const beadsTarget = document.getElementById('beadsTarget');
+        const beadsRing = dockBeads.querySelector('.beads-ring');
+        const tocItems = Array.from(document.querySelectorAll('#tocList .nav-item'));
+        const tocProgressNote = document.getElementById('tocProgressNote');
+
+        let chantLines = [];        // บรรทัดที่สวดได้ทั้งหมด (ตามรูปแบบที่เลือก)
+        let cursor = -1;            // บรรทัดปัจจุบัน
+        let isChanting = false;     // กำลังไฮไลต์ตามจังหวะ
+        let paceTimer = null;
+        let currentSection = null;
+        let ttsOn = store.get('chantingTTS', 'false') === 'true';
+        let wakeLockOn = store.get('chantingWakeLock', 'true') === 'true';
+        let wakeLock = null;
+        let pace = parseInt(store.get('chantingPace', '3'), 10) || 3;
+
+        const PACE = { 1: { f: 0.68, label: 'ช้ามาก' }, 2: { f: 0.84, label: 'ช้า' },
+                       3: { f: 1,    label: 'ปกติ' },   4: { f: 1.25, label: 'เร็ว' },
+                       5: { f: 1.55, label: 'เร็วมาก' } };
+
+        function rebuildLines() {
+            chantLines = [];
+            visibleSections().forEach(sec => {
+                sec.querySelectorAll('.c-line:not([data-cue])').forEach(el => chantLines.push(el));
             });
+            if (cursor >= chantLines.length) cursor = chantLines.length - 1;
         }
-        
-        function speakText(index) {
-            if (index >= ttsTexts.length) {
-                stopTTS();
+
+        function lineSection(el) { return el ? el.closest('.chant-section') : null; }
+
+        function setCursor(i, scroll) {
+            if (!chantLines.length) return;
+            i = Math.max(0, Math.min(chantLines.length - 1, i));
+            if (chantLines[cursor]) chantLines[cursor].classList.remove('is-current');
+            cursor = i;
+            const el = chantLines[cursor];
+            el.classList.add('is-current');
+            if (scroll) {
+                const r = el.getBoundingClientRect();
+                const topSafe = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) + 24;
+                const botSafe = window.innerHeight - 140;
+                if (r.top < topSafe || r.bottom > botSafe) {
+                    const target = window.scrollY + r.top - window.innerHeight * 0.34;
+                    window.scrollTo({ top: Math.max(0, target), behavior: isChanting ? 'smooth' : 'auto' });
+                }
+            }
+            saveResume();
+        }
+
+        function lineDuration(el) {
+            const chars = el.textContent.trim().length;
+            return Math.min(9000, Math.max(1200, (820 + chars * 105) / PACE[pace].f));
+        }
+
+        function speakLine(el, done) {
+            if (!('speechSynthesis' in window)) { done(); return; }
+            speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(el.textContent.trim());
+            u.lang = 'th-TH';
+            u.rate = 0.78 * PACE[pace].f;
+            u.onend = done;
+            u.onerror = done;
+            speechSynthesis.speak(u);
+            // กันเคสเสียงไม่ยอมจบ (Android/iOS บางรุ่น)
+            paceTimer = setTimeout(() => { if (isChanting) done(); }, lineDuration(el) + 6000);
+        }
+
+        function advance() {
+            if (!isChanting) return;
+            if (cursor >= chantLines.length - 1) { markChantDone(currentSection); stopChanting(); showToast('สวดครบทุกบทแล้ว สาธุ'); return; }
+            const prevSection = lineSection(chantLines[cursor]);
+            setCursor(cursor + 1, true);
+            const nowSection = lineSection(chantLines[cursor]);
+            if (prevSection && nowSection !== prevSection) markChantDone(prevSection);
+            scheduleNext();
+        }
+
+        function scheduleNext() {
+            clearTimeout(paceTimer);
+            const el = chantLines[cursor];
+            if (!el) return;
+            if (ttsOn) speakLine(el, () => { clearTimeout(paceTimer); paceTimer = setTimeout(advance, 260); });
+            else paceTimer = setTimeout(advance, lineDuration(el));
+        }
+
+        function startChanting(fromIndex) {
+            rebuildLines();
+            if (!chantLines.length) return;
+            isChanting = true;
+            body.classList.add('is-chanting');
+            dockPlay.setAttribute('aria-pressed', 'true');
+            dockPlay.setAttribute('aria-label', 'หยุดไฮไลต์ตามจังหวะสวด');
+            dockPlay.querySelector('.ui-icon').outerHTML =
+                '<svg class="ui-icon ui-icon--lg" aria-hidden="true"><use href="#icon-pause"/></svg>';
+            dockPlay.querySelector('.dock-label').textContent = 'หยุด';
+            setCursor(typeof fromIndex === 'number' ? fromIndex : (cursor < 0 ? 0 : cursor), true);
+            requestWakeLock();
+            scheduleNext();
+            trackEvent('feature_use', { feature: 'chant_follow_along' });
+        }
+
+        function stopChanting() {
+            isChanting = false;
+            clearTimeout(paceTimer);
+            if ('speechSynthesis' in window) speechSynthesis.cancel();
+            body.classList.remove('is-chanting');
+            dockPlay.setAttribute('aria-pressed', 'false');
+            dockPlay.setAttribute('aria-label', 'เริ่มไฮไลต์ตามจังหวะสวด');
+            dockPlay.querySelector('.ui-icon').outerHTML =
+                '<svg class="ui-icon ui-icon--lg" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8V4z" fill="currentColor" stroke="none"/></svg>';
+            dockPlay.querySelector('.dock-label').textContent = 'สวดตาม';
+            releaseWakeLock();
+        }
+
+        dockPlay.addEventListener('click', () => { isChanting ? stopChanting() : startChanting(); vibrate(12); });
+
+        // แตะบรรทัดไหน = เริ่มจากบรรทัดนั้น
+        document.getElementById('main-content').addEventListener('click', e => {
+            const line = e.target.closest('.c-line');
+            if (line && !line.hasAttribute('data-cue')) {
+                rebuildLines();
+                const i = chantLines.indexOf(line);
+                if (i >= 0) { setCursor(i, false); if (isChanting) scheduleNext(); }
                 return;
             }
-            
-            // Scroll to section
-            const sectionEl = document.getElementById(ttsTexts[index].section);
-            if (sectionEl) {
-                sectionEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            
-            speechSynthesis.cancel();
-            utterance = new SpeechSynthesisUtterance(ttsTexts[index].text);
-            utterance.lang = 'th-TH';
-            utterance.rate = 0.8;
-            utterance.pitch = 1;
-            
-            utterance.onend = () => {
-                currentTTSIndex++;
-                if (isTTSActive && currentTTSIndex < ttsTexts.length) {
-                    setTimeout(() => speakText(currentTTSIndex), 500);
-                } else {
-                    stopTTS();
-                }
-            };
-            
-            speechSynthesis.speak(utterance);
-        }
-        
-        function startTTS() {
-            isTTSActive = true;
-            ttsControls.classList.add('visible');
-            ttsBtn.classList.add('active');
-            ttsPlayPause.innerHTML = ICON_PAUSE;
-            ttsPlayPause.classList.add('active');
-            speakText(currentTTSIndex);
-        }
-        
-        function pauseTTS() {
-            if (speechSynthesis.speaking && !speechSynthesis.paused) {
-                speechSynthesis.pause();
-                ttsPlayPause.innerHTML = ICON_PLAY;
-            } else if (speechSynthesis.paused) {
-                speechSynthesis.resume();
-                ttsPlayPause.innerHTML = ICON_PAUSE;
-            }
-        }
-        
-        function stopTTS() {
-            isTTSActive = false;
-            speechSynthesis.cancel();
-            ttsControls.classList.remove('visible');
-            ttsBtn.classList.remove('active');
-            currentTTSIndex = 0;
-        }
-        
-        ttsBtn.addEventListener('click', () => {
-            if (isTTSActive) {
-                stopTTS();
-            } else {
-                startTTS();
-            }
-        });
-        
-        ttsPlayPause.addEventListener('click', pauseTTS);
-        
-        ttsStop.addEventListener('click', stopTTS);
-        
-        ttsPrev.addEventListener('click', () => {
-            if (currentTTSIndex > 0) {
-                currentTTSIndex--;
-                speakText(currentTTSIndex);
-            }
-        });
-        
-        ttsNext.addEventListener('click', () => {
-            if (currentTTSIndex < ttsTexts.length - 1) {
-                currentTTSIndex++;
-                speakText(currentTTSIndex);
-            }
+            // แตะพื้นที่ว่างในบทสวด = สลับโหมดเต็มจอ
+            if (e.target.closest('button, a, input, details, summary, .wish-section')) return;
+            if (e.target.closest('.chant-body, .chant-section')) toggleImmersive();
         });
 
+        // ---------- เปลี่ยนบท ----------
+        function gotoChant(dir) {
+            const list = visibleSections();
+            if (!list.length) return;
+            let idx = list.indexOf(currentSection);
+            if (idx < 0) idx = 0;
+            const next = list[Math.max(0, Math.min(list.length - 1, idx + dir))];
+            if (!next || next === currentSection) return;
+            gotoSection(next);
+            vibrate(10);
+        }
+        function gotoSection(sec) {
+            const barH = readerBar.offsetHeight || 56;
+            const top = window.scrollY + sec.getBoundingClientRect().top - barH - 8;
+            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+            history.replaceState(null, '', '#' + sec.id);
+            if (isChanting) {
+                rebuildLines();
+                const first = sec.querySelector('.c-line:not([data-cue])');
+                const i = chantLines.indexOf(first);
+                if (i >= 0) { setCursor(i, false); scheduleNext(); }
+            }
+        }
+        dockPrev.addEventListener('click', () => gotoChant(-1));
+        dockNext.addEventListener('click', () => gotoChant(1));
+
+        // ---------- ลูกประคำ: นับจบ ----------
+        const todayKey = () => 'chantingBeads:' + new Date().toISOString().slice(0, 10);
+        function readBeads() { try { return JSON.parse(store.get(todayKey(), '{}')) || {}; } catch (e) { return {}; } }
+        function writeBeads(o) { store.set(todayKey(), JSON.stringify(o)); }
+
+        function targetFor(sec) {
+            if (!sec) return 1;
+            if (sec.dataset.rounds) return parseInt(sec.dataset.rounds, 10);
+            const m = sec.textContent.match(/สวด\s*([๐-๙0-9]+)\s*จบ/);
+            let n = 1;
+            if (m) {
+                const digits = m[1].split('').map(c => {
+                    const i = THAI_NUM.indexOf(c);
+                    return i >= 0 ? i : parseInt(c, 10);
+                }).join('');
+                n = parseInt(digits, 10) || 1;
+            }
+            sec.dataset.rounds = n;
+            return n;
+        }
+
+        function renderBeads() {
+            const sec = currentSection;
+            const beads = readBeads();
+            const n = sec ? (beads[sec.id] || 0) : 0;
+            const t = targetFor(sec);
+            beadsCount.textContent = thaiNum(n);
+            beadsTarget.textContent = thaiNum(t);
+            beadsRing.style.setProperty('--beads-pct', Math.min(100, (n / t) * 100));
+            dockBeads.classList.toggle('is-complete', n >= t);
+            dockBeads.setAttribute('aria-label', `นับจบ สวดแล้ว ${n} จาก ${t} จบ แตะเพื่อเพิ่มหนึ่งจบ`);
+            renderTocProgress();
+        }
+
+        function markChantDone(sec) {
+            if (!sec) return;
+            const beads = readBeads();
+            if (!beads[sec.id]) { beads[sec.id] = 1; writeBeads(beads); renderBeads(); }
+        }
+
+        dockBeads.addEventListener('click', () => {
+            if (!currentSection) return;
+            const beads = readBeads();
+            const n = (beads[currentSection.id] || 0) + 1;
+            beads[currentSection.id] = n;
+            writeBeads(beads);
+            renderBeads();
+            const t = targetFor(currentSection);
+            if (n === t) { vibrate([18, 60, 18]); playBell(); showToast('ครบ ' + thaiNum(t) + ' จบแล้ว สาธุ'); }
+            else vibrate(12);
+            trackEvent('feature_use', { feature: 'beads_count', chant: currentSection.id });
+        });
+
+        document.getElementById('resetProgressBtn').addEventListener('click', () => {
+            writeBeads({});
+            renderBeads();
+            showToast('ล้างจำนวนจบของวันนี้แล้ว');
+        });
+
+        function renderTocProgress() {
+            const beads = readBeads();
+            const list = countedSections();
+            let done = 0;
+            tocItems.forEach(li => {
+                const id = li.querySelector('a').getAttribute('href').slice(1);
+                const sec = document.getElementById(id);
+                const isDone = (beads[id] || 0) > 0;
+                li.classList.toggle('is-done', isDone);
+                li.classList.toggle('is-current', sec === currentSection);
+                if (isDone && list.includes(sec)) done++;
+            });
+            tocProgressNote.textContent = `วันนี้สวดแล้ว ${thaiNum(done)} จาก ${thaiNum(list.length)} บท`;
+        }
+
+        // ---------- หน้าจอไม่ดับ ----------
+        async function requestWakeLock() {
+            if (!wakeLockOn || !('wakeLock' in navigator) || wakeLock) return;
+            try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); }
+            catch (e) { wakeLock = null; }
+        }
+        function releaseWakeLock() { if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; } }
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isChanting) requestWakeLock();
+            else if (document.visibilityState === 'hidden' && isChanting) { stopChanting(); }
+        });
+
+        // ---------- โหมดเต็มจอ ----------
+        const immersiveHint = document.createElement('div');
+        immersiveHint.className = 'immersive-hint';
+        immersiveHint.textContent = 'แตะพื้นที่ว่างอีกครั้งเพื่อแสดงแถบควบคุม';
+        document.body.appendChild(immersiveHint);
+
+        function toggleImmersive() {
+            const on = body.classList.toggle('immersive');
+            if (on) {
+                immersiveHint.classList.add('show');
+                setTimeout(() => immersiveHint.classList.remove('show'), 2200);
+                trackEvent('feature_use', { feature: 'immersive_mode' });
+            }
+        }
+
+        // ---------- อ่านต่อจากที่ค้างไว้ ----------
+        function saveResume() {
+            if (!currentSection || window.scrollY < 80) return;
+            store.set('chantingResume', JSON.stringify({
+                id: currentSection.id, line: cursor, ts: Date.now()
+            }));
+        }
+        function offerResume(data) {
+            if (!data || !data.id) return;
+            if (Date.now() - data.ts > 7 * 864e5) return;
+            const sec = document.getElementById(data.id);
+            if (!sec || sec === visibleSections()[0]) return;
+            const title = sec.querySelector('.chant-title')?.textContent.trim() || '';
+            const btn = document.createElement('button');
+            btn.className = 'resume-btn';
+            btn.type = 'button';
+            btn.innerHTML = `<svg class="ui-icon" aria-hidden="true"><use href="#icon-scroll"/></svg>
+                             อ่านต่อ <span class="resume-where">${title}</span>`;
+            document.body.appendChild(btn);
+            const dismiss = () => { btn.classList.add('hiding'); setTimeout(() => btn.remove(), 300); };
+            btn.addEventListener('click', () => {
+                gotoSection(sec);
+                if (typeof data.line === 'number' && data.line >= 0) {
+                    rebuildLines();
+                    setTimeout(() => setCursor(data.line, true), 420);
+                }
+                dismiss();
+                trackEvent('feature_use', { feature: 'resume_reading' });
+            });
+            setTimeout(dismiss, 9000);
+        }
+
         // ==========================================
-        // SCROLL & NAVIGATION
+        // SCROLL — ความคืบหน้า / ซ่อนแถบบน / รู้ว่าอยู่บทไหน
         // ==========================================
+        let lastScrollY = window.scrollY, scrollTicking = false;
+
+        function onScroll() {
+            const y = window.scrollY;
+            const docH = document.documentElement.scrollHeight - window.innerHeight;
+            progressBar.style.width = (docH > 0 ? (y / docH) * 100 : 0) + '%';
+            scrollTopBtn.classList.toggle('visible', y > 600);
+
+            const hero = document.getElementById('top');
+            body.classList.toggle('at-cover', y < (hero ? hero.offsetHeight - 140 : 0));
+
+            const goingDown = y > lastScrollY + 6;
+            const goingUp = y < lastScrollY - 6;
+            if (!openSheet) {
+                if (goingDown && y > 240) readerBar.classList.add('is-hidden');
+                else if (goingUp) readerBar.classList.remove('is-hidden');
+            }
+            lastScrollY = y;
+        }
         window.addEventListener('scroll', () => {
-            const scrollTop = window.scrollY;
-            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const scrollPercent = (scrollTop / docHeight) * 100;
-            progressBar.style.width = scrollPercent + '%';
-            
-            // Show/hide scroll top button
-            if (scrollTop > 400) {
-                scrollTopBtn.classList.add('visible');
-            } else {
-                scrollTopBtn.classList.remove('visible');
+            if (scrollTicking) return;
+            scrollTicking = true;
+            requestAnimationFrame(() => { onScroll(); scrollTicking = false; });
+        }, { passive: true });
+
+        function setCurrentSection(sec) {
+            if (!sec || sec === currentSection) return;
+            if (currentSection) currentSection.classList.remove('is-active-chant');
+            currentSection = sec;
+            sec.classList.add('is-active-chant');
+            const counted = countedSections();
+            const idx = counted.indexOf(sec);
+            readerNowNum.textContent = sec.querySelector('.chant-number')?.textContent || '';
+            readerNowTitle.textContent = sec.querySelector('.chant-title')?.textContent.trim() || '';
+            readerNowMeta.textContent = idx >= 0
+                ? `บทที่ ${thaiNum(idx + 1)} จาก ${thaiNum(counted.length)}`
+                : 'บทพิเศษ';
+
+            renderBeads();
+            saveResume();
+        }
+
+        function trackCurrentSection() {
+            // บทที่กินพื้นที่ "โซนอ่าน" มากที่สุด คือบทปัจจุบัน
+            const zoneTop = window.innerHeight * 0.18, zoneBottom = window.innerHeight * 0.72;
+            let best = null, bestArea = 0;
+            visibleSections().forEach(sec => {
+                const r = sec.getBoundingClientRect();
+                const area = Math.min(r.bottom, zoneBottom) - Math.max(r.top, zoneTop);
+                if (area > bestArea) { bestArea = area; best = sec; }
+            });
+            setCurrentSection(best || visibleSections()[0]);
+            // ให้ URL สะท้อนบทที่กำลังอ่านเสมอ (คัดลอกลิงก์แล้วเปิดตรงบทนั้นได้)
+            if (currentSection && window.scrollY > 80 && location.hash !== '#' + currentSection.id) {
+                history.replaceState(null, '', '#' + currentSection.id);
             }
-        });
-        
-        scrollTopBtn.addEventListener('click', (e) => {
+        }
+        window.addEventListener('scroll', () => {
+            clearTimeout(window.__secTimer);
+            window.__secTimer = setTimeout(trackCurrentSection, 120);
+        }, { passive: true });
+
+        scrollTopBtn.addEventListener('click', e => {
             e.preventDefault();
-            document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        // Smooth scroll for navigation
-        document.querySelectorAll('.nav-item a').forEach(link => {
-            link.addEventListener('click', (e) => {
+        // สารบัญ: ไปยังบท + ปิด sheet + คง URL ให้แชร์ได้
+        document.querySelectorAll('#tocList a').forEach(link => {
+            link.addEventListener('click', e => {
                 e.preventDefault();
-                const targetId = link.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                const navHeight = document.querySelector('.nav-container').offsetHeight;
-                const targetPosition = targetElement.offsetTop - navHeight - 15;
-                
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
+                const sec = document.querySelector(link.getAttribute('href'));
+                sheetClose();
+                if (sec) setTimeout(() => gotoSection(sec), 120);
             });
+        });
+
+        // ==========================================
+        // ตั้งค่าการอ่าน — มุมมอง / ระยะบรรทัด / สวิตช์
+        // ==========================================
+        function setView(v) {
+            body.setAttribute('data-view', v);
+            store.set('chantingView', v);
+            document.querySelectorAll('.view-btn').forEach(b => {
+                const on = b.dataset.view === v;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-checked', String(on));
+            });
+        }
+        document.querySelectorAll('.view-btn').forEach(b =>
+            b.addEventListener('click', () => { setView(b.dataset.view); vibrate(8); }));
+
+        function setLead(l) {
+            body.setAttribute('data-lead', l);
+            store.set('chantingLead', l);
+            document.querySelectorAll('.lead-btn').forEach(b => {
+                const on = b.dataset.lead === l;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-checked', String(on));
+            });
+        }
+        document.querySelectorAll('.lead-btn').forEach(b =>
+            b.addEventListener('click', () => { setLead(b.dataset.lead); vibrate(8); }));
+
+        const ttsBtn = document.getElementById('ttsBtn');
+        function setTTS(on) {
+            ttsOn = on && ('speechSynthesis' in window);
+            ttsBtn.setAttribute('aria-checked', String(ttsOn));
+            store.set('chantingTTS', ttsOn);
+            if (!ttsOn && 'speechSynthesis' in window) speechSynthesis.cancel();
+            if (isChanting) scheduleNext();
+        }
+        if (!('speechSynthesis' in window)) ttsBtn.hidden = true;
+        ttsBtn.addEventListener('click', () => { setTTS(ttsBtn.getAttribute('aria-checked') !== 'true'); vibrate(10); });
+
+        const wakeLockBtn = document.getElementById('wakeLockBtn');
+        if (!('wakeLock' in navigator)) wakeLockBtn.hidden = true;
+        wakeLockBtn.addEventListener('click', () => {
+            wakeLockOn = wakeLockBtn.getAttribute('aria-checked') !== 'true';
+            wakeLockBtn.setAttribute('aria-checked', String(wakeLockOn));
+            store.set('chantingWakeLock', wakeLockOn);
+            if (wakeLockOn && isChanting) requestWakeLock(); else releaseWakeLock();
+        });
+
+        const storyBtn = document.getElementById('storyBtn');
+        function setStudy(on) {
+            body.classList.toggle('hide-study', !on);
+            storyBtn.setAttribute('aria-checked', String(on));
+            store.set('chantingStudy', on);
+        }
+        storyBtn.addEventListener('click', () => setStudy(storyBtn.getAttribute('aria-checked') !== 'true'));
+
+        const paceSlider = document.getElementById('paceSlider');
+        const paceLabel = document.getElementById('paceLabel');
+        paceSlider.addEventListener('input', () => {
+            pace = parseInt(paceSlider.value, 10);
+            paceLabel.textContent = PACE[pace].label;
+            store.set('chantingPace', pace);
+            if (isChanting) scheduleNext();
+        });
+
+        // คีย์บอร์ด: space เล่น/หยุด, ลูกศรเปลี่ยนบรรทัด
+        document.addEventListener('keydown', e => {
+            if (openSheet) return;
+            const t = e.target;
+            if (t instanceof Element && t.matches('input, textarea, select, [contenteditable]')) return;
+            if (e.code === 'Space') { e.preventDefault(); isChanting ? stopChanting() : startChanting(); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); rebuildLines(); setCursor(cursor + 1, true); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); rebuildLines(); setCursor(cursor - 1, true); }
+            else if (e.key === 'ArrowRight') gotoChant(1);
+            else if (e.key === 'ArrowLeft') gotoChant(-1);
         });
 
         // ==========================================
@@ -4376,19 +5094,10 @@
             body.setAttribute('data-theme', themeToUse);
 
             themeButtons.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-theme') === themeToUse) {
-                    btn.classList.add('active');
-                }
+                const on = btn.getAttribute('data-theme') === themeToUse;
+                btn.classList.toggle('active', on);
+                btn.setAttribute('aria-checked', String(on));
             });
-
-            // Update legacy label (if present inside settings panel)
-            const themeLabel = document.querySelector('.theme-label');
-            if (themeLabel) {
-                const themeIndex = days.indexOf(themeToUse);
-                const suffix = !savedTheme ? ' (วันนี้)' : '';
-                themeLabel.innerHTML = `<svg class="ui-icon" aria-hidden="true"><use href="#icon-palette"/></svg> สีมงคลวัน${dayNames[themeIndex]}${suffix}`;
-            }
 
             // Update new hero date slot
             const now = new Date();
@@ -4420,19 +5129,13 @@
                 body.setAttribute('data-theme', theme);
                 localStorage.setItem('chantingTheme', theme);
                 
-                themeButtons.forEach(b => b.classList.remove('active'));
+                themeButtons.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-checked', 'false');
+                });
                 this.classList.add('active');
-                
-                // อัพเดท label
-                const themeLabel = document.querySelector('.theme-label');
-                if (themeLabel) {
-                    themeLabel.innerHTML = `<svg class="ui-icon" aria-hidden="true"><use href="#icon-palette"/></svg> สีมงคลวัน${dayName}`;
-                }
-                
-                this.style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1.1)';
-                }, 100);
+                this.setAttribute('aria-checked', 'true');
+                showToast('สีมงคลวัน' + dayName);
             });
         });
 
@@ -4449,14 +5152,16 @@
             }
             
             modeButtons.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-mode') === savedMode) {
-                    btn.classList.add('active');
-                }
+                const on = btn.getAttribute('data-mode') === savedMode;
+                btn.classList.toggle('active', on);
+                btn.setAttribute('aria-checked', String(on));
             });
 
             updateSectionNumbers();
             updateHeroSummary(savedMode);
+            document.querySelectorAll('#tocList .extended-nav').forEach(li => {
+                li.hidden = savedMode !== 'long';
+            });
         }
         
         function updateSectionNumbers() {
@@ -4467,14 +5172,20 @@
             allSections.forEach(section => {
                 const isExtended = section.classList.contains('extended-section');
                 const isVisible = !isExtended || isLongMode;
-                
-                if (isVisible) {
-                    const numberSpan = section.querySelector('.chant-number');
-                    if (numberSpan) {
-                        numberSpan.textContent = thaiNumerals[visibleIndex];
-                    }
-                    visibleIndex++;
+                if (!isVisible) return;
+                const numberSpan = section.querySelector('.chant-number');
+                if (section.classList.contains('bonus-section')) {
+                    if (numberSpan) numberSpan.textContent = '✦';
+                    return;
                 }
+                if (numberSpan) numberSpan.textContent = thaiNumerals[visibleIndex];
+                visibleIndex++;
+            });
+            // สารบัญต้องใช้เลขเดียวกับที่อยู่บนหน้าจอ
+            document.querySelectorAll('#tocList .nav-item').forEach(li => {
+                const id = li.querySelector('a').getAttribute('href').slice(1);
+                const num = document.getElementById(id)?.querySelector('.chant-number')?.textContent;
+                if (num) li.querySelector('.toc-num').textContent = num;
             });
         }
         
@@ -4490,12 +5201,22 @@
                 
                 localStorage.setItem('chantingMode', mode);
                 
-                modeButtons.forEach(b => b.classList.remove('active'));
+                modeButtons.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-checked', 'false');
+                });
                 this.classList.add('active');
-                
+                this.setAttribute('aria-checked', 'true');
+
                 updateSectionNumbers();
                 updateHeroSummary(mode);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                document.querySelectorAll('#tocList .extended-nav').forEach(li => {
+                    li.hidden = mode !== 'long';
+                });
+                rebuildLines();
+                trackCurrentSection();
+                renderTocProgress();
+                showToast(mode === 'long' ? 'สวดมนต์ใหญ่ ๙ บท' : 'สวดมนต์เล็ก ๖ บท');
             });
         });
 
@@ -4506,6 +5227,9 @@
             threshold: 0.08,
             rootMargin: '0px 0px -30px 0px'
         };
+
+        // เปิดแอนิเมชันเข้าเฉพาะเมื่อ JS ทำงานจริง (กันหน้าว่างถ้าสคริปต์พัง)
+        body.classList.add('js-anim');
 
         // Animate sections on scroll (with fallback)
         if ('IntersectionObserver' in window) {
@@ -4530,13 +5254,74 @@
         // ==========================================
         // INITIALIZE ALL FEATURES
         // ==========================================
-        initSettingsPanel();
         setDefaultTheme();
         setDefaultMode();
         updateFontSize();
         initDarkMode();
-        initTTS();
         initWishGenerator();
+        initReader();
+
+        // ==========================================
+        // INIT READER — คืนค่าที่ตั้งไว้ + จุดเริ่มการอ่าน
+        // ==========================================
+        function initReader() {
+            const entryHash = location.hash.slice(1);   // อ่านก่อนที่อะไรจะไปแก้ hash
+            let entryResume = null;                    // อ่านก่อนที่ตัวติดตามบทจะเขียนทับ
+            try { entryResume = JSON.parse(store.get('chantingResume', 'null')); } catch (e) {}
+            setView(store.get('chantingView', 'both'));
+            setLead(store.get('chantingLead', 'normal'));
+            setStudy(store.get('chantingStudy', 'true') === 'true');
+            setTTS(store.get('chantingTTS', 'false') === 'true');
+
+            wakeLockBtn.setAttribute('aria-checked', String(wakeLockOn));
+            paceSlider.value = pace;
+            paceLabel.textContent = PACE[pace].label;
+            speedSlider.value = scrollSpeed;
+            speedLabel.textContent = SCROLL_SPEEDS[scrollSpeed].label;
+
+            rebuildLines();
+            trackCurrentSection();
+            renderBeads();
+            renderTocProgress();
+            onScroll();
+
+            // ลิงก์ตรงถึงบท (แชร์ URL ได้) — #chant-id
+            const target = entryHash && document.getElementById(entryHash);
+            if (target && target.classList.contains('chant-section')) {
+                if (target.classList.contains('extended-section') && !body.classList.contains('mode-long')) {
+                    document.querySelector('.mode-btn[data-mode="long"]')?.click();
+                }
+                setTimeout(() => gotoSection(target), 200);
+            } else {
+                offerResume(entryResume);
+            }
+        }
+
+        // ==========================================
+        // TIMER MODAL — ปิดด้วย Esc / แตะฉากหลัง / คืนโฟกัส
+        // ==========================================
+        (function hardenTimerModal() {
+            const modal = document.getElementById('timerModal');
+            const closeBtn = document.getElementById('timerCancel');
+            let opener = null;
+
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.setAttribute('aria-label', 'ตั้งเวลาสวดมนต์');
+
+            document.getElementById('timerBtn').addEventListener('click', () => {
+                opener = document.activeElement;
+                sheetClose();
+                setTimeout(() => modal.querySelector('.timer-preset.active')?.focus({ preventScroll: true }), 60);
+            });
+            modal.addEventListener('click', e => { if (e.target === modal) closeBtn.click(); });
+            document.addEventListener('keydown', e => {
+                if (e.key !== 'Escape' || !modal.classList.contains('visible')) return;
+                e.preventDefault();
+                closeBtn.click();
+            });
+            closeBtn.addEventListener('click', () => { if (opener) opener.focus({ preventScroll: true }); });
+        })();
 
         // ==========================================
         // 11. WISH GENERATOR WITH RANDOM TEMPLATES
@@ -4987,19 +5772,12 @@
         
         // Add ripple effect to all interactive elements
         function addRippleEffect() {
-            const rippleElements = document.querySelectorAll('.control-btn, .theme-btn, .mode-btn, .timer-btn, .timer-preset, .wish-action-btn, .settings-toggle');
+            const rippleElements = document.querySelectorAll('.seg-btn, .timer-btn, .timer-preset, .wish-action-btn, .tool-btn');
             rippleElements.forEach(el => {
                 el.classList.add('ripple');
             });
         }
         addRippleEffect();
-        
-        // Haptic feedback (vibration) for mobile
-        function vibrate(pattern = 10) {
-            if (navigator.vibrate) {
-                navigator.vibrate(pattern);
-            }
-        }
         
         // Add click feedback to theme buttons
         themeButtons.forEach(btn => {
@@ -5022,11 +5800,9 @@
             });
         });
         
-        // Add click feedback to control buttons  
-        document.querySelectorAll('.control-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                vibrate(10);
-            });
+        // Add click feedback to sheet controls
+        document.querySelectorAll('.seg-btn, .tool-btn').forEach(btn => {
+            btn.addEventListener('click', () => vibrate(10));
         });
 
         // ==========================================
